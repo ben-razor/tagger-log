@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg13063"
+   version="1.1"
+   viewBox="0 0 33.478349 232.58611"
+   height="232.58612mm"
+   width="33.478348mm"
+   sodipodi:docname="pm-screen-stem-1.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1366"
+     inkscape:window-height="713"
+     id="namedview21"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="0.46143474"
+     inkscape:cx="-285.51525"
+     inkscape:cy="472.60266"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg13063" />
+  <defs
+     id="defs13057">
+    <filter
+       id="filter2173"
+       style="color-interpolation-filters:sRGB">
+      <feGaussianBlur
+         id="feGaussianBlur2147"
+         stdDeviation="0.01"
+         in="SourceGraphic"
+         result="result0" />
+      <feTurbulence
+         id="feTurbulence2149"
+         type="fractalNoise"
+         result="result1"
+         numOctaves="1"
+         seed="144"
+         baseFrequency="0" />
+      <feGaussianBlur
+         id="feGaussianBlur2151"
+         result="result8"
+         stdDeviation="0.01" />
+      <feDisplacementMap
+         id="feDisplacementMap2153"
+         xChannelSelector="R"
+         in="result0"
+         scale="0"
+         in2="result8"
+         result="result7"
+         yChannelSelector="A" />
+      <feComposite
+         id="feComposite2155"
+         in="result7"
+         in2="result1"
+         operator="in"
+         result="result2" />
+      <feComposite
+         id="feComposite2157"
+         operator="arithmetic"
+         in="result0"
+         in2="result2"
+         k3="3"
+         k1="0"
+         k2="0"
+         k4="0" />
+      <feBlend
+         id="feBlend2159"
+         in2="result2"
+         mode="multiply"
+         result="fbSourceGraphic" />
+      <feColorMatrix
+         id="feColorMatrix2161"
+         result="fbSourceGraphicAlpha"
+         in="fbSourceGraphic"
+         values="1 0 0 -1 0 1 0 1 -1 0 1 0 0 -1 0 -1.8 -0.5 0 5.7 -3.5 " />
+      <feGaussianBlur
+         id="feGaussianBlur2163"
+         result="result0"
+         in="fbSourceGraphicAlpha"
+         stdDeviation="0.5" />
+      <feSpecularLighting
+         specularConstant="0.77999997"
+         id="feSpecularLighting2167"
+         specularExponent="20.60000038"
+         surfaceScale="0.56"
+         result="result6">
+        <feDistantLight
+           id="feDistantLight2165"
+           elevation="10"
+           azimuth="225" />
+      </feSpecularLighting>
+      <feComposite
+         id="feComposite2169"
+         operator="in"
+         result="result2"
+         in="result6"
+         in2="fbSourceGraphicAlpha" />
+      <feComposite
+         id="feComposite2171"
+         in2="result2"
+         k3="0.7"
+         k2="1"
+         operator="arithmetic"
+         result="result4"
+         in="fbSourceGraphic"
+         k1="0"
+         k4="0" />
+    </filter>
+  </defs>
+  <metadata
+     id="metadata13060">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="matrix(3.7227644,0,0,6.4945681,-168.02402,-609.07522)"
+     id="layer1">
+    <path
+       id="path1677"
+       d="m 53.015875,93.782252 c 0,0 -9.065722,23.502378 -7.751422,32.048768 1.3143,8.5464 8.862628,-0.13529 8.862628,-0.13529 z"
+       style="display:inline;fill:#51cb2c;fill-opacity:1;stroke:none;stroke-width:0.14513914px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>

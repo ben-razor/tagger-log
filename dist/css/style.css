@@ -1,0 +1,181 @@
+@font-face {
+    font-family: Moriston;
+    src: url(../font/MoristonPersonal_OTF/MoristonPersonal-Bold.otf);
+}
+
+@font-face {
+    font-family: Lato;
+    src: url(../font/Lato/Lato-Regular.ttf);
+}
+
+@font-face {
+    font-family: LatoBold;
+    src: url(../font/Lato/Lato-Bold.ttf);
+}
+
+@font-face {
+    font-family: MarckScript;
+    src: url(../font/Marck_Script/MarckScript-Regular.ttf);
+}
+
+body {
+  background-image: url("https://www.toptal.com/designers/subtlepatterns/patterns/y-so-serious-white.png");
+  font-family: Lato, sans-serif;
+  padding-bottom: 70px;
+}
+
+div.jumbotron {
+  background-color: hsl(30, 30%, 60%);
+}
+
+div.small-header {
+  background-color: hsl(30, 50%, 20%);
+}
+
+.main-content {
+  padding-top: 1em;
+  background-color: hsl(40, 0%, 100%);
+  border-width: 0 2px 2px 2px;
+  border-style: solid;
+  border-color: hsl(40, 0%, 98%);
+}
+
+.btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
+  background-color: hsl(30, 60%, 40%) !important; 
+  color: white;
+}
+
+.header h1 {
+  line-height: 2em;
+  vertical-align: middle;
+  font-size: 1.5rem;
+  color: white;
+  font-family: LatoBold;
+  font-variant: all-small-caps;
+  margin-left: 5px;
+} 
+
+.header p {
+  color: white;
+  margin-left: 5px;
+} 
+
+h3 {
+  font-family: LatoBold;
+  font-size: 1.5rem;
+  color: hsl(30, 30%, 40%);
+  font-variant: all-small-caps;
+}
+
+div.small-header {
+  text-align: left;
+  padding-left: 10px;
+}
+
+div.small-header h1 {
+  display: inline-block;
+}
+
+div.small-header p {
+  display: inline-block;
+}
+
+div.diary-entry {
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+}
+
+div.diary-entry .diary-entry-text {
+  overflow-wrap: break-word;
+}
+
+div.diary-entry .diary-entry-controls i {
+  color: hsl(30, 30%, 80%);
+}
+
+div.diary-entry .diary-entry-tags {
+  text-align: right;
+  color: hsl(30, 30%, 40%);
+}
+
+.diary-tag {
+  display: inline-block;
+  padding: 5px;
+  margin: 0px 3px 3px 0px;
+  border-radius: 3px;
+  border: 1px solid hsl(30, 60%, 60%);
+  color: hsl(30, 60%, 60%);
+  background-color: white;
+}
+
+.diary-tag:hover {
+  cursor: pointer;
+  cursor: hand;
+}
+
+.diary-tag.selected {
+  background-color: hsl(30, 60%, 60%);
+  color: white;
+}
+
+#header-user-img {
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid hsl(30, 60%, 90%);
+}
+
+#header-user-email {
+  color: hsl(30, 50%, 20%);
+}
+
+.no-border:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.round-img {
+  border-radius: 50%;
+  width: 80%;
+}
+
+.front-page-main img {
+  width: 50%;
+}
+
+.front-page-main h1 {
+  font-size: 3rem;
+  font-family: Lato, sans-serif;
+  color: hsl(30, 50%, 20%);
+}
+
+.front-page-main p {
+  font-family: MarckScript, sans-serif;
+  color: hsl(30, 50%, 20%);
+}
+
+.front-page-main p.quoted:before {
+  content: '"';
+  font-family: serif;
+  font-size: 160%;
+}
+
+.front-page-main p.quoted:after {
+  content: '"';
+  font-family: serif;
+  font-size: 160%;
+}
+
+@media (min-width: 600px) {
+  .front-page-main img {
+    width: 30%;
+  }
+  .front-page-main p {
+    font-size: 150%; 
+  }
+}
+
+.dropdown-toggle::after {
+  color: hsl(30, 60%, 90%);
+}
