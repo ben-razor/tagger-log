@@ -378,13 +378,10 @@ var taggerlog = taggerlog || {};
         if(orphans.length) {
           tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
           queryTags = queryTags.filter(item => !orphans.includes(item));
-          saveTags().then(() => {
-            getRecentEntries(loggedInUser);
-          });
         }
-        else {
+        saveTags().then(() => {
           getRecentEntries(loggedInUser);
-        }
+        });
       });
       $spinner.hide();
       $('#editEntryModal').modal('hide');
