@@ -345,11 +345,15 @@ var taggerlog = taggerlog || {};
     const $date = $form.find('[name=diary-date]');
 
     var formTags = [];
+    var formTagsRemoved = [];
     var $formTags = $('#diary-edit-entry-tags').find('.diary-tag');
     $formTags.each(function() {
       var $formTag = $(this);
       if($formTag.hasClass('selected')) {
         formTags.push($formTag.data('tag'));
+      }
+      else {
+        formTagsRemoved.push($formTag.data('tag'));
       }
     });
 
@@ -360,6 +364,9 @@ var taggerlog = taggerlog || {};
     tags = processTagList(tags);
     var tagString = tags.join();
 
+    tl.allTags = tl.allTags.concat(tags);
+    tl.allTags = processTagList(tl.allTags);
+
     db.collection('diary-entry').doc(id).update({
       'entry': $entry.val(),
       'date': new Date($date.val()),
@@ -367,7 +374,18 @@ var taggerlog = taggerlog || {};
       'tag-list': tags
     })
     .then(function() {
-      getRecentEntries(loggedInUser);
+      findOrphanTags(formTagsRemoved).then(function(orphans) {
+        if(orphans.length) {
+          tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
+          queryTags = queryTags.filter(item => !orphans.includes(item));
+          saveTags().then(() => {
+            getRecentEntries(loggedInUser);
+          });
+        }
+        else {
+          getRecentEntries(loggedInUser);
+        }
+      });
       $spinner.hide();
       $('#editEntryModal').modal('hide');
       showAlert('entry-edited-alert');
@@ -425,19 +443,16 @@ var taggerlog = taggerlog || {};
         showAlert('entry-deleted-alert');
 
         findOrphanTags(tagList).then(function(orphans) {
-          console.log('Finding orphans');
           if(orphans.length) {
             tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
             queryTags = queryTags.filter(item => !orphans.includes(item));
             saveTags().then(() => {
-              console.log('Saving tags');
               getRecentEntries(loggedInUser);
             });
           }
           else {
             getRecentEntries(loggedInUser);
           }
-          console.log('Entry deleted');
         });
 
       }).catch(function(error) {
@@ -674,11 +689,10 @@ var taggerlog = taggerlog || {};
           }
         }
       });
-      tags = Array.from(tagSet).sort();
-      tagString = tags.join(',');
-      console.log(tagString);
+      var tags = Array.from(tagSet).sort();
+      var tagString = tags.join(',');
 
-      tagData = {
+      var tagData = {
         tags: tagString
       }
 
@@ -691,6 +705,7 @@ var taggerlog = taggerlog || {};
       });
     });
   }
+  tl.generateTags = generateTags;
 
   /**
    * Loads the user interface for a logged in user.
