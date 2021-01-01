@@ -321,6 +321,8 @@ var taggerlog = taggerlog || {};
         tagsHTML += tagHTML;
       }
       $('#diary-edit-entry-tags').html(tagsHTML);
+      $form.find('[name=new-tag]').val('');
+      $('#edit-entry-date').removeClass('show');
       $('#editEntryModal').modal();
     })
     .catch(function(error) {
