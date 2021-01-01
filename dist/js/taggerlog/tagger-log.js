@@ -579,6 +579,9 @@ var taggerlog = taggerlog || {};
     var numTags = tags.length;
     if(tags.length) {
       for(var tag of tags) {
+        if(numTags > 7 && prevTag && tag.charAt(0) != prevTag.charAt(0)) {
+          tagHTML += '<br />';
+        }
         replacedTemplate = tagTemplate.replaceAll('{tag}', tag);
         if(queryTags.indexOf(tag) == -1) {
           replacedTemplate = replacedTemplate.replaceAll('{selected}', '');
@@ -587,9 +590,6 @@ var taggerlog = taggerlog || {};
           replacedTemplate = replacedTemplate.replaceAll('{selected}', 'selected');
         }
         tagHTML += replacedTemplate;
-        if(numTags > 7 && prevTag && tag.charAt(0) != prevTag.charAt(0)) {
-          tagHTML += '<br />';
-        }
         prevTag = tag;
       }
     }
