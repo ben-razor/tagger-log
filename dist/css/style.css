@@ -99,6 +99,20 @@ div.diary-entry .diary-entry-tags {
   color: hsl(30, 30%, 40%);
 }
 
+.diary-tag-display {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 3px;
+  border: 1px solid hsl(30, 60%, 60%);
+  color: hsl(30, 60%, 60%);
+  background-color: white;
+}
+
+.diary-tag-display.selected {
+  background-color: hsl(30, 60%, 60%);
+  color: white;
+}
+
 .diary-tag {
   display: inline-block;
   padding: 5px;

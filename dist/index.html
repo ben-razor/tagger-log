@@ -10,9 +10,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-  <link rel="stylesheet" type="text/css" href="lib/bootstrap-select/dist/css/bootstrap-select.min.css" />
+  <link rel="stylesheet" type="text/css" href="vendor/fontawesome/css/all.css">
+  <link rel="stylesheet" type="text/css" href="vendor/bootstrap-select/dist/css/bootstrap-select.min.css" />
   <link rel="stylesheet" type="text/css" href="css/style.css" />
   <link rel="stylesheet" type="text/css" href="css/animate.css" />
+  <link href="vendor/fontawesome-5.15.1/css/all.min.css" rel="stylesheet">
   <link rel="apple-touch-icon" sizes="144x144" href="img/favicon/aapple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="img/favicon/favicon-16x16.png">
@@ -60,37 +62,44 @@
         <div class="modal-body">
           <div class="form-group">
             <form onsubmit="taggerlog.diaryEditEntry(this); return false;" id="edit-entry-form">
-              <textarea class="form-control" name="diary-entry" rows="6"></textarea>
+              <textarea class="form-control" name="diary-entry" rows="5"></textarea>
+              <h3 class="">Tags</h3>
+              <div id="diary-edit-entry-tags">
+              </div>
+              <div class="pt-2 input-group w-100 d-flex flex-row">
+                <input type="text" placeholder="Enter tags (separated by commas)" name="new-tag" class="flex-fill" 
+                  autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" />
+              </div>
               <div class="py-2">
                 <input type="datetime-local" name="diary-date" />
               </div>
             </form>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" data-id="" onclick="taggerlog.editEntry($(this).data('id'))" id="edit-entry-button">
-            <span id="edit-entry-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+    <button type="button" class="btn btn-primary" data-id="" onclick="taggerlog.editEntry($(this).data('id'))" id="edit-entry-button">
+      <span id="edit-entry-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+      Confirm
+    </button>
+  </div>
+</div>
+</div>
+</div>
 
-  <div class="content">
-    <div class="pm-screen-background">
+<div class="content">
+<div class="pm-screen-background">
 
-    <div id="firebaseui-auth-container">
-      <div class="small-header header">
-        <div>
-          <div class="align-items-center d-flex">
-            <div class="d-inline-block">
-                <img src="img/favicon/favicon-32x32.png">
-                <h1>Tagger Log</h1>
-                <p class="d-none d-md-inline">It keeps track of what you are doing</p> 
-            </div>
-            <div class="d-inline-block ml-auto">
+<div id="firebaseui-auth-container">
+<div class="small-header header">
+  <div>
+    <div class="align-items-center d-flex">
+      <div class="d-inline-block">
+          <img src="img/favicon/favicon-32x32.png">
+          <h1>Tagger Log</h1>
+          <p class="d-none d-md-inline">It keeps track of what you are doing</p> 
+      </div>
+      <div class="d-inline-block ml-auto">
               <a class="logged-out-show btn btn-outline-light mr-2" onclick="taggerlog.logIn()" role="button" style="text-transform:none">
                 <img width="20px" style="margin-bottom:3px; margin-right:5px" alt="Google sign-in" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
                 Login
@@ -118,6 +127,32 @@
       <template id="text-entry-add-failed-alert">Error adding entry</template>
       <template id="text-entry-delete-failed-alert">Error deleting entry</template>
       <template id="text-entry-edit-failed-alert">Error editing entry</template>
+      <template id="elem-no-entries-for-tags">
+        <div class="diary-entry">
+          <div class="diary-entry-text">
+            There are no entries to show for your active tags.
+          </div>
+        </div>
+      </template>
+      <template id="elem-no-entries">
+        <div class="alert alert-light" role="alert">
+          No diary entries to display.    
+        </div>
+      </template>
+      <template id="elem-no-tags">
+        <div class="alert alert-light" role="alert">
+          No tags to display.
+        </div>
+      </template>
+      <template id="elem-diary-tag">
+        <span class="diary-tag {selected}" onclick="taggerlog.toggleTag('{tag}')">{tag}</span>
+      </template>
+      <template id="elem-diary-tag-display">
+        <span class="diary-tag-display {selected}">{tag}</span>
+      </template>
+      <template id="elem-diary-tag-edit">
+        <span class="diary-tag {selected}" id="diary-tag-edit-{tag}" data-tag="{tag}" onclick="taggerlog.toggleEditTag('{tag}')">{tag}</span>
+      </template>
 
       <div class="container main-content">
         <div class="loading-show" style="height: 400px;">
@@ -144,30 +179,16 @@
         <div class="loaded-show d-none">
           <div class="row d-none logged-in-show">
             <div class="col-md-4 collapse d-md-block" id="diary-new-entry-panel">
-              <h3 class="d-none d-md-block">New Entry</h3>
+              <h3>New Entry</h3>
                 <div class="form-group mt-2">
                   <form onsubmit="taggerlog.diaryAddEntry(this); return false;">
                     <textarea class="form-control" name="diary-entry" rows="4"></textarea>
-                    <div class="py-2 d-flex">
-                      <h3>Tags</h3>
+                    <h3 class="">Tags</h3>
+                    <div id="diary-entry-active-tags">
                     </div>
-                    <div class="d-flex">
-                      <select name="tag-selector" class="selectpicker w-100" multiple title="Choose 1 to 5 tags..." data-done-button="true" id="new-entry-tag-selector">
-                      </select>
-                    </div>
-                    <div class="py-2 pl-1 input-group w-100 d-flex flex-row">
-
-                      <input type="text" placeholder="Extra tags (separated by commas)" name="new-tag" class="flex-fill" 
+                    <div class="pt-2 input-group w-100 d-flex flex-row">
+                      <input type="text" placeholder="Enter tags (separated by commas)" name="new-tag" class="flex-fill" 
                         autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" />
-
-                      <!--
-                      <div class="input-group-append">
-                        <button type="button" class="btn btn-outline-secondary" onclick="taggerlog.createNewTag($(this).closest('form'));">
-                          Create tag(s)
-                        </button>
-                      </div>
-
-                      -->
                     </div>
                     <div class="py-2 d-flex">
                       <input type="datetime-local" name="diary-date" class="d-none" />
@@ -219,7 +240,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.1.2/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/ui/4.7.1/firebase-ui-auth.js"></script>
 <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.7.1/firebase-ui-auth.css" />
-<script src="lib/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+<script src="vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
 
 <script src="js/taggerlog/tags.js"></script>
 <script src="js/taggerlog/tagger-log.js"></script>

@@ -36,7 +36,7 @@ var taggerlog = taggerlog || {};
     tagVerifier.verifyTags(tags);
 
     if(tagVerifier.errors.length == 0) {
-      allTags = processTagList(allTags.concat(tags));
+      tl.allTags = processTagList(tl.allTags.concat(tags));
       refreshTagSelect();
       selected = selected.concat(tags);
       $tagSelect.val(selected);
@@ -68,35 +68,19 @@ var taggerlog = taggerlog || {};
     $button.prop('disabled', true);
 
     var $form = $(form);
-    createNewTag($form);
-    const entry = $form.find('textarea[name=diary-entry]').val();
-    const dateStr = $form.find('[name=diary-date]').val();
-    const tagSelections = $form.find('[name=tag-selector').val();
+    var entry = $form.find('textarea[name=diary-entry]').val();
+    var dateStr = $form.find('[name=diary-date]').val();
+    var entryText = entry;
 
-    let tagVerifier = new tl.TagVerifier(tl.tagErrorConfig);
-    tagVerifier.verifyTags(tagSelections);
+    var $elem = $form.find('[name=new-tag]');
+    var tagStr = $elem.val();
+    var tags = tl.tagCSVToTags(tagStr);
+    tags = tags.concat(queryTags);
+    tags = processTagList(tags);
+    var tagString = tags.join();
 
-    let tags = [];
-    if(tagSelections && tagSelections.length > 0) {
-      tags = tagSelections;
-    }
-
-    let lines = entry.split("\n");
-    let entryText = '';
-    for(var line of lines) {
-      if(line.startsWith("--")) {
-        let lineClean = line.replace("--", "").trim();
-        tags = tags.concat(tl.tagCSVToTags(lineClean));
-      }
-      else {
-        if(line.trim() != '') {
-          entryText += line + "\n";
-        }
-      }
-    }
-    const tagString = tags.join();
-    allTags = allTags.concat(tags);
-    allTags = processTagList(allTags);
+    tl.allTags = tl.allTags.concat(tags);
+    tl.allTags = processTagList(tl.allTags);
 
     let date = new Date();
     if(dateStr && dateStr !== "") {
@@ -137,7 +121,7 @@ var taggerlog = taggerlog || {};
     var db = tl.db;
     return new Promise((resolve, reject) => {
       console.log('in  save tags promise');
-      db.collection("diary-tags").doc(loggedInUser.uid).set({tags: allTags.join()})
+      db.collection("diary-tags").doc(loggedInUser.uid).set({tags: tl.allTags.join()})
       .then(function(docRef) {
         console.log("Tags written with ID: ", loggedInUser.uid);
         resolve();
@@ -201,10 +185,8 @@ var taggerlog = taggerlog || {};
     var db = tl.db;
 
     var tableTemplate = '<div class="diary-entries">{rows}</div>';
-    var defaultEntry = `<div class="diary-entry">
-      <div class="diary-entry-text">There are no entries to show for your active tags.</div>
-    </div>
-    `;
+    var defaultEntry = $('#elem-no-entries').html();
+    var defaultEntryNoMatchingTags = $('#elem-no-entries-for-tags').html();
     var rowTemplate = `<div class="diary-entry">
       <div class="diary-entry-text">{entry}</div>
       <div>
@@ -271,7 +253,12 @@ var taggerlog = taggerlog || {};
         refreshTagDisplay();
 
         if(rows == '') {
-          rows = defaultEntry;          
+          if(tl.allTags.length > 0) {
+            rows = defaultEntryNoMatchingTags;
+          }
+          else {
+            rows = defaultEntry;          
+          }
         }
 
         var tableHTML = tableTemplate.replace('{rows}', rows)        
@@ -323,6 +310,17 @@ var taggerlog = taggerlog || {};
       var date = new Date(dateInfo['seconds'] * 1000);
       $date[0].valueAsNumber = date.getTime();
       $('#edit-entry-button').data('id', id);
+
+      var tags = data['tag-list'];
+      var tagDisplayTemplate = $('#elem-diary-tag-edit').html();
+      var tagHTML = '';
+      var tagsHTML = '';
+      for(var i = 0; i < tags.length; i++) {
+        tagHTML = tagDisplayTemplate.replaceAll('{tag}', tags[i]);
+        tagHTML = tagHTML.replace('{selected}', 'selected');
+        tagsHTML += tagHTML;
+      }
+      $('#diary-edit-entry-tags').html(tagsHTML);
       $('#editEntryModal').modal();
     })
     .catch(function(error) {
@@ -346,9 +344,27 @@ var taggerlog = taggerlog || {};
     const $entry = $form.find('textarea[name=diary-entry]');
     const $date = $form.find('[name=diary-date]');
 
+    var formTags = [];
+    var $formTags = $('#diary-edit-entry-tags').find('.diary-tag');
+    $formTags.each(function() {
+      var $formTag = $(this);
+      if($formTag.hasClass('selected')) {
+        formTags.push($formTag.data('tag'));
+      }
+    });
+
+    var $elem = $form.find('[name=new-tag]');
+    var tagStr = $elem.val();
+    var tags = tl.tagCSVToTags(tagStr);
+    tags = tags.concat(formTags);
+    tags = processTagList(tags);
+    var tagString = tags.join();
+
     db.collection('diary-entry').doc(id).update({
       'entry': $entry.val(),
-      'date': new Date($date.val())
+      'date': new Date($date.val()),
+      'tags': tagString,
+      'tag-list': tags
     })
     .then(function() {
       getRecentEntries(loggedInUser);
@@ -411,7 +427,7 @@ var taggerlog = taggerlog || {};
         findOrphanTags(tagList).then(function(orphans) {
           console.log('Finding orphans');
           if(orphans.length) {
-            allTags = allTags.filter(item => !orphans.includes(item));
+            tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
             queryTags = queryTags.filter(item => !orphans.includes(item));
             saveTags().then(() => {
               console.log('Saving tags');
@@ -450,28 +466,33 @@ var taggerlog = taggerlog || {};
    * All the tags currently stored with entries. Sorted and unique.
    * @type {string[]}
    */
-  let allTags = [];
+  tl.allTags = [];
   /**
    * The "active" tags which limit displayed entries and are auto 
    * attached to new entries. Sorted and unique.
    * @type {string[]}
    */
-  let queryTags = [];
+  var queryTags = [];
   /**
    * Tags that are used on any entry that the queryTags are also used
    * on, includes the queryTags themselves. Sorted and unique.
    * @type {string[]}
    */
-  let queryRelatedTags = [];
+  var queryRelatedTags = [];
 
   /**
-   * Takes an array of tags, removes duplicates and sorts.
+   * Takes an array of tags, removes duplicates and empty tag and sorts.
    * 
    * @param {string[]} tagList 
    */
   function processTagList(tagList) {
-    let tagSet = new Set(tagList);
-    let tags = Array.from(tagSet).sort();
+    var tagSet = new Set(tagList);
+    var tags = Array.from(tagSet).sort();
+    for(var i = tagList.length - 1; i >= 0; i--) {
+      if(tags[i] == "") {
+        tags.splice(i, 1);
+      }
+    }
     return tags;
   }
 
@@ -485,7 +506,12 @@ var taggerlog = taggerlog || {};
     .then(function(doc) {
         let data = doc.data();
         let tagString = data['tags'];
-        allTags = processTagList(tagString.split(','));
+        if(tagString) {
+          tl.allTags = processTagList(tagString.split(','));
+        }
+        else {
+          tl.allTags = [];
+        }
         refreshTagDisplay();
         refreshTagSelect();
     });
@@ -509,38 +535,68 @@ var taggerlog = taggerlog || {};
   tl.toggleTag = toggleTag;
 
   /**
+   * Makes a tag active/deactivated on the entry edit form.
+   * 
+   * @param {string} tag 
+   */
+  function toggleEditTag(tag) {
+    var $elem = $('#diary-tag-edit-' + tag);
+    if($elem.hasClass('selected')) {
+      $elem.removeClass('selected');
+    }
+    else {
+      $elem.addClass('selected');
+    }
+  }
+  tl.toggleEditTag = toggleEditTag;
+
+
+  /**
    * Updates the displaying of tags based on currently active
    * query tags.
    */
   function refreshTagDisplay() {
-    var tagTemplate = '<span class="diary-tag {selected}" onclick="taggerlog.toggleTag(\'{tag}\')">{tag}</span>';
+    var tagTemplate = $('#elem-diary-tag').html();
+    var tagDisplayTemplate = $('#elem-diary-tag-display').html();
     var tagHTML = '';
     var replacedTemplate = '';
-    let tags = allTags;
+    let tags = tl.allTags;
     if(queryRelatedTags.length) {
       tags = queryRelatedTags;
     }
+    var noTagsElem = $('#elem-no-tags').html();
 
-    var $tagSelect = $('#new-entry-tag-selector');
-    if(queryTags.length) {
-      $tagSelect.val(queryTags);
-      $tagSelect.selectpicker('refresh');
+    var activeTagHTML = '';
+    var activeTagsHTML = '';
+    for(var i = 0; i < queryTags.length; i++) {
+      activeTagHTML = tagDisplayTemplate.replaceAll('{tag}', queryTags[i]);
+      activeTagHTML = activeTagHTML.replace('{selected}', 'selected');
+      activeTagsHTML += activeTagHTML;
+    }
+    $('#diary-entry-active-tags').html(activeTagsHTML);
+
+    var prevTag = '';
+    var numTags = tags.length;
+    if(tags.length) {
+      for(var tag of tags) {
+        replacedTemplate = tagTemplate.replaceAll('{tag}', tag);
+        if(queryTags.indexOf(tag) == -1) {
+          replacedTemplate = replacedTemplate.replaceAll('{selected}', '');
+        }
+        else {
+          replacedTemplate = replacedTemplate.replaceAll('{selected}', 'selected');
+        }
+        tagHTML += replacedTemplate;
+        if(numTags > 7 && prevTag && tag.charAt(0) != prevTag.charAt(0)) {
+          tagHTML += '<br />';
+        }
+        prevTag = tag;
+      }
     }
     else {
-      $tagSelect.val('');
-      $tagSelect.selectpicker('refresh');
+      tagHTML = noTagsElem;
     }
 
-    for(var tag of tags) {
-      replacedTemplate = tagTemplate.replaceAll('{tag}', tag);
-      if(queryTags.indexOf(tag) == -1) {
-        replacedTemplate = replacedTemplate.replaceAll('{selected}', '');
-      }
-      else {
-        replacedTemplate = replacedTemplate.replaceAll('{selected}', 'selected');
-      }
-      tagHTML += replacedTemplate;
-    }
     $('#diary-tags').html(tagHTML);
   }
 
@@ -553,7 +609,7 @@ var taggerlog = taggerlog || {};
     var $tagSelect = $('#new-entry-tag-selector');
     let selected = $tagSelect.val();
 
-    for(var tag of allTags) {
+    for(var tag of tl.allTags) {
       tagOptionHTML += tagOptionTemplate.replaceAll('{tag}', tag);
     }
     $tagSelect.html(tagOptionHTML);
@@ -699,5 +755,7 @@ var taggerlog = taggerlog || {};
     window.scrollTo(0, 0);
   }
   tl.toggleTags = toggleTags;
+
+  
 
 })(taggerlog);
