@@ -199,3 +199,7 @@ div.diary-entry .diary-entry-tags {
 .dropdown-toggle::after {
   color: hsl(30, 60%, 90%);
 }
+
+.firebase-emulator-warning {
+  display: none;
+}
