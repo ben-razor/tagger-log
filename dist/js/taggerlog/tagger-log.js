@@ -748,6 +748,9 @@ var taggerlog = taggerlog || {};
       $inputs.on('blur', function() {
         showWhenNotTyping();
       });
+      $('#diary-controls-toggle').on('touchstart', function() {
+        showWhenNotTyping();
+      });
 
       getRecentEntries(loggedInUser);
     }
@@ -766,15 +769,20 @@ var taggerlog = taggerlog || {};
     var $newEntry = $('#diary-new-entry-panel');
     var $tags = $('#diary-tags-panel');
     var $entries = $('#diary-entries-panel');
+    var $newEntryBtn = $('#diary-control-new-entry');
+    var $tagsBtn = $('#diary-control-tags');
 
     if($newEntry.hasClass('collapse')) {
       $newEntry.removeClass('collapse');
       $entries.removeClass('collapse');
       $tags.addClass('collapse');
+      $newEntryBtn.removeClass('inactive');
+      $tagsBtn.addClass('inactive');
     }
     else {
       $newEntry.addClass('collapse');
       $entries.removeClass('collapse');
+      $newEntryBtn.addClass('inactive');
     }
     window.scrollTo(0, 0);
   }
@@ -786,13 +794,18 @@ var taggerlog = taggerlog || {};
   function toggleTags() {
     var $tags = $('#diary-tags-panel');
     var $newEntry = $('#diary-new-entry-panel');
+    var $newEntryBtn = $('#diary-control-new-entry');
+    var $tagsBtn = $('#diary-control-tags');
 
     if($tags.hasClass('collapse')) {
       $tags.removeClass('collapse');
       $newEntry.addClass('collapse');
+      $newEntryBtn.addClass('inactive');
+      $tagsBtn.removeClass('inactive');
     }
     else {
       $tags.addClass('collapse');
+      $tagsBtn.addClass('inactive');
     }
     window.scrollTo(0, 0);
   }

@@ -233,10 +233,10 @@
               </div>
           </div>
           <div id="diary-controls" class="fixed-bottom d-none row d-md-none mx-1">
-              <button class="flex-fill btn btn-primary d-inline-block d-md-none m-1" type="button" onclick="taggerlog.toggleNewEntry()" data-target="#diary-new-entry" aria-expanded="false" aria-controls="collapseExample">
+              <button id="diary-control-new-entry" class="inactive flex-fill diary-control-btn d-inline-block d-md-none m-1" type="button" onclick="taggerlog.toggleNewEntry()" data-target="#diary-new-entry" aria-expanded="false" aria-controls="collapseExample">
                 New Entry
               </button>
-              <button class="flex-fill col-6 btn btn-primary d-inline-block d-md-none m-1" type="button" onclick="taggerlog.toggleTags()" data-target="#diary-tags" aria-expanded="false" aria-controls="collapseExample">
+              <button id="diary-control-tags" class="inactive flex-fill col-6 diary-control-btn d-inline-block d-md-none m-1" type="button" onclick="taggerlog.toggleTags()" data-target="#diary-tags" aria-expanded="false" aria-controls="collapseExample">
                 Tags
               </button>
           </div>

@@ -45,6 +45,8 @@ div.small-header {
   color: white;
 }
 
+
+
 .header h1 {
   line-height: 2em;
   vertical-align: middle;
@@ -206,6 +208,24 @@ div.diary-entry .diary-entry-tags {
 
 #diary-controls {
   background-color: white;
+}
+
+.diary-control-btn {
+  border-radius: 5px;
+  padding: 4px;
+  background-color: hsl(30, 60%, 40%); 
+  color: white;
+  border: 1px solid hsl(30, 60%, 40%);
+}
+
+.diary-control-btn.inactive {
+  background-color: white; 
+  color: hsl(30, 60%, 40%) !important;
+}
+
+.diary-control-btn:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 #diary-controls-toggle div {
