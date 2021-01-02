@@ -14,7 +14,7 @@ var taggerlog = taggerlog || {};
     var $alertElem = $("#entry-alert");
     var $alertTextElem = $("#entry-alert-text");
     $alertTextElem.html(alertText);
-    $alertElem.fadeTo(2000, 500).slideUp(500, function() {
+    $alertElem.fadeTo(2000, 1000).slideUp(500, function() {
       $alertElem.slideUp(500);
     });
   }

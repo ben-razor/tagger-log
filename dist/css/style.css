@@ -22,6 +22,7 @@ body {
   background-image: url("https://www.toptal.com/designers/subtlepatterns/patterns/y-so-serious-white.png");
   font-family: Lato, sans-serif;
   padding-bottom: 70px;
+  padding-right: 0px !important;
 }
 
 div.jumbotron {
@@ -44,8 +45,6 @@ div.small-header {
   background-color: hsl(30, 60%, 40%) !important; 
   color: white;
 }
-
-
 
 .header h1 {
   line-height: 2em;
@@ -235,4 +234,20 @@ div.diary-entry .diary-entry-tags {
   background-color: hsl(30, 60%, 30%); 
   border: 2px solid hsl(30, 50%, 40%);
   transform: translateY(50%) scaleY(0.5) rotate(45deg);
+}
+
+.diary-alert {
+  position: fixed;
+  max-width: 20em;
+  width: 100%;
+  top: 1em;
+  left: 0;
+  margin: 0 auto;
+  right: 0;
+  z-index: 10;
+  opacity: 0.85;
+}
+
+.modal-open {
+  overflow-y: auto;
 }
