@@ -19,6 +19,10 @@ var taggerlog = taggerlog || {};
   function initNewUser(user) {
     var gettingStartedEntries = [
         {
+            "text": "This is demo application. Any entries will be lost!",
+            "tags": ['warning', 'this-is-a-demo'] 
+        },
+        {
             "text": 'This is an entry with some tags. You can click on it to edit or delete it.',
             "tags": ['getting-started', 'entries']
         },
