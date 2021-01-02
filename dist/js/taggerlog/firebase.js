@@ -14,6 +14,46 @@ var taggerlog = taggerlog || {};
     appId: "1:719415357807:web:9d7542eb704b4bc430f89a"
   };
 
+  var isNewUser = false;
+
+  function initNewUser(user) {
+    var gettingStartedEntries = [
+        {
+            "text": 'This is an entry with some tags. You can click on it to edit or delete it.',
+            "tags": ['getting-started', 'entries']
+        },
+        {
+            "text": "The tags panel has the tags from all your entries. " +
+                "Clicking them makes them active.",
+            "tags": ['getting-started', 'tags']
+        },
+        {
+            "text": "Only entries matching active tags are displayed.\n\n"  +
+                "Active tags are automatically added to new entries.\n\n",
+            "tags": ['getting-started', 'tags', 'entries']
+        }
+    ];
+
+    var allTags = [];
+    var numEntries = gettingStartedEntries.length;
+    for(var i = 0; i < numEntries; i++) {
+        var entry = gettingStartedEntries[i];
+        var text = entry["text"];
+        var tags = entry["tags"];
+        const entryData = {
+            uid: user.uid,
+            entry: text,
+            date: new Date(Date.now() + (numEntries - i) * 100),
+            "tag-list": tags
+        };
+        tl.db.collection('diary-entry').add(entryData);
+        allTags = allTags.concat(tags);
+    }
+
+    allTags = tl.processTagList(allTags);
+    tl.db.collection("diary-tags").doc(user.uid).set({tags: allTags.join()})
+  }
+
   $(function() {
     firebase.initializeApp(firebaseConfig);
 
@@ -22,10 +62,17 @@ var taggerlog = taggerlog || {};
       tl.db.useEmulator("localhost", 8080);
       firebase.auth().useEmulator('http://localhost:9099/');
     }
-    
+
     firebase.auth().onAuthStateChanged(function(user) {
       tl.loggedInUser = user;
-      tl.updateLoggedInUI();
+      if(isNewUser) {
+        initNewUser(user);
+        tl.updateLoggedInUI();
+        isNewUser = false;
+      }
+      else {
+        tl.updateLoggedInUI();
+      }
     });
 
   });
@@ -43,7 +90,11 @@ var taggerlog = taggerlog || {};
    */
   function logIn() {
     var provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(provider).then().catch(function(error) {
+    firebase.auth().signInWithPopup(provider).then(function(result) {
+      if(result.additionalUserInfo.isNewUser) {
+        isNewUser = true;
+      }
+    }).catch(function(error) {
       console.log(error);
     });
   }

@@ -221,10 +221,10 @@ var taggerlog = taggerlog || {};
           // doc.data() is never undefined for query doc snapshots
           let data = doc.data();
           console.log(data);
-          let tags = data['tags'];
-          let tagList = tags.split(',');
+          var tagList = data['tag-list'];
+          var tags = tagList.join();
 
-          let containsQueryTags = true;
+          var containsQueryTags = true;
           if(tagQueryActive) {
             if(!queryTags.every(r => tagList.indexOf(r) >= 0)) {
               containsQueryTags = false;
@@ -509,6 +509,7 @@ var taggerlog = taggerlog || {};
     }
     return tags;
   }
+  tl.processTagList = processTagList;
 
   /**
    * Gets all tags from the database and updates the tag UI.
