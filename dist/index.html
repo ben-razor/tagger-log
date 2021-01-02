@@ -4,6 +4,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Tagger Log</title>
   <link rel="icon" type="image/png" href="favicon.ico">
   <link rel="stylesheet" href="css/normalize.css" />
@@ -225,7 +228,11 @@
               </div>
             </div>
           </div>
-          <div id="diary-controls" class="fixed-bottom d-none row d-md-none mx-1" style="background-color: white">
+          <div id="diary-controls-toggle" class="fixed-bottom d-none row d-md-none mx-1 justify-content-center">
+            <div>
+              </div>
+          </div>
+          <div id="diary-controls" class="fixed-bottom d-none row d-md-none mx-1">
               <button class="flex-fill btn btn-primary d-inline-block d-md-none m-1" type="button" onclick="taggerlog.toggleNewEntry()" data-target="#diary-new-entry" aria-expanded="false" aria-controls="collapseExample">
                 New Entry
               </button>

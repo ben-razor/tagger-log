@@ -203,3 +203,16 @@ div.diary-entry .diary-entry-tags {
 .firebase-emulator-warning {
   display: none;
 }
+
+#diary-controls {
+  background-color: white;
+}
+
+#diary-controls-toggle div {
+  width: 60px; 
+  height: 60px; 
+  border-radius: 8px;
+  background-color: hsl(30, 60%, 30%); 
+  border: 2px solid hsl(30, 50%, 40%);
+  transform: translateY(50%) scaleY(0.5) rotate(45deg);
+}

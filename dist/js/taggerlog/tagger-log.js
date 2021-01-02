@@ -708,6 +708,23 @@ var taggerlog = taggerlog || {};
   tl.generateTags = generateTags;
 
   /**
+   * Hides elements on mobile html while typing in case
+   * the static controls hide the form.
+   */
+  function hideWhenTyping() {
+    $('#diary-controls-toggle').removeClass('d-none').addClass('d-flex');
+    $('#diary-controls').removeClass('d-flex').addClass('d-none');
+  }
+
+  /**
+   * Shows any elements hidden by hideWhenTyping.
+   */
+  function showWhenNotTyping() {
+    $('#diary-controls-toggle').addClass('d-none').removeClass('d-flex');
+    $('#diary-controls').removeClass('d-none').addClass('d-flex');
+  }
+
+  /**
    * Loads the user interface for a logged in user.
    */
   function updateLoggedInUI() {
@@ -722,6 +739,16 @@ var taggerlog = taggerlog || {};
       $('#header-user-name').html(loggedInUser.displayName);
       $('#header-user-email').html(loggedInUser.email);
       $('#diary-controls').removeClass('d-none').addClass('d-flex');
+
+      var $inputs = $('input[type=text], textarea');
+
+      $inputs.focus(function() {
+        hideWhenTyping();
+      });
+      $inputs.on('blur', function() {
+        showWhenNotTyping();
+      });
+
       getRecentEntries(loggedInUser);
     }
     else {
