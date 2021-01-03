@@ -95,24 +95,23 @@ var taggerlog = taggerlog || {};
       "tag-list": tags
     }
 
-    db.collection("diary-entry").add(entryData)
-      .then(function(docRef) {
-
-        saveTags().then(() => {
-          getRecentEntries(loggedInUser);
-        });
-        $spinner.hide();
-        $button.prop('disabled', false);
-        showAlert('entry-added-alert');
-
-        console.log("Document written with ID: ", docRef.id);
-      })
-      .catch(function(error) {
-          console.error("Error adding document: ", error);
-          $spinner.hide();
-          $button.prop('disabled', false);
-          showAlert('entry-add-failed-alert');
-      });
+    var batch = db.batch();
+    var newEntryRef = db.collection('diary-entry').doc();
+    var tagsRef = db.collection('diary-tags').doc(loggedInUser.uid);
+    batch.set(newEntryRef, entryData);
+    batch.set(tagsRef, {tags: tl.allTags.join()})
+    batch.commit().then(function() {
+      getRecentEntries();
+      $spinner.hide();
+      $button.prop('disabled', false);
+      showAlert('entry-added-alert');
+    })
+    .catch(function(error) {
+      logError("Error adding document: ", error);
+      $spinner.hide();
+      $button.prop('disabled', false);
+      showAlert('entry-add-failed-alert');
+    });
   }
   tl.diaryAddEntry = diaryAddEntry;
 
@@ -187,19 +186,15 @@ var taggerlog = taggerlog || {};
     var tableTemplate = '<div class="diary-entries">{rows}</div>';
     var defaultEntry = $('#elem-no-entries').html();
     var defaultEntryNoMatchingTags = $('#elem-no-entries-for-tags').html();
-    var rowTemplate = `<div class="diary-entry">
+    var rowTemplate = `<div class="diary-entry" onclick="taggerlog.entryClicked('{entry-id}')">
       <div class="diary-entry-text">{entry}</div>
       <div>
         <div class="row">
-          <div class="diary-entry-controls col-3">
-            {controls}
-          </div>
+          <div class="diary-entry-controls col-3"></div>
           <div class="diary-entry-tags col-9 text-truncate">{tags}</div>
         </div>
       </div>
     </div>`;
-    let editLinkTemplate = `<a href="#" onclick="taggerlog.editEntryStart('{entry-id}'); return false;"><i class="fa fa-edit"></i></a>`;
-    let deleteLinkTemplate = `<a href="#" onclick="taggerlog.deleteEntryStart('{entry-id}'); return false;"> <i class="fa fa-trash-alt"></i></a>`;
     var rows = '';
     let query = db.collection("diary-entry").orderBy("date", "desc");
     query = query.where('uid', '==', loggedInUser.uid);
@@ -237,11 +232,7 @@ var taggerlog = taggerlog || {};
             }
             let row = rowTemplate.replace('{date}', data['date']);
             row = row.replace('{entry}', cleanEntry(data['entry'])); 
-
-            let editStartLink = editLinkTemplate.replace('{entry-id}', doc.id);
-            let deleteStartLink = deleteLinkTemplate.replace('{entry-id}', doc.id);
-            let controls = editStartLink + deleteStartLink;
-            row = row.replace('{controls}', controls);
+            row = row.replace('{entry-id}', doc.id); 
             row = row.replace('{tags}', tags); 
             rows += row;
           }
@@ -310,6 +301,7 @@ var taggerlog = taggerlog || {};
       var date = new Date(dateInfo['seconds'] * 1000);
       $date[0].valueAsNumber = date.getTime();
       $('#edit-entry-button').data('id', id);
+      $('#delete-entry-button-on-popup').data('id', id);
 
       var tags = data['tag-list'];
       var tagDisplayTemplate = $('#elem-diary-tag-edit').html();
@@ -382,7 +374,7 @@ var taggerlog = taggerlog || {};
           queryTags = queryTags.filter(item => !orphans.includes(item));
         }
         saveTags().then(() => {
-          getRecentEntries(loggedInUser);
+          getRecentEntries();
         });
       });
       $spinner.hide();
@@ -414,6 +406,7 @@ var taggerlog = taggerlog || {};
     });
 
     $('#delete-entry-button').data('id', id);
+    $('#editEntryModal').modal('hide');
     $('#deleteEntryModal').modal();
   }
   tl.deleteEntryStart = deleteEntryStart;
@@ -446,11 +439,11 @@ var taggerlog = taggerlog || {};
             tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
             queryTags = queryTags.filter(item => !orphans.includes(item));
             saveTags().then(() => {
-              getRecentEntries(loggedInUser);
+              getRecentEntries();
             });
           }
           else {
-            getRecentEntries(loggedInUser);
+            getRecentEntries();
           }
         });
 
@@ -545,7 +538,7 @@ var taggerlog = taggerlog || {};
     else {
       queryTags.splice(tagIndex, 1);
     }
-    getRecentEntries(tl.loggedInUser);
+    getRecentEntries();
   }
   tl.toggleTag = toggleTag;
 
@@ -752,7 +745,7 @@ var taggerlog = taggerlog || {};
         showWhenNotTyping();
       });
 
-      getRecentEntries(loggedInUser);
+      getRecentEntries();
     }
     else {
       $('.logged-in-show').addClass('d-none');
@@ -811,6 +804,15 @@ var taggerlog = taggerlog || {};
   }
   tl.toggleTags = toggleTags;
 
+  /**
+   * Handler for clicking on an entry.
+   * 
+   * @param {string} entryID 
+   */
+  function entryClicked(entryID) {
+    editEntryStart(entryID);
+  }
+  tl.entryClicked = entryClicked;
   
 
 })(taggerlog);

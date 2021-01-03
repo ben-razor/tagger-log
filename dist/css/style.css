@@ -207,6 +207,8 @@ div.diary-entry .diary-entry-tags {
 
 #diary-controls {
   background-color: white;
+  border-radius: 0 4px;
+  z-index: 100;
 }
 
 .diary-control-btn {

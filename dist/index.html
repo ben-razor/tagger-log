@@ -92,7 +92,11 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Edit Entry</h5>
+            <h5 class="modal-title d-inline-block">Edit Entry or</h5>
+              <button type="button" class="btn btn-primary ml-1" data-id="" onclick="taggerlog.deleteEntryStart($(this).data('id'))" id="delete-entry-button-on-popup">
+              <span id="delete-entry-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+              Delete
+            </button>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -230,7 +234,7 @@
             <div>
               </div>
           </div>
-          <div id="diary-controls" class="fixed-bottom d-none row d-md-none mx-1">
+          <div id="diary-controls" class="fixed-bottom d-none row d-md-none mx-1 pt-1">
               <button id="diary-control-new-entry" class="inactive flex-fill diary-control-btn d-inline-block d-md-none m-1" type="button" onclick="taggerlog.toggleNewEntry()" data-target="#diary-new-entry" aria-expanded="false" aria-controls="collapseExample">
                 New Entry
               </button>
