@@ -3,6 +3,29 @@
 var taggerlog = taggerlog || {};
 
 (function(tl) {
+  /**
+   * The entry data for the currently active tags.
+   * @type {object[]}
+   */
+  tl.entries = [];
+  /**
+   * All the tags currently stored with entries. Sorted and unique.
+   * @type {string[]}
+   */
+  tl.allTags = [];
+  /**
+   * The "active" tags which limit displayed entries and are auto 
+   * attached to new entries. Sorted and unique.
+   * @type {string[]}
+   */
+  var queryTags = [];
+  /**
+   * Tags that are used on any entry that the queryTags are also used
+   * on, includes the queryTags themselves. Sorted and unique.
+   * @type {string[]}
+   */
+  var queryRelatedTags = [];
+
 
   /**
    * Display an alert to reflect actions carried out on entries.
@@ -37,7 +60,6 @@ var taggerlog = taggerlog || {};
 
     if(tagVerifier.errors.length == 0) {
       tl.allTags = processTagList(tl.allTags.concat(tags));
-      refreshTagSelect();
       selected = selected.concat(tags);
       $tagSelect.val(selected);
       $tagSelect.selectpicker('refresh');
@@ -101,7 +123,9 @@ var taggerlog = taggerlog || {};
     batch.set(newEntryRef, entryData);
     batch.set(tagsRef, {tags: tl.allTags.join()})
     batch.commit().then(function() {
-      getRecentEntries();
+      entryData["id"] = newEntryRef.id;
+      tl.entries.unshift(entryData);
+      refreshUI(tl.entries);
       $spinner.hide();
       $button.prop('disabled', false);
       showAlert('entry-added-alert');
@@ -177,25 +201,12 @@ var taggerlog = taggerlog || {};
   /**
    * Gets recent entries from the database and formats them for display.
    * 
-   * Also calls to refresh the tag list based on the selected query tags.
+   * Also finds the tags related to the currently active tags.
    */
   function getRecentEntries() {
     var loggedInUser = tl.loggedInUser;
     var db = tl.db;
 
-    var tableTemplate = '<div class="diary-entries">{rows}</div>';
-    var defaultEntry = $('#elem-no-entries').html();
-    var defaultEntryNoMatchingTags = $('#elem-no-entries-for-tags').html();
-    var rowTemplate = `<div class="diary-entry" onclick="taggerlog.entryClicked('{entry-id}')">
-      <div class="diary-entry-text">{entry}</div>
-      <div>
-        <div class="row">
-          <div class="diary-entry-controls col-3"></div>
-          <div class="diary-entry-tags col-9 text-truncate">{tags}</div>
-        </div>
-      </div>
-    </div>`;
-    var rows = '';
     let query = db.collection("diary-entry").orderBy("date", "desc");
     query = query.where('uid', '==', loggedInUser.uid);
 
@@ -208,14 +219,17 @@ var taggerlog = taggerlog || {};
       query = query.limit(10);
     }
 
+    tl.entries = [];
     queryRelatedTags = [];
 
-    query.get()
-    .then(function(querySnapshot) {
+    return new Promise(function(resolve, reject) {
+      query.get()
+      .then(function(querySnapshot) {
         querySnapshot.forEach(function(doc) {
-          // doc.data() is never undefined for query doc snapshots
           let data = doc.data();
-          console.log(data);
+          data['id'] = doc.id;
+          tl.entries.push(data);
+
           var tagList = data['tag-list'];
           var tags = tagList.join();
 
@@ -230,37 +244,90 @@ var taggerlog = taggerlog || {};
             if(tagQueryActive) {
               queryRelatedTags = queryRelatedTags.concat(tags.split(','));
             }
-            let row = rowTemplate.replace('{date}', data['date']);
-            row = row.replace('{entry}', cleanEntry(data['entry'])); 
-            row = row.replace('{entry-id}', doc.id); 
-            row = row.replace('{tags}', tags); 
-            rows += row;
           }
         });
 
         if(tagQueryActive) {
           queryRelatedTags = processTagList(queryRelatedTags); 
         }
-        refreshTagDisplay();
 
-        if(rows == '') {
-          if(tl.allTags.length > 0) {
-            rows = defaultEntryNoMatchingTags;
-          }
-          else {
-            rows = defaultEntry;          
-          }
-        }
-
-        var tableHTML = tableTemplate.replace('{rows}', rows)        
-        var $recentEntriesElem = $('#recent-entries');
-        $recentEntriesElem.html(tableHTML);
-    })
-    .catch(function(error) {
-        console.log("Error getting documents: ", error);
+        resolve(tl.entries);
+      })
+      .catch(function(error) {
+          console.log("Error getting documents: ", error);
+          resolve(tl.entries);
+      });
     });
+     
+  }
 
-      getTags();
+  /**
+   * Performs a refresh of the UI after the full entries list is
+   * changed.
+   */
+  function refreshUI(entries) {
+    refreshEntryDisplay(entries);
+    refreshTagDisplay();
+  }
+
+  /**
+   * Displays the entries for the currently active tags.
+   * 
+   * @param {object[]} entries List of entry data
+   */
+  function refreshEntryDisplay(entries) {
+    var tableTemplate = '<div class="diary-entries">{rows}</div>';
+    var defaultEntry = $('#elem-no-entries').html();
+    var defaultEntryNoMatchingTags = $('#elem-no-entries-for-tags').html();
+    var rowTemplate = `<div class="diary-entry" onclick="taggerlog.entryClicked('{entry-id}')">
+      <div class="diary-entry-text">{entry}</div>
+      <div>
+        <div class="row">
+          <div class="diary-entry-controls col-3"></div>
+          <div class="diary-entry-tags col-9 text-truncate">{tags}</div>
+        </div>
+      </div>
+    </div>`;
+    var rows = '';
+
+    var tagQueryActive = false;
+    if(queryTags.length > 0) {
+      tagQueryActive = true;
+    }
+
+    for(var i = 0; i < entries.length; i++) {
+      var data = entries[i];
+      var tagList = data['tag-list'];
+      var tags = tagList.join();
+
+      var containsQueryTags = true;
+      if(tagQueryActive) {
+        if(!queryTags.every(r => tagList.indexOf(r) >= 0)) {
+          containsQueryTags = false;
+        }
+      }
+
+      if(containsQueryTags) {
+        let row = rowTemplate.replace('{date}', data['date']);
+        row = row.replace('{entry}', postFormatEntry(cleanEntry(data['entry']))); 
+        row = row.replace('{entry-id}', data['id']); 
+        row = row.replace('{tags}', tags); 
+        rows += row;
+      }
+    }
+
+    if(rows == '') {
+      if(tl.allTags.length > 0) {
+        rows = defaultEntryNoMatchingTags;
+      }
+      else {
+        rows = defaultEntry;          
+      }
+    }
+
+    var tableHTML = tableTemplate.replace('{rows}', rows)        
+    var $recentEntriesElem = $('#recent-entries');
+    $recentEntriesElem.html(tableHTML);
   }
 
   /**
@@ -280,6 +347,38 @@ var taggerlog = taggerlog || {};
    */
   function cleanEntry(entry) {
     entry = htmlEntities(entry);
+    return entry;
+  }
+
+  /**
+   * Tests if link is valid to use as a href.
+   * 
+   * @param {string} string 
+   */
+  function isValidURL(string) {
+    var res = string.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+    return (res !== null)
+  };
+
+  /**
+   * Do any formatting after markdown and sanitising has been done.
+   * 
+   * @param {string} entry 
+   */
+  function postFormatEntry(entry) {
+    // entry = entry.replace(/^(#+)(.*)$/gm, "<b>$2</b>");
+    var linkTemplate = '<a href="{link}" target="_blank" onclick="event.stopPropagation();">{linkDisplay}</a>';
+    entry = entry.replace(/^(http.*)$/gm, function(match) {
+      if(isValidURL(match)) {
+        var line = linkTemplate.replace("{link}", match);
+        line = line.replace("{linkDisplay}", match);
+        return line;
+      }
+      else {
+        return match;
+      }
+    });
+    entry = entry.replaceAll("*", "&bull;");
     entry = entry.replaceAll("\n", "<br />");
     return entry;
   }
@@ -360,23 +459,35 @@ var taggerlog = taggerlog || {};
 
     tl.allTags = tl.allTags.concat(tags);
     tl.allTags = processTagList(tl.allTags);
-
-    db.collection('diary-entry').doc(id).update({
+    var newEntry = {
       'entry': $entry.val(),
       'date': new Date($date.val()),
       'tags': tagString,
       'tag-list': tags
-    })
+    };
+
+    db.collection('diary-entry').doc(id).update(newEntry)
     .then(function() {
+      for(var i = 0; i < tl.entries.length; i++) {
+        var entryData = tl.entries[i];
+        if(entryData["id"] == id) {
+          newEntry["id"] = id;
+          tl.entries[i] = newEntry;
+          break;
+        }
+      }
+
       findOrphanTags(formTagsRemoved).then(function(orphans) {
         if(orphans.length) {
           tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
           queryTags = queryTags.filter(item => !orphans.includes(item));
         }
         saveTags().then(() => {
-          getRecentEntries();
+          refreshTagDisplay();
         });
       });
+      refreshEntryDisplay(tl.entries);
+
       $spinner.hide();
       $('#editEntryModal').modal('hide');
       showAlert('entry-edited-alert');
@@ -433,17 +544,24 @@ var taggerlog = taggerlog || {};
         $spinner.hide();
         $('#deleteEntryModal').modal('hide');
         showAlert('entry-deleted-alert');
+        for(var i = 0; i < tl.entries.length; i++) {
+          var entryData = tl.entries[i];
+          if(entryData["id"] == id) {
+            tl.entries.splice(i, 1);
+            break;
+          }
+        }
+        refreshEntryDisplay(tl.entries);
 
         findOrphanTags(tagList).then(function(orphans) {
           if(orphans.length) {
             tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
             queryTags = queryTags.filter(item => !orphans.includes(item));
             saveTags().then(() => {
-              getRecentEntries();
+              getRecentEntries().then(function() {
+                refreshUI(tl.entries);
+              });
             });
-          }
-          else {
-            getRecentEntries();
           }
         });
 
@@ -470,24 +588,6 @@ var taggerlog = taggerlog || {};
   }
 
   /**
-   * All the tags currently stored with entries. Sorted and unique.
-   * @type {string[]}
-   */
-  tl.allTags = [];
-  /**
-   * The "active" tags which limit displayed entries and are auto 
-   * attached to new entries. Sorted and unique.
-   * @type {string[]}
-   */
-  var queryTags = [];
-  /**
-   * Tags that are used on any entry that the queryTags are also used
-   * on, includes the queryTags themselves. Sorted and unique.
-   * @type {string[]}
-   */
-  var queryRelatedTags = [];
-
-  /**
    * Takes an array of tags, removes duplicates and empty tag and sorts.
    * 
    * @param {string[]} tagList 
@@ -509,19 +609,21 @@ var taggerlog = taggerlog || {};
    */
   function getTags() {
     var db = tl.db;
-    db.collection("diary-tags").doc(tl.loggedInUser.uid)
-    .get()
-    .then(function(doc) {
-        let data = doc.data();
-        let tagString = data['tags'];
-        if(tagString) {
-          tl.allTags = processTagList(tagString.split(','));
-        }
-        else {
-          tl.allTags = [];
-        }
-        refreshTagDisplay();
-        refreshTagSelect();
+
+    return new Promise(function(resolve, reject) {
+      db.collection("diary-tags").doc(tl.loggedInUser.uid)
+      .get()
+      .then(function(doc) {
+          let data = doc.data();
+          let tagString = data['tags'];
+          if(tagString) {
+            tl.allTags = processTagList(tagString.split(','));
+          }
+          else {
+            tl.allTags = [];
+          }
+          resolve();
+      });
     });
   }
 
@@ -538,7 +640,9 @@ var taggerlog = taggerlog || {};
     else {
       queryTags.splice(tagIndex, 1);
     }
-    getRecentEntries();
+    getRecentEntries().then(function() {
+      refreshUI(tl.entries);
+    });
   }
   tl.toggleTag = toggleTag;
 
@@ -606,24 +710,6 @@ var taggerlog = taggerlog || {};
     }
 
     $('#diary-tags').html(tagHTML);
-  }
-
-  /**
-   * Updates the tag selector with all available tags.
-   */
-  function refreshTagSelect() {
-    var tagOptionTemplate = '<option data-tokens="{tag}">{tag}</option>';
-    var tagOptionHTML = '';
-    var $tagSelect = $('#new-entry-tag-selector');
-    let selected = $tagSelect.val();
-
-    for(var tag of tl.allTags) {
-      tagOptionHTML += tagOptionTemplate.replaceAll('{tag}', tag);
-    }
-    $tagSelect.html(tagOptionHTML);
-    $tagSelect.selectpicker('refresh');
-    $tagSelect.val(selected);
-    $tagSelect.selectpicker('refresh');
   }
 
   /**
@@ -745,7 +831,12 @@ var taggerlog = taggerlog || {};
         showWhenNotTyping();
       });
 
-      getRecentEntries();
+      getRecentEntries().then(function(entries) {
+        refreshUI(entries);
+      });
+      getTags().then(function() {
+        refreshTagDisplay();
+      });
     }
     else {
       $('.logged-in-show').addClass('d-none');
@@ -810,7 +901,12 @@ var taggerlog = taggerlog || {};
    * @param {string} entryID 
    */
   function entryClicked(entryID) {
-    editEntryStart(entryID);
+    var selection = window.getSelection();
+    var selecting = selection.toString().length; 
+    
+    if(!selecting) {
+      editEntryStart(entryID);
+    }
   }
   tl.entryClicked = entryClicked;
   
