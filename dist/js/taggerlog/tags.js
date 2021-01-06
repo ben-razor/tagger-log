@@ -6,6 +6,7 @@ var taggerlog = taggerlog || {};
 
   var tagErrorConfig = {
     "tags-empty": {},
+    "tag-empty": {},
     "tag-format-max-length": {
       "data": {
         "max-length": 20
@@ -74,7 +75,7 @@ var taggerlog = taggerlog || {};
     this.verifyTags = function(tags) {
       let maxTags = this.tagErrorConfig["tag-format-max-tags"]["data"]["max-tags"];
 
-      if(tags.length == 0 || !tags[0]) {
+      if(tags.length == 0) {
         this.addError("", "tags-empty");
       }
       else if(tags.length > maxTags) {
@@ -94,6 +95,10 @@ var taggerlog = taggerlog || {};
      */
     this.verifyTag = function(tag) {
       let tagMaxLength = this.tagErrorConfig["tag-format-max-length"]["data"]["max-length"];
+
+      if(!tag) {
+        this.addError("", "tag-empty");
+      }
 
       if(tag.length > tagMaxLength) {
         this.addError(tag, "tag-format-max-length");
@@ -119,13 +124,19 @@ var taggerlog = taggerlog || {};
     let tagSet = new Set();
 
     let tagStrings = tagStr.split(",");
+    for(var i = 0; i < tagStrings.length; i++) {
+      var tag = tagStrings[i]
+      tagStrings[i] = tag.trim();
+    }
 
     if(clean) {
       tagStrings = cleanTags(tagStrings);
     }
 
-    for(var tagRaw of tagStrings) {
-      tagSet.add(tagRaw.trim());
+    for(var tag of tagStrings) {
+      if(tag) {
+        tagSet.add(tag);
+      }
     }
 
     let tags = Array.from(tagSet);
