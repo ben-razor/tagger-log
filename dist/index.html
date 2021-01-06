@@ -37,7 +37,7 @@
     <template id="text-entry-delete-failed-alert">Error deleting entry</template>
     <template id="text-entry-edit-failed-alert">Error editing entry</template>
     <template id="text-entry-error-entry-empty">Entry is empty</template>
-    <template id="text-entry-error-tags-empty">Each entry must have at least one tag</template>
+    <template id="text-entry-error-tags-empty">Entries must have at least one tag</template>
     <template id="text-entry-error-tag-empty">A tag is empty</template>
     <template id="text-entry-error-tag-format-max-length">Tags must be shorter than {max-length} characters</template>
     <template id="text-entry-error-tag-format-valid-chars">Tags may only contain letters, numbers and {valid-extra-chars}</template>
@@ -124,6 +124,12 @@
                     Change date and time
                   </a>
                   <input type="datetime-local" name="diary-date" id="edit-entry-date" class="collapse" />
+                </div>
+
+                <div class="">
+                  <div class="alert alert-warning alert-dismissible" role="alert" id="edit-error-alert" style="opacity: 0; display: none;">
+                    <span id="edit-error-text">Entry error</span>
+                  </div>
                 </div>
               </form>
             </div>

@@ -31,7 +31,9 @@ var taggerlog = taggerlog || {};
    * 
    * @param {string} id 
    */
-  function showErrorAlert(error) {
+  function showErrorAlert(error, elemPrefix) {
+    if(elemPrefix === undefined) { elemPrefix = 'entry-error'; }
+
     var id = error.reason;
     var alertText = $('#text-entry-error-' + id).html();
 
@@ -44,8 +46,8 @@ var taggerlog = taggerlog || {};
         }
       }
     }
-    var $alertElem = $("#entry-error-alert");
-    var $alertTextElem = $("#entry-error-text");
+    var $alertElem = $("#" + elemPrefix + "-alert");
+    var $alertTextElem = $("#" + elemPrefix + "-text");
     $alertTextElem.html(alertText);
     $alertElem.fadeTo(2000, 1000).delay(2000).slideUp(500);
   }
@@ -116,8 +118,8 @@ var taggerlog = taggerlog || {};
     var db = tl.db;
 
     var $spinner = $('#add-entry-spinner');
-    $spinner.show();
     var $button = $('#diary-submit');
+    $spinner.show();
     $button.prop('disabled', true);
 
     var $form = $(form);
@@ -140,7 +142,7 @@ var taggerlog = taggerlog || {};
     }
 
     if(errors.length) {
-      entryFailedUpdateUI(errors);
+      entryFailedUpdateUI(errors, $spinner, $button);
     }
     else {
       tags = tl.cleanTags(tags);
@@ -187,16 +189,29 @@ var taggerlog = taggerlog || {};
    * 
    * @param {object[]} errors An array of error objects.
    */
-  function entryFailedUpdateUI(errors) {
+  function entryFailedUpdateUI(errors, $spinner, $button) {
     var $spinner = $('#add-entry-spinner');
     var $button = $('#diary-submit');
-
     var errorReason = errors[0].reason;
     
     logError("Error adding document: " + errorReason);
     $spinner.hide();
     $button.prop('disabled', false);
     showErrorAlert(errors[0]);
+  }
+
+  /**
+   * Display errors with entry and update entry edit UI.
+   * 
+   * @param {object[]} errors An array of error objects.
+   */
+  function editFailedUpdateUI(errors) {
+    var $spinner = $('#edit-entry-spinner');
+    var $button = $('#edit-entry-button');
+    logError(JSON.stringify(errors));
+    $spinner.hide();
+    $button.prop('disabled', false);
+    showErrorAlert(errors[0], "edit-error");
   }
 
   /**
@@ -494,10 +509,17 @@ var taggerlog = taggerlog || {};
     var db = tl.db;
 
     var $spinner = $('#edit-entry-spinner');
+    var $button = $('#edit-entry-button');
     $spinner.show();
+    $button.prop('disabled', true);
     const $form = $('#edit-entry-form');
-    const $entry = $form.find('textarea[name=diary-entry]');
+    const entry = $form.find('textarea[name=diary-entry]').val();
     const $date = $form.find('[name=diary-date]');
+
+    var errors = [];    
+    if(!entry) {
+      errors.push(new EntryError("entry-empty"));
+    }
 
     var formTags = [];
     var formTagsRemoved = [];
@@ -514,52 +536,67 @@ var taggerlog = taggerlog || {};
 
     var $elem = $form.find('[name=new-tag]');
     var tagStr = $elem.val();
-    var tags = tl.tagCSVToTags(tagStr);
+
+    var tags = tl.tagCSVToTags(tagStr, false);
     tags = tags.concat(formTags);
     tags = processTagList(tags);
-    var tagString = tags.join();
 
-    tl.allTags = tl.allTags.concat(tags);
-    tl.allTags = processTagList(tl.allTags);
-    var newEntry = {
-      'entry': $entry.val(),
-      'date': new Date($date.val()),
-      'tags': tagString,
-      'tag-list': tags
-    };
+    let tagVerifier = new tl.TagVerifier(tl.tagErrorConfig);
+    tagVerifier.verifyTags(tags);
+    if(tagVerifier.errors.length) {
+      errors = errors.concat(tagVerifier.errors);
+    }
 
-    db.collection('diary-entry').doc(id).update(newEntry)
-    .then(function() {
-      for(var i = 0; i < tl.entries.length; i++) {
-        var entryData = tl.entries[i];
-        if(entryData["id"] == id) {
-          newEntry["id"] = id;
-          tl.entries[i] = newEntry;
-          break;
+    if(errors.length) {
+      editFailedUpdateUI(errors);
+    }
+    else {
+      var tagString = tags.join();
+      tl.allTags = tl.allTags.concat(tags);
+      tl.allTags = processTagList(tl.allTags);
+      var newEntry = {
+        'entry': entry,
+        'date': new Date($date.val()),
+        'tags': tagString,
+        'tag-list': tags
+      };
+
+      db.collection('diary-entry').doc(id).update(newEntry)
+      .then(function() {
+        for(var i = 0; i < tl.entries.length; i++) {
+          var entryData = tl.entries[i];
+          if(entryData["id"] == id) {
+            newEntry["id"] = id;
+            tl.entries[i] = newEntry;
+            break;
+          }
         }
-      }
 
-      findOrphanTags(formTagsRemoved).then(function(orphans) {
-        if(orphans.length) {
-          tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
-          queryTags = queryTags.filter(item => !orphans.includes(item));
-        }
-        saveTags().then(() => {
-          refreshTagDisplay();
+        findOrphanTags(formTagsRemoved).then(function(orphans) {
+          if(orphans.length) {
+            tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
+            queryTags = queryTags.filter(item => !orphans.includes(item));
+          }
+          saveTags().then(() => {
+            refreshTagDisplay();
+          });
         });
-      });
-      refreshEntryDisplay(tl.entries);
+        refreshEntryDisplay(tl.entries);
 
-      $spinner.hide();
-      $('#editEntryModal').modal('hide');
-      showAlert('entry-edited-alert');
-      
-    }).catch(function(error) {
-      logError(error);
-      showAlert('entry-edit-failed-alert');
-      $spinner.hide();
-      $('#editEntryModal').modal('hide');
-    });
+        $spinner.hide();
+        $button.prop('disabled', false);
+        $('#editEntryModal').modal('hide');
+        showAlert('entry-edited-alert');
+        
+      }).catch(function(error) {
+        logError(error);
+        showAlert('entry-edit-failed-alert');
+        $spinner.hide();
+        $button.prop('disabled', false);
+        $('#editEntryModal').modal('hide');
+      });
+    }
+    
   }
   tl.editEntry = editEntry;
 
