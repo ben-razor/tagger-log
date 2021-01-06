@@ -1,0 +1,10 @@
+message=$1
+
+if [ $# -gt 0 ]
+then
+  git add .
+  git commit -m "$message"
+  git push origin main
+else
+  echo "Usage $0 <commit msg>"
+fi
