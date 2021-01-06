@@ -38,6 +38,7 @@ div.small-header {
 
 .btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
   background-color: hsl(30, 60%, 40%) !important; 
+  border-color: hsl(30, 60%, 30%) !important;
   color: white;
 }
 
