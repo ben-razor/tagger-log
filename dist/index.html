@@ -36,6 +36,11 @@
     <template id="text-entry-add-failed-alert">Error adding entry</template>
     <template id="text-entry-delete-failed-alert">Error deleting entry</template>
     <template id="text-entry-edit-failed-alert">Error editing entry</template>
+    <template id="text-entry-error-entry-empty">Entry is empty</template>
+    <template id="text-entry-error-tags-empty">Each entry must have at least one tag</template>
+    <template id="text-entry-error-tag-format-max-length">Tags must be shorter than {max-length} characters</template>
+    <template id="text-entry-error-tag-format-max-tags">Entries may contain a maximum of {max-tags} tags</template>
+
     <template id="elem-no-entries-for-tags">
       <div class="diary-entry">
         <div class="diary-entry-text">
@@ -213,7 +218,11 @@
                         Add Entry
                       </button>
                     </div>
-
+                    <div class="">
+                      <div class="alert alert-warning alert-dismissible" role="alert" id="entry-error-alert" style="opacity: 0; display: none;">
+                        <span id="entry-error-text">Entry Added</span>
+                      </div>
+                    </div>
                   </form>
                 </div>
             </div>

@@ -26,6 +26,30 @@ var taggerlog = taggerlog || {};
    */
   var queryRelatedTags = [];
 
+  /**
+   * Display an alert to reflect actions carried out on entries.
+   * 
+   * @param {string} id 
+   */
+  function showErrorAlert(error) {
+    var id = error.reason;
+    var alertText = $('#text-entry-error-' + id).html();
+
+    var tagErrorInfo = tl.tagErrorConfig[id];
+    if(tagErrorInfo) {
+      var replace = tagErrorInfo["data"];
+      if(replace) {
+        for(var string in replace) {
+          alertText = alertText.replaceAll('{' + string + '}', replace[string]);
+        }
+      }
+    }
+    var $alertElem = $("#entry-error-alert");
+    var $alertTextElem = $("#entry-error-text");
+    $alertTextElem.html(alertText);
+    $alertElem.fadeTo(2000, 1000).delay(2000).slideUp(500);
+  }
+  tl.showAlert = showAlert;
 
   /**
    * Display an alert to reflect actions carried out on entries.
@@ -37,9 +61,7 @@ var taggerlog = taggerlog || {};
     var $alertElem = $("#entry-alert");
     var $alertTextElem = $("#entry-alert-text");
     $alertTextElem.html(alertText);
-    $alertElem.fadeTo(2000, 1000).slideUp(500, function() {
-      $alertElem.slideUp(500);
-    });
+    $alertElem.fadeTo(2000, 1000).slideUp(500);
   }
   tl.showAlert = showAlert;
 
@@ -70,6 +92,10 @@ var taggerlog = taggerlog || {};
     }
   }
 
+  function EntryError(reason) {
+    this.reason = reason;
+  }
+
   /**
    * Adds an entry to the diary.
    * 
@@ -92,8 +118,11 @@ var taggerlog = taggerlog || {};
     var $form = $(form);
     var entry = $form.find('textarea[name=diary-entry]').val();
     var dateStr = $form.find('[name=diary-date]').val();
-    var entryText = entry;
 
+    var errors = [];    
+    if(!entry) {
+      errors.push(new EntryError("entry-empty"));
+    }
     var $elem = $form.find('[name=new-tag]');
     var tagStr = $elem.val();
     var tags = tl.tagCSVToTags(tagStr);
@@ -101,43 +130,63 @@ var taggerlog = taggerlog || {};
     tags = processTagList(tags);
     var tagString = tags.join();
 
-    tl.allTags = tl.allTags.concat(tags);
-    tl.allTags = processTagList(tl.allTags);
-
-    let date = new Date();
-    if(dateStr && dateStr !== "") {
-      date = new Date(dateStr);
+    let tagVerifier = new tl.TagVerifier(tl.tagErrorConfig);
+    tagVerifier.verifyTags(tags);
+    if(tagVerifier.errors.length) {
+      errors = errors.concat(tagVerifier.errors);
     }
 
-    const entryData = {
-      uid: loggedInUser.uid,
-      entry: entryText,
-      date: new Date(date),
-      tags: tagString,
-      "tag-list": tags
+    if(errors.length) {
+      entryFailedUpdateUI(errors);
     }
+    else {
+      tl.allTags = tl.allTags.concat(tags);
+      tl.allTags = processTagList(tl.allTags);
 
-    var batch = db.batch();
-    var newEntryRef = db.collection('diary-entry').doc();
-    var tagsRef = db.collection('diary-tags').doc(loggedInUser.uid);
-    batch.set(newEntryRef, entryData);
-    batch.set(tagsRef, {tags: tl.allTags.join()})
-    batch.commit().then(function() {
-      entryData["id"] = newEntryRef.id;
-      tl.entries.unshift(entryData);
-      refreshUI(tl.entries);
-      $spinner.hide();
-      $button.prop('disabled', false);
-      showAlert('entry-added-alert');
-    })
-    .catch(function(error) {
-      logError("Error adding document: ", error);
-      $spinner.hide();
-      $button.prop('disabled', false);
-      showAlert('entry-add-failed-alert');
-    });
+      let date = new Date();
+      if(dateStr && dateStr !== "") {
+        date = new Date(dateStr);
+      }
+
+      const entryData = {
+        uid: loggedInUser.uid,
+        entry: entry,
+        date: new Date(date),
+        tags: tagString,
+        "tag-list": tags
+      }
+
+      var batch = db.batch();
+      var newEntryRef = db.collection('diary-entry').doc();
+      var tagsRef = db.collection('diary-tags').doc(loggedInUser.uid);
+      batch.set(newEntryRef, entryData);
+      batch.set(tagsRef, {tags: tl.allTags.join()})
+      batch.commit().then(function() {
+        entryData["id"] = newEntryRef.id;
+        tl.entries.unshift(entryData);
+        refreshUI(tl.entries);
+        $spinner.hide();
+        $button.prop('disabled', false);
+        showAlert('entry-added-alert');
+      })
+      .catch(function(error) {
+        entryFailedUpdateUI(error);
+      });
+    }
   }
   tl.diaryAddEntry = diaryAddEntry;
+
+  function entryFailedUpdateUI(errors) {
+    var $spinner = $('#add-entry-spinner');
+    var $button = $('#diary-submit');
+
+    var errorReason = errors[0].reason;
+    
+    logError("Error adding document: " + errorReason);
+    $spinner.hide();
+    $button.prop('disabled', false);
+    showErrorAlert(errors[0]);
+  }
 
   function saveTags() {
     var loggedInUser = tl.loggedInUser;

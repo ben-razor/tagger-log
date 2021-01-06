@@ -5,18 +5,17 @@ var taggerlog = taggerlog || {};
 (function(tl) {
 
   var tagErrorConfig = {
+    "tags-empty": {},
     "tag-format-max-length": {
-      "max-length": 20
-    },
-    "tag-format-min-length": {
-      "min-length": 1
+      "data": {
+        "max-length": 20
+      }
     },
     "tag-format-max-tags": {
-      "max-tags": 5
-    },
-    "tag-format-valid-chars": {
-      "valid-extra-chars": ["-", "_"]
-    },
+      "data": {
+        "max-tags": 10
+      }
+    }
   };
   tl.tagErrorConfig = tagErrorConfig;
 
@@ -68,9 +67,12 @@ var taggerlog = taggerlog || {};
      * @param {string[]} tags 
      */
     this.verifyTags = function(tags) {
-      let maxTags = this.tagErrorConfig["tag-format-max-tags"]["max-tags"];
+      let maxTags = this.tagErrorConfig["tag-format-max-tags"]["data"]["max-tags"];
 
-      if(tags.length > maxTags) {
+      if(tags.length == 0) {
+        this.addError("", "tags-empty");
+      }
+      else if(tags.length > maxTags) {
         this.addError("", "tag-format-max-tags");
       }
 
@@ -86,19 +88,10 @@ var taggerlog = taggerlog || {};
      * @param {string} tag 
      */
     this.verifyTag = function(tag) {
-      let tagMinLength = this.tagErrorConfig["tag-format-min-length"]["min-length"];
-      let tagMaxLength = this.tagErrorConfig["tag-format-max-length"]["max-length"];
-      let validExtraChars = this.tagErrorConfig["tag-format-valid-chars"]["valid-extra-chars"];
+      let tagMaxLength = this.tagErrorConfig["tag-format-max-length"]["data"]["max-length"];
 
-      if(tag.length < tagMinLength) {
-        this.addError(tag, "tag-format-min-length");
-      }
       if(tag.length > tagMaxLength) {
         this.addError(tag, "tag-format-max-length");
-      }
-      const regex = /^[a-z0-9-]+$/i;
-      if(!regex.test(tag)) {
-        this.addError(tag, "tag-format-valid-chars");
       }
     }
   }
