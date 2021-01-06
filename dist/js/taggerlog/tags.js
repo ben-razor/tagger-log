@@ -98,7 +98,7 @@ var taggerlog = taggerlog || {};
       if(tag.length > tagMaxLength) {
         this.addError(tag, "tag-format-max-length");
       }
-      const regex = /^[a-z0-9-]+$/i;
+      const regex = /^[a-z0-9- ]+$/i;
       if(!regex.test(tag)) {
         this.addError(tag, "tag-format-valid-chars");
       }
@@ -125,7 +125,7 @@ var taggerlog = taggerlog || {};
     }
 
     for(var tagRaw of tagStrings) {
-      tagSet.add(tagRaw);
+      tagSet.add(tagRaw.trim());
     }
 
     let tags = Array.from(tagSet);
