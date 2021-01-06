@@ -92,6 +92,11 @@ var taggerlog = taggerlog || {};
     }
   }
 
+  /**
+   * Class for communicating an errors with entries.
+   * 
+   * @param {string} reason A reason code like entry-empty
+   */
   function EntryError(reason) {
     this.reason = reason;
   }
@@ -125,10 +130,8 @@ var taggerlog = taggerlog || {};
     }
     var $elem = $form.find('[name=new-tag]');
     var tagStr = $elem.val();
-    var tags = tl.tagCSVToTags(tagStr);
+    var tags = tl.tagCSVToTags(tagStr, false);
     tags = tags.concat(queryTags);
-    tags = processTagList(tags);
-    var tagString = tags.join();
 
     let tagVerifier = new tl.TagVerifier(tl.tagErrorConfig);
     tagVerifier.verifyTags(tags);
@@ -140,6 +143,9 @@ var taggerlog = taggerlog || {};
       entryFailedUpdateUI(errors);
     }
     else {
+      tags = tl.cleanTags(tags);
+      tags = processTagList(tags);
+      var tagString = tags.join();
       tl.allTags = tl.allTags.concat(tags);
       tl.allTags = processTagList(tl.allTags);
 
@@ -176,6 +182,11 @@ var taggerlog = taggerlog || {};
   }
   tl.diaryAddEntry = diaryAddEntry;
 
+  /**
+   * Display errors with entry and update entry submit UI.
+   * 
+   * @param {object[]} errors An array of error objects.
+   */
   function entryFailedUpdateUI(errors) {
     var $spinner = $('#add-entry-spinner');
     var $button = $('#diary-submit');
@@ -188,14 +199,17 @@ var taggerlog = taggerlog || {};
     showErrorAlert(errors[0]);
   }
 
+  /**
+   * Save tags to firestore.
+   * 
+   * @returns {Promise}
+   */
   function saveTags() {
     var loggedInUser = tl.loggedInUser;
     var db = tl.db;
     return new Promise((resolve, reject) => {
-      console.log('in  save tags promise');
       db.collection("diary-tags").doc(loggedInUser.uid).set({tags: tl.allTags.join()})
       .then(function(docRef) {
-        console.log("Tags written with ID: ", loggedInUser.uid);
         resolve();
       })
       .catch(function(error) {
@@ -346,7 +360,7 @@ var taggerlog = taggerlog || {};
 
     for(var i = 0; i < entries.length; i++) {
       var data = entries[i];
-      var tagList = data['tag-list'];
+      var tagList = tl.cleanTags(data['tag-list']);
       var tags = tagList.join();
 
       var containsQueryTags = true;
@@ -390,12 +404,12 @@ var taggerlog = taggerlog || {};
   }
 
   /**
-   * Replaces HTML special characters and replaces \n with <br />
+   * Replaces HTML special characters.
    * 
    * @param {string} entry 
    */
   function cleanEntry(entry) {
-    entry = htmlEntities(entry);
+    entry = DOMPurify.sanitize(entry);
     return entry;
   }
 
@@ -415,7 +429,6 @@ var taggerlog = taggerlog || {};
    * @param {string} entry 
    */
   function postFormatEntry(entry) {
-    // entry = entry.replace(/^(#+)(.*)$/gm, "<b>$2</b>");
     var linkTemplate = '<a href="{link}" target="_blank" onclick="event.stopPropagation();">{linkDisplay}</a>';
     entry = entry.replace(/^(http.*)$/gm, function(match) {
       if(isValidURL(match)) {
@@ -456,7 +469,7 @@ var taggerlog = taggerlog || {};
       var tagHTML = '';
       var tagsHTML = '';
       for(var i = 0; i < tags.length; i++) {
-        tagHTML = tagDisplayTemplate.replaceAll('{tag}', tags[i]);
+        tagHTML = tagDisplayTemplate.replaceAll('{tag}', tl.cleanTag(tags[i]));
         tagHTML = tagHTML.replace('{selected}', 'selected');
         tagsHTML += tagHTML;
       }
@@ -582,7 +595,6 @@ var taggerlog = taggerlog || {};
     var $spinner = $('#delete-entry-spinner');
     $spinner.show();
     let orphanTags = [];
-    console.log('Deleting ' + id);
 
     db.collection('diary-entry').doc(id).get().then(function(doc) {
       let data = doc.data();
@@ -730,7 +742,7 @@ var taggerlog = taggerlog || {};
     var activeTagHTML = '';
     var activeTagsHTML = '';
     for(var i = 0; i < queryTags.length; i++) {
-      activeTagHTML = tagDisplayTemplate.replaceAll('{tag}', queryTags[i]);
+      activeTagHTML = tagDisplayTemplate.replaceAll('{tag}', tl.cleanTag(queryTags[i]));
       activeTagHTML = activeTagHTML.replace('{selected}', 'selected');
       activeTagsHTML += activeTagHTML;
     }
@@ -743,7 +755,7 @@ var taggerlog = taggerlog || {};
         if(numTags > 7 && prevTag && tag.charAt(0) != prevTag.charAt(0)) {
           tagHTML += '<br />';
         }
-        replacedTemplate = tagTemplate.replaceAll('{tag}', tag);
+        replacedTemplate = tagTemplate.replaceAll('{tag}', tl.cleanTag(tag));
         if(queryTags.indexOf(tag) == -1) {
           replacedTemplate = replacedTemplate.replaceAll('{selected}', '');
         }

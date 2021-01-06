@@ -15,6 +15,11 @@ var taggerlog = taggerlog || {};
       "data": {
         "max-tags": 10
       }
+    },
+    "tag-format-valid-chars": {
+      "data": {
+        "valid-extra-chars": "-" 
+      }
     }
   };
   tl.tagErrorConfig = tagErrorConfig;
@@ -69,7 +74,7 @@ var taggerlog = taggerlog || {};
     this.verifyTags = function(tags) {
       let maxTags = this.tagErrorConfig["tag-format-max-tags"]["data"]["max-tags"];
 
-      if(tags.length == 0) {
+      if(tags.length == 0 || !tags[0]) {
         this.addError("", "tags-empty");
       }
       else if(tags.length > maxTags) {
@@ -93,6 +98,10 @@ var taggerlog = taggerlog || {};
       if(tag.length > tagMaxLength) {
         this.addError(tag, "tag-format-max-length");
       }
+      const regex = /^[a-z0-9-]+$/i;
+      if(!regex.test(tag)) {
+        this.addError(tag, "tag-format-valid-chars");
+      }
     }
   }
   tl.TagVerifier = TagVerifier;
@@ -100,17 +109,23 @@ var taggerlog = taggerlog || {};
   /**
    * Converts csv of tags to array of lower case tags.
    * Replaces spaces and underscores with dashes.
-   * @param {string} A CSV string of tags.
+   * @param {string} tagStr A CSV string of tags.
+   * @param {boolean} clean Whether to sanitize tag.
    * @returns {string[]}
    */
-  function tagCSVToTags(tagStr) {
+  function tagCSVToTags(tagStr, clean) {
+    if(clean === undefined) clean = true;
+
     let tagSet = new Set();
 
     let tagStrings = tagStr.split(",");
 
+    if(clean) {
+      tagStrings = cleanTags(tagStrings);
+    }
+
     for(var tagRaw of tagStrings) {
-      let tagClean = tagRaw.trim().toLowerCase().replaceAll(/[ _]/g, '-');
-      tagSet.add(tagClean);
+      tagSet.add(tagRaw);
     }
 
     let tags = Array.from(tagSet);
@@ -118,5 +133,36 @@ var taggerlog = taggerlog || {};
     return tags;
   }
   tl.tagCSVToTags = tagCSVToTags;
+  
+  /**
+   * Cleans an array of tags.
+   * 
+   * @param {string[]} tagStrings 
+   */
+  function cleanTags(tagStrings) {
+    var tags = [];
+    for(var tagRaw of tagStrings) {
+      tags.push(cleanTag(tagRaw));
+    }
+
+    return tags;
+  }
+  tl.cleanTags = cleanTags;
+  
+  /**
+   * Replaces _ and space with dash.
+   * 
+   * Removes any characters except alphanumeric.
+   * 
+   * Converts to lower case.
+   * 
+   * @param {string} tagRaw 
+   */
+  function cleanTag(tagRaw) {
+    let tagClean = tagRaw.toLowerCase().replaceAll(/[ _]/g, '-');
+    tagClean = tagClean.replaceAll(/[^0-9a-zA-Z\-]/g, '');
+    return tagClean;
+  }
+  tl.cleanTag = cleanTag;
 
 })(taggerlog);
