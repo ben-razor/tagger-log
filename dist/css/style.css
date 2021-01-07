@@ -128,11 +128,13 @@ div.diary-entry .diary-entry-tags {
 
 .diary-tag.selected {
   background-color: hsl(100, 40%, 60%);
+  border: 1px solid hsl(100, 60%, 40%);
   color: white;
 }
 
 .diary-tag.exclude {
   background-color: hsl(0, 60%, 60%);
+  border: 1px solid hsl(0, 60%, 50%);
   color: white;
 }
 
