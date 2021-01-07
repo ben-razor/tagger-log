@@ -795,6 +795,11 @@ var taggerlog = taggerlog || {};
     }
     var noTagsElem = $('#elem-no-tags').html();
 
+    if(tl.loggedInUser) {
+      Cookies.set('query-tags-' + tl.loggedInUser.uid, JSON.stringify(queryTags));
+      Cookies.set('exclude-tags-' + tl.loggedInUser.uid, JSON.stringify(excludeTags));
+    }
+
     var activeTagHTML = '';
     var activeTagsHTML = '';
     for(var i = 0; i < queryTags.length; i++) {
@@ -944,10 +949,19 @@ var taggerlog = taggerlog || {};
    */
   function updateLoggedInUI() {
     var loggedInUser = tl.loggedInUser;
-
     $('.loading-show').addClass('d-none');
     $('.loaded-show').removeClass('d-none');
-    if(loggedInUser) {
+    if(tl.loggedInUser) {
+      var cookieQueryTags = Cookies.get('query-tags-' + tl.loggedInUser.uid);
+      var cookieExcludeTags = Cookies.get('exclude-tags-' + tl.loggedInUser.uid);
+
+      if(cookieQueryTags) {
+        queryTags = JSON.parse(cookieQueryTags);
+      }
+      if(cookieExcludeTags) {
+        excludeTags = JSON.parse(cookieExcludeTags);
+      }
+
       $('.logged-in-show').removeClass('d-none');
       $('.logged-out-show').addClass('d-none');
       $('#header-user-img').attr('src', loggedInUser.photoURL);
