@@ -127,13 +127,25 @@ div.diary-entry .diary-entry-tags {
 }
 
 .diary-tag.selected {
-  background-color: hsl(30, 60%, 60%);
+  background-color: hsl(100, 40%, 60%);
   color: white;
 }
 
-.diary-tag.selected::after {
-  font-family: "Font Awesome 5 Free"; font-weight: 900; content: " \f00d";
+.diary-tag.exclude {
+  background-color: hsl(0, 60%, 60%);
+  color: white;
+}
+
+.diary-tag.selected::before {
+  font-family: "Font Awesome 5 Free"; font-weight: 900; content: "\f0fe ";
   font-size: .75em;
+  margin-right: .5em;
+}
+
+.diary-tag.exclude::before {
+  font-family: "Font Awesome 5 Free"; font-weight: 900; content: "\f146 ";
+  font-size: .75em;
+  margin-right: .5em;
 }
 
 #header-user-img {

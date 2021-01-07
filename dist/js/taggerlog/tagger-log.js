@@ -20,6 +20,13 @@ var taggerlog = taggerlog || {};
    */
   var queryTags = [];
   /**
+   * Entries with a tag in excludeTags will not be displayed.
+   * Sorted and unique.
+   * @type {string[]}
+   */
+  var excludeTags = [];
+
+  /**
    * Tags that are used on any entry that the queryTags are also used
    * on, includes the queryTags themselves. Sorted and unique.
    * @type {string[]}
@@ -368,10 +375,8 @@ var taggerlog = taggerlog || {};
     </div>`;
     var rows = '';
 
-    var tagQueryActive = false;
-    if(queryTags.length > 0) {
-      tagQueryActive = true;
-    }
+    var tagQueryActive = queryTags.length > 0;
+    var excludeQueryActive = excludeTags.length > 0;
 
     for(var i = 0; i < entries.length; i++) {
       var data = entries[i];
@@ -381,6 +386,11 @@ var taggerlog = taggerlog || {};
       var containsQueryTags = true;
       if(tagQueryActive) {
         if(!queryTags.every(r => tagList.indexOf(r) >= 0)) {
+          containsQueryTags = false;
+        }
+      }
+      if(excludeQueryActive) {
+        if(tagList.some(r => excludeTags.indexOf(r) >= 0)) {
           containsQueryTags = false;
         }
       }
@@ -731,12 +741,20 @@ var taggerlog = taggerlog || {};
    * @param {string} tag 
    */
   function toggleTag(tag) {
-    let tagIndex = queryTags.indexOf(tag);
-    if(tagIndex == -1) {
+    let queryTagIndex = queryTags.indexOf(tag);
+    let tagActive = queryTagIndex != -1;
+    let excludeTagIndex = excludeTags.indexOf(tag);
+    let tagExcluded = excludeTagIndex != -1;
+
+    if(!tagActive && !tagExcluded) {
       queryTags.push(tag);
     }
+    if(tagActive) {
+      queryTags.splice(queryTagIndex, 1);
+      excludeTags.push(tag);
+    }
     else {
-      queryTags.splice(tagIndex, 1);
+      excludeTags.splice(excludeTagIndex, 1);
     }
     getRecentEntries().then(function() {
       refreshUI(tl.entries);
@@ -769,6 +787,7 @@ var taggerlog = taggerlog || {};
     var tagTemplate = $('#elem-diary-tag').html();
     var tagDisplayTemplate = $('#elem-diary-tag-display').html();
     var tagHTML = '';
+    var queryTagHTML = '';
     var replacedTemplate = '';
     let tags = tl.allTags;
     if(queryRelatedTags.length) {
@@ -787,18 +806,34 @@ var taggerlog = taggerlog || {};
 
     var prevTag = '';
     var numTags = tags.length;
+
+    for(var i = 0; i < queryTags.length; i++) {
+      var tag = queryTags[i]
+      replacedTemplate = tagTemplate.replaceAll('{tag}', tl.cleanTag(tag));
+      replacedTemplate = replacedTemplate.replaceAll('{selected}', 'selected');
+      queryTagHTML += replacedTemplate;
+    }
+
+    for(var i = 0; i < excludeTags.length; i++) {
+      var tag = excludeTags[i]
+      replacedTemplate = tagTemplate.replaceAll('{tag}', tl.cleanTag(tag));
+      replacedTemplate = replacedTemplate.replaceAll('{selected}', 'exclude');
+      queryTagHTML += replacedTemplate;
+    }
+
     if(tags.length) {
       for(var tag of tags) {
-        if(numTags > 7 && prevTag && tag.charAt(0) != prevTag.charAt(0)) {
-          tagHTML += '<br />';
+        if(queryTags.indexOf(tag) > -1 || excludeTags.indexOf(tag) > -1) {
+          continue;
+        }
+        let showingAllTags = !queryTags.length && !excludeTags.length;
+        if(showingAllTags) {
+          if(numTags > 7 && prevTag && tag.charAt(0) != prevTag.charAt(0)) {
+            tagHTML += '<br />';
+          }
         }
         replacedTemplate = tagTemplate.replaceAll('{tag}', tl.cleanTag(tag));
-        if(queryTags.indexOf(tag) == -1) {
-          replacedTemplate = replacedTemplate.replaceAll('{selected}', '');
-        }
-        else {
-          replacedTemplate = replacedTemplate.replaceAll('{selected}', 'selected');
-        }
+        replacedTemplate = replacedTemplate.replaceAll('{selected}', '');
         tagHTML += replacedTemplate;
         prevTag = tag;
       }
@@ -807,6 +842,9 @@ var taggerlog = taggerlog || {};
       tagHTML = noTagsElem;
     }
 
+    if(queryTagHTML) {
+      tagHTML = queryTagHTML + '<br />' + tagHTML;
+    }
     $('#diary-tags').html(tagHTML);
   }
 
