@@ -404,8 +404,10 @@ var taggerlog = taggerlog || {};
       }
     }
 
+    var hasSelectedTags = queryTags.length > 0 || excludeTags.length > 0;
+
     if(rows == '') {
-      if(queryTags.length > 0 || excludeTags.length > 0) {
+      if(hasSelectedTags) {
         rows = defaultEntryNoMatchingTags;
       }
       else {
@@ -848,10 +850,21 @@ var taggerlog = taggerlog || {};
       tagHTML = noTagsElem;
     }
 
+    var $relatedTagsHeader = $('#diary-related-tags-header').addClass('d-none');
+    var $relatedTags = $('#diary-related-tags').addClass('d-none');
+
     if(queryTagHTML) {
-      tagHTML = queryTagHTML + '<br />' + tagHTML;
+      $('#diary-tags').html(queryTagHTML);
+
+      if(tagHTML) {
+        $relatedTagsHeader.removeClass('d-none');
+        $relatedTags.removeClass('d-none');
+        $relatedTags.html(tagHTML);
+      }
     }
-    $('#diary-tags').html(tagHTML);
+    else {
+      $('#diary-tags').html(tagHTML);
+    }
   }
 
   /**
@@ -872,7 +885,6 @@ var taggerlog = taggerlog || {};
   function getCookie(id) {
     return Cookies.get(id);
   }
-
 
   /**
    * Management function to convert csv tags in diary-entry in the db
