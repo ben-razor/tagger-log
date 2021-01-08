@@ -405,7 +405,7 @@ var taggerlog = taggerlog || {};
     }
 
     if(rows == '') {
-      if(tl.allTags.length > 0) {
+      if(queryTags.length > 0 || excludeTags.length > 0) {
         rows = defaultEntryNoMatchingTags;
       }
       else {
@@ -796,8 +796,9 @@ var taggerlog = taggerlog || {};
     var noTagsElem = $('#elem-no-tags').html();
 
     if(tl.loggedInUser) {
-      Cookies.set('query-tags-' + tl.loggedInUser.uid, JSON.stringify(queryTags));
-      Cookies.set('exclude-tags-' + tl.loggedInUser.uid, JSON.stringify(excludeTags));
+      var uid = tl.loggedInUser.uid;
+      Cookies.set('query-tags-' + uid, JSON.stringify(queryTags), { expires: 365 });
+      Cookies.set('exclude-tags-' + uid, JSON.stringify(excludeTags), { expires: 365 });
     }
 
     var activeTagHTML = '';
