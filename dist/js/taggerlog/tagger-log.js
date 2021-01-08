@@ -797,8 +797,8 @@ var taggerlog = taggerlog || {};
 
     if(tl.loggedInUser) {
       var uid = tl.loggedInUser.uid;
-      Cookies.set('query-tags-' + uid, JSON.stringify(queryTags), { expires: 365 });
-      Cookies.set('exclude-tags-' + uid, JSON.stringify(excludeTags), { expires: 365 });
+      setCookie('query-tags-' + uid, queryTags);
+      setCookie('exclude-tags-' + uid, excludeTags);
     }
 
     var activeTagHTML = '';
@@ -853,6 +853,26 @@ var taggerlog = taggerlog || {};
     }
     $('#diary-tags').html(tagHTML);
   }
+
+  /**
+   * Helper function for setting cookies.
+   * 
+   * @param {string} id 
+   * @param {object} value 
+   */
+  function setCookie(id, value) {
+    Cookies.set(id, JSON.stringify(value), { expires: 365 });
+  }
+
+  /**
+   * Helper function for getting cookies.
+   * 
+   * @param {string} id 
+   */
+  function getCookie(id) {
+    return Cookies.get(id);
+  }
+
 
   /**
    * Management function to convert csv tags in diary-entry in the db
@@ -953,8 +973,9 @@ var taggerlog = taggerlog || {};
     $('.loading-show').addClass('d-none');
     $('.loaded-show').removeClass('d-none');
     if(tl.loggedInUser) {
-      var cookieQueryTags = Cookies.get('query-tags-' + tl.loggedInUser.uid);
-      var cookieExcludeTags = Cookies.get('exclude-tags-' + tl.loggedInUser.uid);
+      var uid = tl.loggedInUser.uid;
+      var cookieQueryTags = getCookie('query-tags-' + uid);
+      var cookieExcludeTags = getCookie('exclude-tags-' + uid);
 
       if(cookieQueryTags) {
         queryTags = JSON.parse(cookieQueryTags);
