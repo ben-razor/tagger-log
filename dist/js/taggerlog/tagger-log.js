@@ -180,6 +180,7 @@ var taggerlog = taggerlog || {};
       batch.commit().then(function() {
         entryData["id"] = newEntryRef.id;
         tl.entries.unshift(entryData);
+        updateQueryRelatedTags();
         refreshUI(tl.entries);
         $spinner.hide();
         $button.prop('disabled', false);
@@ -316,28 +317,9 @@ var taggerlog = taggerlog || {};
           let data = doc.data();
           data['id'] = doc.id;
           tl.entries.push(data);
-
-          var tagList = data['tag-list'];
-          var tags = tagList.join();
-
-          var containsQueryTags = true;
-          if(tagQueryActive) {
-            if(!queryTags.every(r => tagList.indexOf(r) >= 0)) {
-              containsQueryTags = false;
-            }
-          }
-
-          if(containsQueryTags) {
-            if(tagQueryActive) {
-              queryRelatedTags = queryRelatedTags.concat(tags.split(','));
-            }
-          }
         });
 
-        if(tagQueryActive) {
-          queryRelatedTags = processTagList(queryRelatedTags); 
-        }
-
+        updateQueryRelatedTags();
         resolve(tl.entries);
       })
       .catch(function(error) {
@@ -345,7 +327,42 @@ var taggerlog = taggerlog || {};
           resolve(tl.entries);
       });
     });
-     
+  }
+
+  /**
+   * When there are active tags, get's all other tags from
+   * records matching tags.
+   * 
+   * These can then be shown as related tags.
+   */
+  function updateQueryRelatedTags() {
+    queryRelatedTags = [];
+    let tagQueryActive = queryTags.length > 0;
+
+    for(var i = 0; i < tl.entries.length; i++) {
+      var data = tl.entries[i];
+
+      var tagList = data['tag-list'];
+
+      var containsQueryTags = true;
+      if(tagQueryActive) {
+        if(!queryTags.every(r => tagList.indexOf(r) >= 0)) {
+          containsQueryTags = false;
+        }
+      }
+
+      if(containsQueryTags) {
+        if(tagQueryActive) {
+          queryRelatedTags = queryRelatedTags.concat(tagList);
+        }
+      }
+    }
+
+    if(tagQueryActive) {
+      queryRelatedTags = processTagList(queryRelatedTags); 
+    }
+
+    return queryRelatedTags;
   }
 
   /**
@@ -590,6 +607,9 @@ var taggerlog = taggerlog || {};
           if(orphans.length) {
             tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
             queryTags = queryTags.filter(item => !orphans.includes(item));
+            getRecentEntries().then(function() {
+              refreshUI(tl.entries);
+            });
           }
           saveTags().then(() => {
             refreshTagDisplay();
