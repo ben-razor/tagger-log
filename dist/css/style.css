@@ -181,7 +181,7 @@ div.diary-entry .diary-entry-tags {
 }
 
 .front-page-main img {
-  width: 50%;
+  width: 70%;
 }
 
 .front-page-main h1 {
@@ -209,7 +209,7 @@ div.diary-entry .diary-entry-tags {
 
 @media (min-width: 600px) {
   .front-page-main img {
-    width: 30%;
+    width: 50%;
   }
   .front-page-main p {
     font-size: 150%; 
