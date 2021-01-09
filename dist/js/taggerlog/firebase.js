@@ -19,10 +19,6 @@ var taggerlog = taggerlog || {};
   function initNewUser(user) {
     var gettingStartedEntries = [
         {
-            "text": "This is demo application. Any entries will be lost!",
-            "tags": ['warning', 'this-is-a-demo'] 
-        },
-        {
             "text": 'This is an entry with some tags. You can click on it to edit or delete it.',
             "tags": ['getting-started', 'entries']
         },
@@ -35,7 +31,11 @@ var taggerlog = taggerlog || {};
             "text": "Only entries matching active tags are displayed.\n\n"  +
                 "Active tags are automatically added to new entries.\n\n",
             "tags": ['getting-started', 'tags', 'entries']
-        }
+        },
+        {
+            "text": "This is demo application. Any entries will be lost!",
+            "tags": ['warning', 'this-is-a-demo'] 
+        },
     ];
 
     var allTags = [];
