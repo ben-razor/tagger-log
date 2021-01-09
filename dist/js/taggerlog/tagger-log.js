@@ -130,7 +130,8 @@ var taggerlog = taggerlog || {};
     $button.prop('disabled', true);
 
     var $form = $(form);
-    var entry = $form.find('textarea[name=diary-entry]').val();
+    var $entry = $form.find('textarea[name=diary-entry]');
+    var entry = $entry.val();
     var dateStr = $form.find('[name=diary-date]').val();
 
     var errors = [];    
@@ -183,6 +184,7 @@ var taggerlog = taggerlog || {};
         $spinner.hide();
         $button.prop('disabled', false);
         showAlert('entry-added-alert');
+        $entry.val('');
       })
       .catch(function(error) {
         entryFailedUpdateUI(error);

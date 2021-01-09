@@ -13,11 +13,16 @@
     src: url(../font/Marck_Script/MarckScript-Regular.ttf);
 }
 
+html {
+  height: 100vh;
+}
+
 body {
   background-image: url("https://www.toptal.com/designers/subtlepatterns/patterns/y-so-serious-white.png");
   font-family: Lato, sans-serif;
   padding-bottom: 70px;
   padding-right: 0px !important;
+  height: 100vh;
 }
 
 div.jumbotron {
@@ -26,6 +31,10 @@ div.jumbotron {
 
 div.small-header {
   background-color: hsl(30, 50%, 20%);
+}
+
+.content {
+  min-height: 100vh;
 }
 
 .main-content {
