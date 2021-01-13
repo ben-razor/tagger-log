@@ -113,6 +113,7 @@ div.diary-entry .diary-entry-tags {
   border: 1px solid hsl(30, 60%, 60%);
   color: hsl(30, 60%, 60%);
   background-color: white;
+  margin: 2px 0;
 }
 
 .diary-tag-display.selected {
@@ -123,7 +124,7 @@ div.diary-entry .diary-entry-tags {
 .diary-tag {
   display: inline-block;
   padding: 5px;
-  margin: 0px 3px 3px 0px;
+  margin: 2px 1px 2px 0px;
   border-radius: 3px;
   border: 1px solid hsl(30, 60%, 60%);
   color: hsl(30, 60%, 60%);
@@ -133,6 +134,12 @@ div.diary-entry .diary-entry-tags {
 .diary-tag:hover {
   cursor: pointer;
   cursor: hand;
+}
+
+.diary-tag.combo {
+  background-color: hsl(30, 60%, 60%);
+  border: 1px solid hsl(30, 60%, 40%);
+  color: white;
 }
 
 .diary-tag.selected {
@@ -271,4 +278,31 @@ div.diary-entry .diary-entry-tags {
 
 .modal-open {
   overflow-y: auto;
+}
+
+.selected-tags-row {
+  border-bottom: 1px solid lightgrey;
+  display: flex;
+}
+
+.selected-tags-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.selected-tags-tags {
+  flex-grow: 1;
+}
+
+.selected-tags-star {
+  margin-top: 2px;
+  width: 2em;
+  height: 2em;
+  background-image: url(../img/svg/ui/hp_star_no_fill.svg);
+  background-size: cover;
+  min-width: 2em;
+}
+
+.selected-tags-star.starred {
+  background-image: url(../img/svg/ui/hp_gold_star.svg);
 }

@@ -34,6 +34,15 @@ var taggerlog = taggerlog || {};
   var queryRelatedTags = [];
 
   /**
+   * An array of starred tag combinations.
+   * 
+   * E.g. ['dev,web', 'audio,drums,cymbals']
+   * 
+   * @type {string[]}
+   */
+  tl.tagCombos = [];
+
+  /**
    * Display an alert to reflect actions carried out on entries.
    * 
    * @param {string} id 
@@ -720,6 +729,15 @@ var taggerlog = taggerlog || {};
   }
 
   /**
+   * Helper function to wrap logging.
+   * 
+   * @param {string} error 
+   */
+  function logObject(obj) {
+    console.log(JSON.stringify(obj));
+  }
+
+  /**
    * Takes an array of tags, removes duplicates and empty tag and sorts.
    * 
    * @param {string[]} tagList 
@@ -754,7 +772,14 @@ var taggerlog = taggerlog || {};
           else {
             tl.allTags = [];
           }
-          resolve();
+          db.collection("diary-tag-combos").doc(tl.loggedInUser.uid)
+          .get()
+          .then(function(doc) {
+            let data = doc.data();
+            let tagCombos = data['tag-combos'];
+            tl.tagCombos = tagCombos.slice();
+            resolve();
+          });
       });
     });
   }
@@ -812,6 +837,7 @@ var taggerlog = taggerlog || {};
     var tagDisplayTemplate = $('#elem-diary-tag-display').html();
     var tagHTML = '';
     var queryTagHTML = '';
+    var queryTagCombo = [];
     var replacedTemplate = '';
     let tags = tl.allTags;
     if(queryRelatedTags.length) {
@@ -838,17 +864,29 @@ var taggerlog = taggerlog || {};
     var numTags = tags.length;
 
     for(var i = 0; i < queryTags.length; i++) {
-      var tag = queryTags[i]
-      replacedTemplate = tagTemplate.replaceAll('{tag}', tl.cleanTag(tag));
+      var tag = tl.cleanTag(queryTags[i]);
+      replacedTemplate = tagTemplate.replaceAll('{tag}', tag);
       replacedTemplate = replacedTemplate.replaceAll('{selected}', 'selected');
       queryTagHTML += replacedTemplate;
+      queryTagCombo.push(tag)
     }
 
     for(var i = 0; i < excludeTags.length; i++) {
-      var tag = excludeTags[i]
+      var tag = tl.cleanTag(excludeTags[i]);
       replacedTemplate = tagTemplate.replaceAll('{tag}', tl.cleanTag(tag));
       replacedTemplate = replacedTemplate.replaceAll('{selected}', 'exclude');
       queryTagHTML += replacedTemplate;
+      queryTagCombo.push('!' + tag);
+    }
+
+    if(queryTagCombo.length) {
+      var queryTagComboString = queryTagCombo.join(',');
+      if(tl.tagCombos.indexOf(queryTagComboString) == -1) {
+        $('#star-tags-main').removeClass('starred');
+      }
+      else {
+        $('#star-tags-main').addClass('starred');
+      }
     }
 
     if(tags.length) {
@@ -872,20 +910,47 @@ var taggerlog = taggerlog || {};
       tagHTML = noTagsElem;
     }
 
-    var $relatedTagsHeader = $('#diary-related-tags-header').addClass('d-none');
-    var $relatedTags = $('#diary-related-tags').addClass('d-none');
+    var $panelAllTags = $('#panel-all-tags').addClass('d-none');
+    var $selectedTagsPanel = $('#panel-selected-tags').addClass('d-none');
+    var $relatedTagsPanel = $('#panel-related-tags').addClass('d-none');
+    var $relatedTags = $('#diary-related-tags');
 
     if(queryTagHTML) {
-      $('#diary-tags').html(queryTagHTML);
+      $selectedTagsPanel.removeClass('d-none');
+      $('#diary-selected-tags').html(queryTagHTML);
+      $('#diary-tags').html('');
 
       if(tagHTML) {
-        $relatedTagsHeader.removeClass('d-none');
-        $relatedTags.removeClass('d-none');
+        $relatedTagsPanel.removeClass('d-none');
         $relatedTags.html(tagHTML);
       }
     }
     else {
+      $panelAllTags.removeClass('d-none');
       $('#diary-tags').html(tagHTML);
+    }
+
+    var $panelTagCombos = $('#panel-tag-combos').addClass('d-none');
+    var $tagCombos = $('#diary-tag-combos');
+    if(tl.tagCombos.length) {
+      var tagCombosHTML = '';
+      var template = $('#elem-diary-tag-combos').html();
+      for(var i = 0; i < tl.tagCombos.length; i++) {
+        var tagCombo = tl.tagCombos[i];
+        var tagStrings = tagCombo.split(',');
+        var tagComboElem = template.replaceAll('{tag}', tagCombo);
+        for(var j = 0; j < tagStrings.length; j++) {
+          var tagString = tagStrings[j];
+          if(tagString.startsWith('!')) {
+            tagStrings[j] = tagString.replace('!', 'not(') + ')';
+          }
+        }
+        var tagCSV = tagStrings.join(', ');
+        tagComboElem = tagComboElem.replaceAll('{tag-string}', tagCSV);
+        tagCombosHTML += tagComboElem;
+      }
+      $tagCombos.html(tagCombosHTML);
+      $panelTagCombos.removeClass('d-none');
     }
   }
 
@@ -1116,5 +1181,100 @@ var taggerlog = taggerlog || {};
   }
   tl.entryClicked = entryClicked;
   
+  /**
+   * Marks a selection of tags as stars, saves these to the
+   * database as a preset.
+   * 
+   * @param {object} The clicked star element.
+   */
+  function starTags(elem) {
+    var $elem = $(elem);
+    var tagsElem = $elem.data('tagsElem');
+    var $tagsElem = $('#' + tagsElem);
+    var $tags = $tagsElem.find('.diary-tag');
+
+    var tags = [];
+    $tags.each(function() {
+      var $this = $(this);
+      var tagID = $this.data('tag');
+      if($this.hasClass('exclude')) {
+        tagID = '!' + tagID;
+      }
+      tags.push(tagID);
+    });
+    var tagString = tags.join(',');
+
+    var index = tl.tagCombos.indexOf(tagString);
+    var exists = (index != -1);
+    if(exists) {
+      tl.tagCombos.splice(index, 1);
+    }
+
+    if($elem.hasClass('starred')) {
+      $elem.removeClass('starred');
+    }
+    else {
+      tl.tagCombos.unshift(tagString);
+      $elem.addClass('starred');
+    }
+
+    logObject(tl.tagCombos);
+
+    saveTagCombos().then(function() {
+      refreshTagDisplay();
+    });
+  }
+  tl.starTags = starTags;
+  
+  /**
+   * Gets the array of CSVs of favourite tag combinations. 
+   */
+  function getTagCombos() {
+    return tl.tagCombos;
+  }
+  tl.getTagCombos = getTagCombos;
+
+  /**
+   * Save the array of favourite tag combinations to the db.
+   */
+  function saveTagCombos() {
+    var loggedInUser = tl.loggedInUser;
+    var db = tl.db;
+    return new Promise((resolve, reject) => {
+      db.collection("diary-tag-combos").doc(loggedInUser.uid).set({"tag-combos": tl.tagCombos})
+      .then(function(docRef) {
+        resolve();
+      })
+      .catch(function(error) {
+        reject("Error adding tags: " + error.toString());
+      });
+    });
+  }
+
+  /**
+   * Makes the tags in a combo active/excluded.
+   */
+  function selectCombo(elem) {
+    var $elem = $(elem);
+    var tagString = $elem.data('tag');
+    var tags = tagString.split(',');
+
+    queryTags = [];
+    excludeTags = [];
+    for(var i = 0; i < tags.length; i++) {
+      var tag = tags[i];
+      if(tag.startsWith('!')) {
+        excludeTags.push(tag.substring(1));
+      }
+      else {
+        queryTags.push(tag);
+      }
+    }
+    
+    getRecentEntries().then(function() {
+      refreshUI(tl.entries);
+    });
+  }
+  tl.selectCombo = selectCombo;
 
 })(taggerlog);
