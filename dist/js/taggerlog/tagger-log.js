@@ -34,9 +34,12 @@ var taggerlog = taggerlog || {};
   var queryRelatedTags = [];
 
   /**
-   * An array of starred tag combinations.
+   * An array of starred tag combinations with titles
    * 
-   * E.g. ['dev,web', 'audio,drums,cymbals']
+   * E.g. [
+   *   { 'title': 'Web', 'tags': 'dev,web' }, 
+   *   { 'title': 'Cymbals', 'tags': 'audio,drums,cymbals' }
+   * ]
    * 
    * @type {string[]}
    */
@@ -106,7 +109,7 @@ var taggerlog = taggerlog || {};
       $elem.val('');
     }
     else {
-      console.log(tagVerifier.errors);
+      tl.util.logError(tagVerifier.errors);
     }
   }
 
@@ -213,7 +216,7 @@ var taggerlog = taggerlog || {};
     var $button = $('#diary-submit');
     var errorReason = errors[0].reason;
     
-    logError("Error adding document: " + errorReason);
+    tl.util.logError("Error adding document: " + errorReason);
     $spinner.hide();
     $button.prop('disabled', false);
     showErrorAlert(errors[0]);
@@ -227,7 +230,7 @@ var taggerlog = taggerlog || {};
   function editFailedUpdateUI(errors) {
     var $spinner = $('#edit-entry-spinner');
     var $button = $('#edit-entry-button');
-    logError(JSON.stringify(errors));
+    tl.util.logError(JSON.stringify(errors));
     $spinner.hide();
     $button.prop('disabled', false);
     showErrorAlert(errors[0], "edit-error");
@@ -332,7 +335,7 @@ var taggerlog = taggerlog || {};
         resolve(tl.entries);
       })
       .catch(function(error) {
-          console.log("Error getting documents: ", error);
+          tl.util.logError("Error getting documents: ", error)
           resolve(tl.entries);
       });
     });
@@ -534,7 +537,7 @@ var taggerlog = taggerlog || {};
       $('#editEntryModal').modal();
     })
     .catch(function(error) {
-      console.log(error);
+      tl.util.logError(error);
     });
   }
   tl.editEntryStart = editEntryStart;
@@ -632,7 +635,7 @@ var taggerlog = taggerlog || {};
         showAlert('entry-edited-alert');
         
       }).catch(function(error) {
-        logError(error);
+        tl.util.logError(error);
         showAlert('entry-edit-failed-alert');
         $spinner.hide();
         $button.prop('disabled', false);
@@ -652,10 +655,9 @@ var taggerlog = taggerlog || {};
     var db = tl.db;
     db.collection('diary-entry').doc(id).get().then(function(doc) {
       let data = doc.data();
-      console.log(data);
     })
     .catch(function(error) {
-      console.log(error);
+      tl.util.logError(error);
     });
 
     $('#delete-entry-button').data('id', id);
@@ -679,7 +681,6 @@ var taggerlog = taggerlog || {};
     db.collection('diary-entry').doc(id).get().then(function(doc) {
       let data = doc.data();
       let tagList = data['tag-list'];
-      console.log(data);
 
       db.collection('diary-entry').doc(id).delete().then(function() {
         $spinner.hide();
@@ -707,35 +708,17 @@ var taggerlog = taggerlog || {};
         });
 
       }).catch(function(error) {
-        logError(error);
+        tl.util.logError(error);
         showAlert('entry-delete-failed-alert');
         $spinner.hide();
         $('#deleteEntryModal').modal('hide');
       });
     })
     .catch(function(error) {
-      console.log(error);
+      tl.util.logError(error);
     });
   }
   tl.deleteEntry = deleteEntry;
-
-  /**
-   * Helper function to wrap logging.
-   * 
-   * @param {string} error 
-   */
-  function logError(error) {
-    console.log(error);
-  }
-
-  /**
-   * Helper function to wrap logging.
-   * 
-   * @param {string} error 
-   */
-  function logObject(obj) {
-    console.log(JSON.stringify(obj));
-  }
 
   /**
    * Takes an array of tags, removes duplicates and empty tag and sorts.
@@ -777,8 +760,7 @@ var taggerlog = taggerlog || {};
           .then(function(doc) {
             let data = doc.data();
             if(data) {
-              let tagCombos = data['tag-combos'];
-              tl.tagCombos = tagCombos.slice();
+              tl.tagCombos = data['tag-combos'];
             }
             resolve();
           });
@@ -883,11 +865,12 @@ var taggerlog = taggerlog || {};
 
     if(queryTagCombo.length) {
       var queryTagComboString = queryTagCombo.join(',');
-      if(tl.tagCombos.indexOf(queryTagComboString) == -1) {
-        $('#star-tags-main').removeClass('starred');
+
+      if(tl.tagCombos.find(o => o['tags'] === queryTagComboString)) {
+        $('#star-tags-main').addClass('starred');
       }
       else {
-        $('#star-tags-main').addClass('starred');
+        $('#star-tags-main').removeClass('starred');
       }
     }
 
@@ -938,17 +921,10 @@ var taggerlog = taggerlog || {};
       var tagCombosHTML = '';
       var template = $('#elem-diary-tag-combos').html();
       for(var i = 0; i < tl.tagCombos.length; i++) {
-        var tagCombo = tl.tagCombos[i];
-        var tagStrings = tagCombo.split(',');
+        var tagCombo = tl.tagCombos[i]['tags'];
+        var tagComboTitle = tl.tagCombos[i]['title'];
         var tagComboElem = template.replaceAll('{tag}', tagCombo);
-        for(var j = 0; j < tagStrings.length; j++) {
-          var tagString = tagStrings[j];
-          if(tagString.startsWith('!')) {
-            tagStrings[j] = tagString.replace('!', 'not(') + ')';
-          }
-        }
-        var tagCSV = tagStrings.join(', ');
-        tagComboElem = tagComboElem.replaceAll('{tag-string}', tagCSV);
+        tagComboElem = tagComboElem.replaceAll('{tag-string}', tagComboTitle);
         tagCombosHTML += tagComboElem;
       }
       $tagCombos.html(tagCombosHTML);
@@ -999,10 +975,9 @@ var taggerlog = taggerlog || {};
 
         collection.doc(doc.id).update({'tag-list': tags})
         .then(function() {
-          console.log('Tag list updated for doc ' + doc.id);
         })
         .catch(function(error) {
-          logError(error);
+          tl.util.logError(error);
         });
       });
     });
@@ -1040,10 +1015,9 @@ var taggerlog = taggerlog || {};
 
       db.collection("diary-tags").doc(user.uid).set(tagData)
       .then(function(docRef) {
-          console.log("Tags written with ID: ", user.uid);
       })
       .catch(function(error) {
-          console.error("Error adding tags: ", error);
+        tl.util.logError("Error adding tags: ", error)
       });
     });
   }
@@ -1184,19 +1158,11 @@ var taggerlog = taggerlog || {};
   tl.entryClicked = entryClicked;
   
   /**
-   * Open a popup to favouite a combination of tags.
-   */
-  function starTagsStart() {
-
-  }
-
-  /**
-   * Marks a selection of tags as stars, saves these to the
-   * database as a preset.
+   * If current active tags are starred, unstars them.
    * 
-   * @param {object} The clicked star element.
+   * Otherwise, open a popup to star the combination of tags.
    */
-  function starTags(elem) {
+  function starTagsStart(elem) {
     var $elem = $(elem);
     var tagsElem = $elem.data('tagsElem');
     var $tagsElem = $('#' + tagsElem);
@@ -1213,30 +1179,65 @@ var taggerlog = taggerlog || {};
     });
     var tagString = tags.join(',');
 
-    var index = tl.tagCombos.indexOf(tagString);
-    var exists = (index != -1);
-    if(exists) {
-      tl.tagCombos.splice(index, 1);
-    }
+    var existingCombo = tl.tagCombos.find(x => x['tags'] === tagString);
 
-    if($elem.hasClass('starred')) {
-      $elem.removeClass('starred');
+    if(existingCombo !== undefined) {
+      tl.tagCombos = tl.tagCombos.filter(x => x['tags'] !== tagString)
+      saveTagCombos().then(function() {
+        $elem.removeClass('starred');
+        refreshTagDisplay();
+      });
     }
     else {
-      tl.tagCombos.unshift(tagString);
-      $elem.addClass('starred');
+      $('#star-tags-modal').on('shown.bs.modal', function () {
+        $('#star-tags-form').find('[name=title').val('').focus();
+      });
+
+      $('#star-tags-modal').modal();
     }
+  }
+  tl.starTagsStart = starTagsStart;
 
-    logObject(tl.tagCombos);
+  /**
+   * Marks a selection of tags as stars, saves these to the
+   * database as a preset.
+   * 
+   * @param {object} The clicked star element.
+   */
+  function starTags(elem) {
+    var $elem = $(elem);
+    var tagsElem = $elem.data('tagsElem');
+    var $tagsElem = $('#' + tagsElem);
+    var $tags = $tagsElem.find('.diary-tag');
 
-    saveTagCombos().then(function() {
-      refreshTagDisplay();
-    });
+    var title = $('#star-tags-form').find('[name=title').val();
+
+    if(title) {
+
+      var tags = [];
+      $tags.each(function() {
+        var $this = $(this);
+        var tagID = $this.data('tag');
+        if($this.hasClass('exclude')) {
+          tagID = '!' + tagID;
+        }
+        tags.push(tagID);
+      });
+
+      var tagString = tags.join(',');
+      tl.tagCombos.unshift({'title': title, 'tags': tagString});
+      $elem.addClass('starred');
+
+      saveTagCombos().then(function() {
+        refreshTagDisplay();
+        $('#star-tags-modal').modal('hide');
+      });
+    }
   }
   tl.starTags = starTags;
   
   /**
-   * Gets the array of CSVs of favourite tag combinations. 
+   * Gets the array of favourite tag combinations. 
    */
   function getTagCombos() {
     return tl.tagCombos;
