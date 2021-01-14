@@ -776,8 +776,10 @@ var taggerlog = taggerlog || {};
           .get()
           .then(function(doc) {
             let data = doc.data();
-            let tagCombos = data['tag-combos'];
-            tl.tagCombos = tagCombos.slice();
+            if(data) {
+              let tagCombos = data['tag-combos'];
+              tl.tagCombos = tagCombos.slice();
+            }
             resolve();
           });
       });
@@ -1181,6 +1183,13 @@ var taggerlog = taggerlog || {};
   }
   tl.entryClicked = entryClicked;
   
+  /**
+   * Open a popup to favouite a combination of tags.
+   */
+  function starTagsStart() {
+
+  }
+
   /**
    * Marks a selection of tags as stars, saves these to the
    * database as a preset.
