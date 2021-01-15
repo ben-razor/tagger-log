@@ -42,6 +42,8 @@
     <template id="text-entry-error-tag-format-max-length">Tags must be shorter than {max-length} characters</template>
     <template id="text-entry-error-tag-format-valid-chars">Tags may only contain letters, numbers and {valid-extra-chars}</template>
     <template id="text-entry-error-tag-format-max-tags">Entries may contain a maximum of {max-tags} tags</template>
+    <template id="text-entry-error-starred-title-empty">Title is empty</template>
+    <template id="text-entry-error-starred-title-invalid">Title must only contain letters and numbers</template>
 
     <template id="elem-no-entries-for-tags">
       <div class="diary-entry-text">
@@ -160,6 +162,13 @@
               </form>
 
             </div>
+
+            <div class="">
+              <div class="alert alert-warning alert-dismissible" role="alert" id="star-tags-error-alert" style="opacity: 0; display: none;">
+                <span id="star-tags-error-text">Entry error</span>
+              </div>
+            </div>
+
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -326,10 +335,10 @@
 <script type="text/javascript" src="vendor/purify.min.js"></script>
 <script type="text/javascript" src="vendor/js.cookie.min.js"></script>
 
-<script src="js-babel/taggerlog/util.js"></script> 
-<script src="js-babel/taggerlog/tags.js"></script>
-<script src="js-babel/taggerlog/tagger-log.js"></script>
-<script src="js-babel/taggerlog/firebase.js"></script>
+<script src="js/taggerlog/util.js"></script> 
+<script src="js/taggerlog/tags.js"></script>
+<script src="js/taggerlog/tagger-log.js"></script>
+<script src="js/taggerlog/firebase.js"></script>
 
 </body>
 

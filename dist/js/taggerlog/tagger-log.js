@@ -46,9 +46,22 @@ var taggerlog = taggerlog || {};
   tl.tagCombos = [];
 
   /**
+   * Display an alert using the message from an error object.
+   * 
+   * @param {Error} error 
+   */
+  function alertError(error) {
+    var $alertElem = $("#entry-error-alert");
+    var $alertTextElem = $("#entry-error-text");
+    $alertTextElem.html(error.message);
+    $alertElem.fadeTo(2000, 1000).delay(2000).slideUp(500);
+  }
+
+  /**
    * Display an alert to reflect actions carried out on entries.
    * 
-   * @param {string} id 
+   * @param {object} error An error object
+   * @param {string} elemPrefix 
    */
   function showErrorAlert(error, elemPrefix) {
     if(elemPrefix === undefined) { elemPrefix = 'entry-error'; }
@@ -468,6 +481,19 @@ var taggerlog = taggerlog || {};
    */
   function cleanEntry(entry) {
     entry = DOMPurify.sanitize(entry);
+    return entry;
+  }
+
+  /**
+   * Replaces HTML special characters. Removes control characters including newlines
+   * and tabs.
+   * 
+   * @param {string} entry 
+   */
+  function cleanTitle(entry) {
+    entry = DOMPurify.sanitize(entry);
+    // entry = entry.replace(/[\x00-\x1F\x21-\x2F\x3A-\x40\x7B-\x9F]/g, "");
+    entry = entry.replace(/[\r\n\t]/g, "");
     return entry;
   }
 
@@ -935,7 +961,7 @@ var taggerlog = taggerlog || {};
         var tagCombo = tl.tagCombos[i]['tags'];
         var tagComboTitle = tl.tagCombos[i]['title'];
         var tagComboElem = template.replaceAll('{tag}', tagCombo);
-        tagComboElem = tagComboElem.replaceAll('{tag-string}', tagComboTitle);
+        tagComboElem = tagComboElem.replaceAll('{tag-string}', cleanTitle(tagComboTitle));
         tagCombosHTML += tagComboElem;
       }
       $tagCombos.html(tagCombosHTML);
@@ -1222,8 +1248,16 @@ var taggerlog = taggerlog || {};
     var $tags = $tagsElem.find('.diary-tag');
 
     var title = $('#star-tags-form').find('[name=title').val();
+    var cleanedTitle = cleanTitle(title);
 
-    if(title) {
+    if(title !== cleanedTitle) {
+      showErrorAlert(new EntryError('starred-title-invalid'), 'star-tags-error');
+    }
+    else if(!title) {
+      showErrorAlert(new EntryError('starred-title-empty'), 'star-tags-error');
+    }
+    else {
+      title = cleanedTitle.trim();
 
       var tags = [];
       $tags.each(function() {
