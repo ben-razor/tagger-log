@@ -813,7 +813,7 @@ var taggerlog = taggerlog || {};
       queryTags.splice(queryTagIndex, 1);
       excludeTags.push(tag);
     }
-    else {
+    else if(tagExcluded) {
       excludeTags.splice(excludeTagIndex, 1);
     }
 
@@ -1111,7 +1111,8 @@ var taggerlog = taggerlog || {};
       $inputs.on('blur', function() {
         showWhenNotTyping();
       });
-      $('#diary-controls-toggle').on('touchstart', function() {
+      $('#diary-controls-toggle').on('click', function(event) {
+        event.stopPropagation();
         showWhenNotTyping();
       });
 
@@ -1159,7 +1160,8 @@ var taggerlog = taggerlog || {};
   /**
    * For smaller displays, shows the tags display and hides entry form.
    */
-  function toggleTags() {
+  function toggleTags(event) {
+
     var $tags = $('#diary-tags-panel');
     var $newEntry = $('#diary-new-entry-panel');
     var $newEntryBtn = $('#diary-control-new-entry');
