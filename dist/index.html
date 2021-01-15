@@ -95,34 +95,6 @@
       </div>
     </div>
 
-    <!-- Add star tags modal-->
-    <div class="modal fade" id="star-tags-modal" tabindex="-1" role="dialog" aria-labelledby="star-tags-modal" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title d-inline-block">Create Starred Tags</h5>
-          </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <form onsubmit="taggerlog.submitTagComboForm(this); return false;" id="star-tags-form">
-                  <input type="text" placeholder="Enter a title for these tags" name="title" class="w-100" 
-                    autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" />
-              </form>
-
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" data-id="" onclick="taggerlog.starTags(this)" 
-              data-tags-elem="diary-selected-tags" id="star-tags-button">
-              <span id="add-combo-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-              Confirm
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Edit entry modal-->
     <div class="modal fade" id="editEntryModal" tabindex="-1" role="dialog" aria-labelledby="editEntryModal" aria-hidden="true">
       <div class="modal-dialog" role="document">
@@ -173,6 +145,34 @@
         </div>
       </div>
     </div>
+
+    <!-- Add starred tags modal-->
+    <div class="modal fade" id="star-tags-modal" tabindex="-1" role="dialog" aria-labelledby="star-tags-modal" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title d-inline-block">Create Starred Tags</h5>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <form onsubmit="taggerlog.submitTagComboForm(this); return false;" id="star-tags-form">
+                  <input type="text" placeholder="Enter a title for these tags" name="title" class="w-100" />
+              </form>
+
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" data-id="" onclick="taggerlog.starTags(this)" 
+              data-tags-elem="diary-selected-tags" id="star-tags-button">
+              <span id="add-combo-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <div class="content d-flex flex-column">
 
@@ -326,6 +326,7 @@
 <script type="text/javascript" src="vendor/purify.min.js"></script>
 <script type="text/javascript" src="vendor/js.cookie.min.js"></script>
 
+<script src="js/taggerlog/util.js"></script> 
 <script src="js/taggerlog/tags.js"></script>
 <script src="js/taggerlog/tagger-log.js"></script>
 <script src="js/taggerlog/firebase.js"></script>

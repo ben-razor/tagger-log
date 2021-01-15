@@ -24,7 +24,7 @@ var taggerlog = taggerlog || {};
    * 
    * @param {string} error 
    */
-  tl.util.logError(error) {
+  tl.util.logError = function(error) {
     console.log(error);
   }
 
@@ -33,7 +33,7 @@ var taggerlog = taggerlog || {};
    * 
    * @param {string} error 
    */
-  tl.util.logObject(obj) {
+  tl.util.logObject = function(obj) {
     console.log(JSON.stringify(obj));
   }
 

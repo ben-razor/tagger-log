@@ -778,7 +778,8 @@ var taggerlog = taggerlog || {};
     let tagActive = queryTagIndex != -1;
     let excludeTagIndex = excludeTags.indexOf(tag);
     let tagExcluded = excludeTagIndex != -1;
-
+    let prevPrimaryTag = queryTags[0];
+    
     if(!tagActive && !tagExcluded) {
       queryTags.push(tag);
     }
@@ -789,9 +790,19 @@ var taggerlog = taggerlog || {};
     else {
       excludeTags.splice(excludeTagIndex, 1);
     }
-    getRecentEntries().then(function() {
+
+    let primaryTag = queryTags[0];
+
+    let alreadyHaveEntries = tl.entries.length && (primaryTag === prevPrimaryTag);
+
+    if(alreadyHaveEntries) {
       refreshUI(tl.entries);
-    });
+    }
+    else {
+      getRecentEntries().then(function() {
+        refreshUI(tl.entries);
+      });
+    }
   }
   tl.toggleTag = toggleTag;
 
@@ -1268,6 +1279,7 @@ var taggerlog = taggerlog || {};
     var $elem = $(elem);
     var tagString = $elem.data('tag');
     var tags = tagString.split(',');
+    let prevPrimaryTag = queryTags[0];
 
     queryTags = [];
     excludeTags = [];
@@ -1280,10 +1292,19 @@ var taggerlog = taggerlog || {};
         queryTags.push(tag);
       }
     }
-    
-    getRecentEntries().then(function() {
+   
+    let primaryTag = queryTags[0];
+
+    let alreadyHaveEntries = tl.entries.length && (primaryTag === prevPrimaryTag);
+
+    if(alreadyHaveEntries) {
       refreshUI(tl.entries);
-    });
+    }
+    else {
+      getRecentEntries().then(function() {
+        refreshUI(tl.entries);
+      });
+    }
   }
   tl.selectCombo = selectCombo;
 
