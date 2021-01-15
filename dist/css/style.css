@@ -73,6 +73,10 @@ h3 {
   font-variant: all-small-caps;
 }
 
+#recent-entries {
+  margin-bottom: 3em;
+}
+
 div.small-header {
   text-align: left;
   padding-left: 10px;
