@@ -99,7 +99,7 @@ var taggerlog = taggerlog || {};
         isNewUser = true;
       }
     }).catch(function(error) {
-      console.log(error);
+      tl.util.logError(error);
     });
   }
   tl.logIn = logIn;
