@@ -560,6 +560,9 @@ var taggerlog = taggerlog || {};
       $('#diary-edit-entry-tags').html(tagsHTML);
       $form.find('[name=new-tag]').val('');
       $('#edit-entry-date').removeClass('show');
+      $('#editEntryModal').on('shown.bs.modal', function () {
+        $('#editEntryModal').find('[name=diary-entry]').focus();
+      });
       $('#editEntryModal').modal();
     })
     .catch(function(error) {
@@ -1147,6 +1150,7 @@ var taggerlog = taggerlog || {};
       $tags.addClass('collapse');
       $newEntryBtn.removeClass('inactive');
       $tagsBtn.addClass('inactive');
+      $('#diary-new-entry').find('[name=diary-entry]').focus();
     }
     else {
       $newEntry.addClass('collapse');
@@ -1229,7 +1233,7 @@ var taggerlog = taggerlog || {};
     }
     else {
       $('#star-tags-modal').on('shown.bs.modal', function () {
-        $('#star-tags-form').find('[name=title').val('').focus();
+        $('#star-tags-form').find('[name=title]').val('').focus();
       });
 
       $('#star-tags-modal').modal();
