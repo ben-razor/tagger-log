@@ -903,9 +903,8 @@ var taggerlog = taggerlog || {};
       queryTagCombo.push('!' + tag);
     }
 
+    var queryTagComboString = queryTagCombo.join(',');
     if(queryTagCombo.length) {
-      var queryTagComboString = queryTagCombo.join(',');
-
       if(tl.tagCombos.find(o => o['tags'] === queryTagComboString)) {
         $('#star-tags-main').addClass('starred');
       }
@@ -965,6 +964,12 @@ var taggerlog = taggerlog || {};
         var tagComboTitle = tl.tagCombos[i]['title'];
         var tagComboElem = template.replaceAll('{tag}', tagCombo);
         tagComboElem = tagComboElem.replaceAll('{tag-string}', cleanTitle(tagComboTitle));
+        if(tagCombo === queryTagComboString) {
+          tagComboElem = tagComboElem.replaceAll('{active}', 'active');
+        }
+        else {
+          tagComboElem = tagComboElem.replaceAll('{active}', '');
+        }
         tagCombosHTML += tagComboElem;
       }
       $tagCombos.html(tagCombosHTML);
