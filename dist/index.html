@@ -157,7 +157,7 @@
           </div>
           <div class="modal-body">
             <div class="form-group">
-              <form onsubmit="taggerlog.submitTagComboForm(this); return false;" id="star-tags-form">
+              <form onsubmit="taggerlog.starTags(this); return false;" id="star-tags-form" data-tags-elem="diary-selected-tags">
                   <input type="text" placeholder="Enter a title for these tags" name="title" class="w-100" />
               </form>
 
@@ -274,7 +274,7 @@
             <div class="col-md-4" id="diary-entries-panel">
               <h3 class="">Entries</h3>        
               <div id="recent-entries">
-                Diary entries will appear here.
+                Entries will appear here.
               </div>
             </div>
             <div class="col-md-4 collapse d-md-block order-first order-md-12" id="diary-tags-panel">
