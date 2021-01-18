@@ -664,6 +664,7 @@ var taggerlog = taggerlog || {};
             refreshTagDisplay();
           });
         });
+        updateQueryRelatedTags();
         refreshEntryDisplay(tl.entries);
 
         $spinner.hide();
