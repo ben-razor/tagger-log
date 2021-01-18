@@ -3,6 +3,12 @@
 var taggerlog = taggerlog || {};
 
 (function(tl) {
+
+  var entryConfig = {
+    "max-length": 400
+  };
+  tl.entryConfig = entryConfig;
+
   /**
    * The entry data for the currently active tags.
    * @type {object[]}
@@ -156,7 +162,7 @@ var taggerlog = taggerlog || {};
 
     var $form = $(form);
     var $entry = $form.find('textarea[name=diary-entry]');
-    var entry = $entry.val();
+    var entry = $entry.val().substring(0, entryConfig["max-length"]);
     var dateStr = $form.find('[name=diary-date]').val();
 
     var errors = [];    
@@ -338,6 +344,7 @@ var taggerlog = taggerlog || {};
     return new Promise(function(resolve, reject) {
       query.get()
       .then(function(querySnapshot) {
+        tl.util.logObject(querySnapshot.metadata);
         querySnapshot.forEach(function(doc) {
           let data = doc.data();
           data['id'] = doc.id;
@@ -563,6 +570,7 @@ var taggerlog = taggerlog || {};
       $('#editEntryModal').on('shown.bs.modal', function () {
         $('#editEntryModal').find('[name=diary-entry]').focus();
       });
+      entryInputInit();
       $('#editEntryModal').modal();
     })
     .catch(function(error) {
@@ -585,7 +593,7 @@ var taggerlog = taggerlog || {};
     $spinner.show();
     $button.prop('disabled', true);
     const $form = $('#edit-entry-form');
-    const entry = $form.find('textarea[name=diary-entry]').val();
+    const entry = $form.find('textarea[name=diary-entry]').val().substring(0, entryConfig["max-length"]);
     const $date = $form.find('[name=diary-date]');
 
     var errors = [];    
@@ -984,7 +992,8 @@ var taggerlog = taggerlog || {};
    * @param {object} value 
    */
   function setCookie(id, value) {
-    Cookies.set(id, JSON.stringify(value), { expires: 365 });
+    window.localStorage.setItem(id, JSON.stringify(value));
+    // Cookies.set(id, JSON.stringify(value), { expires: 365 });
   }
 
   /**
@@ -993,7 +1002,8 @@ var taggerlog = taggerlog || {};
    * @param {string} id 
    */
   function getCookie(id) {
-    return Cookies.get(id);
+    return window.localStorage.getItem(id); 
+    // return Cookies.get(id);
   }
 
   /**
@@ -1352,5 +1362,76 @@ var taggerlog = taggerlog || {};
     }
   }
   tl.selectCombo = selectCombo;
+
+  /**
+   * Management function to create a document in a table called entries
+   * that contains all the entries rather than one document per entry.
+   */
+  function createEntries() {
+    var db = tl.db;
+
+    var allEntries = [];
+    let query = db.collection("diary-entry").orderBy("date", "desc");
+    query.get().then(function(querySnapshot) {
+      querySnapshot.forEach(function(doc) {
+        var data = doc.data();
+        tl.util.logObject(data);
+        delete data.uid;
+        allEntries.push(data);
+      });
+      db.collection('entries').doc().set({
+        uid: tl.loggedInUser.uid,
+        entries: allEntries,
+      });
+    });
+    return allEntries;
+  }
+  tl.createEntries = createEntries;
+
+  /**
+   * Called when the input in the entry textarea is changed.
+   * 
+   * Warns when message length limit being reached.
+   * 
+   * @param {object} elem 
+   */
+  function entryChanged(elem) {
+    var entryMaxLength = entryConfig["max-length"];
+    var $elem = $(elem);
+    var countElem = $elem.data('countElem');
+    var $countElem = $('#' + countElem);
+    var count = $elem.val().length;
+    $countElem.removeClass('max warning');
+    if(count > entryMaxLength - 20) {
+      $countElem.html(count + '/' + entryMaxLength);
+      $countElem.removeClass('d-none');
+      if(count >= entryMaxLength) {
+        $countElem.addClass('max');
+      }
+      else {
+        $countElem.addClass('warning');
+      }
+    }
+    else {
+      $countElem.addClass('d-none');
+    }
+  }
+  tl.entryChanged = entryChanged;
+
+  /**
+   * Initialises the entry text areas to call entryChanged
+   * when input changes.
+   */
+  function entryInputInit() {
+    var $entryArea = $('textarea.entry-count');
+    $entryArea.on('change keyup input', function(event) {
+      entryChanged($(event.target));
+    }).attr('maxlength', tl.entryConfig["max-length"]);
+    $entryArea.each(function() {
+      entryChanged(this);
+    })
+  }
+
+  entryInputInit();
 
 })(taggerlog);

@@ -66,6 +66,20 @@ var taggerlog = taggerlog || {};
       tl.db.useEmulator("localhost", 8080);
       firebase.auth().useEmulator('http://localhost:9099/');
     }
+    firebase.firestore().enablePersistence()
+    .catch(function(err) {
+      if (err.code == 'failed-precondition') {
+          // Multiple tabs open, persistence can only be enabled
+          // in one tab at a a time.
+          // ...
+      } else if (err.code == 'unimplemented') {
+          // The current browser does not support all of the
+          // features required to enable persistence
+          // ...
+      }
+      tl.util.logError(err.message);   
+    });
+
 
     firebase.auth().onAuthStateChanged(function(user) {
       tl.loggedInUser = user;

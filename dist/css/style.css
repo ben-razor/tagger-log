@@ -147,7 +147,7 @@ div.diary-entry .diary-entry-tags {
 }
 
 .diary-tag.combo.active {
-  background-color: hsl(30, 90%, 60%);
+  background-color: hsl(30, 60%, 40%);
 }
 
 .diary-tag.selected {
@@ -313,4 +313,26 @@ div.diary-entry .diary-entry-tags {
 
 .selected-tags-star.starred {
   background-image: url(../img/svg/ui/hp_gold_star.svg);
+}
+
+.fancy-finish {
+  background-image: url(../img/svg/ui/obb-2.png); 
+  background-position: bottom;
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 20px;
+}
+
+.entry-count-display {
+  text-align: right;
+  color: hsl(0, 0%, 70%);
+  font-size: 80%;
+}
+
+.entry-count-display.warning {
+  color: hsl(30, 80%, 50%);
+}
+
+.entry-count-display.max {
+  color: hsl(0, 80%, 60%);
 }
