@@ -1217,14 +1217,18 @@ var taggerlog = taggerlog || {};
   tl.entryClicked = entryClicked;
   
   /**
-   * If current active tags are starred, unstars them.
+   * Given the element id of a container of tag buttons. Builds a CSV where excluded
+   * tags are prepended with !.
    * 
-   * Otherwise, open a popup to star the combination of tags.
+   * E.g.
+   *   dev,web,todo,!done
+   * 
+   * This is then used as the identifier for a group of starred tags.
+   * 
+   * @param {string} tagsElemID 
    */
-  function starTagsStart(elem) {
-    var $elem = $(elem);
-    var tagsElem = $elem.data('tagsElem');
-    var $tagsElem = $('#' + tagsElem);
+  function getStarredTagString(tagsElemID) {
+    var $tagsElem = $('#' + tagsElemID);
     var $tags = $tagsElem.find('.diary-tag');
 
     var tags = [];
@@ -1237,6 +1241,18 @@ var taggerlog = taggerlog || {};
       tags.push(tagID);
     });
     var tagString = tags.join(',');
+    return tagString;
+  }
+
+  /**
+   * If current active tags are starred, unstars them.
+   * 
+   * Otherwise, open a popup to star the combination of tags.
+   */
+  function starTagsStart(elem) {
+    var $elem = $(elem);
+    var tagsElemID = $elem.data('tagsElem');
+    var tagString = getStarredTagString(tagsElemID);
 
     var existingCombo = tl.tagCombos.find(x => x['tags'] === tagString);
 
@@ -1336,22 +1352,31 @@ var taggerlog = taggerlog || {};
     var tagString = $elem.data('tag');
     var tags = tagString.split(',');
     let prevPrimaryTag = queryTags[0];
+    let alreadyHaveEntries = false;
 
-    queryTags = [];
-    excludeTags = [];
-    for(var i = 0; i < tags.length; i++) {
-      var tag = tags[i];
-      if(tag.startsWith('!')) {
-        excludeTags.push(tag.substring(1));
-      }
-      else {
-        queryTags.push(tag);
-      }
+    if($elem.hasClass('active')) {
+      excludeTags = [];
+      queryTags = [];
+      $elem.removeClass('active');
+      $('.selected-tags-star').removeClass('starred');
     }
-   
-    let primaryTag = queryTags[0];
+    else {
+      queryTags = [];
+      excludeTags = [];
+      for(var i = 0; i < tags.length; i++) {
+        var tag = tags[i];
+        if(tag.startsWith('!')) {
+          excludeTags.push(tag.substring(1));
+        }
+        else {
+          queryTags.push(tag);
+        }
+      }
+    
+      let primaryTag = queryTags[0];
 
-    let alreadyHaveEntries = tl.entries.length && (primaryTag === prevPrimaryTag);
+      alreadyHaveEntries = tl.entries.length && (primaryTag === prevPrimaryTag);
+    }
 
     if(alreadyHaveEntries) {
       refreshUI(tl.entries);
