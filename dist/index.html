@@ -154,9 +154,9 @@
           <div class="modal-body">
             <div class="form-group">
               <form onsubmit="taggerlog.starTags(this); return false;" id="star-tags-form" data-tags-elem="diary-selected-tags">
-                  <input type="text" placeholder="Enter a title for these tags" name="title" class="w-100" />
+                <input type="text" class="entry-count w-100" data-entry-type="combo-title" data-count-elem="starred-tags-count" placeholder="Enter a title for these tags" name="title" class="w-100" />
+                <div class="entry-count-display d-none" id="starred-tags-count">0/500</div>
               </form>
-
             </div>
 
             <div class="">

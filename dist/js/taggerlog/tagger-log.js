@@ -4,10 +4,11 @@ var taggerlog = taggerlog || {};
 
 (function(tl) {
 
-  var entryConfig = {
-    "max-length": 400
+  var config = {
+    "max-length": 400,
+    "combo-title-max-length": 30
   };
-  tl.entryConfig = entryConfig;
+  tl.config = config;
 
   /**
    * The entry data for the currently active tags.
@@ -162,7 +163,7 @@ var taggerlog = taggerlog || {};
 
     var $form = $(form);
     var $entry = $form.find('textarea[name=diary-entry]');
-    var entry = $entry.val().substring(0, entryConfig["max-length"]);
+    var entry = $entry.val().substring(0, config["max-length"]);
     var dateStr = $form.find('[name=diary-date]').val();
 
     var errors = [];    
@@ -618,7 +619,7 @@ var taggerlog = taggerlog || {};
     $spinner.show();
     $button.prop('disabled', true);
     const $form = $('#edit-entry-form');
-    const entry = $form.find('textarea[name=diary-entry]').val().substring(0, entryConfig["max-length"]);
+    const entry = $form.find('textarea[name=diary-entry]').val().substring(0, config["max-length"]);
     const $date = $form.find('[name=diary-date]');
 
     var errors = [];    
@@ -1296,6 +1297,7 @@ var taggerlog = taggerlog || {};
     else {
       $('#star-tags-modal').on('shown.bs.modal', function () {
         $('#star-tags-form').find('[name=title]').val('').focus();
+        entryInputInit();
       });
 
       $('#star-tags-modal').modal();
@@ -1325,7 +1327,7 @@ var taggerlog = taggerlog || {};
       showErrorAlert(new EntryError('starred-title-empty'), 'star-tags-error');
     }
     else {
-      title = cleanedTitle.trim();
+      title = cleanedTitle.trim().substring(0, tl.config["combo-title-max-length"]);
 
       var tags = [];
       $tags.each(function() {
@@ -1431,7 +1433,6 @@ var taggerlog = taggerlog || {};
     query.get().then(function(querySnapshot) {
       querySnapshot.forEach(function(doc) {
         var data = doc.data();
-        tl.util.logObject(data);
         delete data.uid;
         allEntries.push(data);
       });
@@ -1455,7 +1456,6 @@ var taggerlog = taggerlog || {};
     query = query.where('uid', '==', tl.loggedInUser.uid);
     query.get().then(function(querySnapshot) {
       querySnapshot.forEach(function(doc) {
-        //doc.ref.update({'date-modified': doc.data()["date"]});
         batch.update(doc.ref, {'date-modified': doc.data()["date"]});
       })
       batch.commit().then(function() {
@@ -1473,13 +1473,18 @@ var taggerlog = taggerlog || {};
    * @param {object} elem 
    */
   function entryChanged(elem) {
-    var entryMaxLength = entryConfig["max-length"];
     var $elem = $(elem);
     var countElem = $elem.data('countElem');
     var $countElem = $('#' + countElem);
+
+    var entryType = $elem.data('entry-type');
+    var configID = [entryType, "max-length"].join('-');
+    var entryMaxLength = config[configID];
     var count = $elem.val().length;
     $countElem.removeClass('max warning');
-    if(count > entryMaxLength - 20) {
+    var warningLevel = entryMaxLength / 10;
+
+    if(count > entryMaxLength - warningLevel) {
       $countElem.html(count + '/' + entryMaxLength);
       $countElem.removeClass('d-none');
       if(count >= entryMaxLength) {
@@ -1500,15 +1505,24 @@ var taggerlog = taggerlog || {};
    * when input changes.
    */
   function entryInputInit() {
-    var $entryArea = $('textarea.entry-count');
-    $entryArea.on('change keyup input', function(event) {
+    var $entryAreas = $('.entry-count');
+    $entryAreas.on('change keyup input', function(event) {
       entryChanged($(event.target));
-    }).attr('maxlength', tl.entryConfig["max-length"]);
-    $entryArea.each(function() {
-      entryChanged(this);
-    })
-  }
+    });
 
+    $entryAreas.each(function() {
+      var $entryArea = $(this);
+      var configID = "max-length";
+      var entryType = $entryArea.data('entryType');
+      if(entryType) {
+        configID = entryType + '-' + configID;
+      }
+      var maxLength = tl.config[configID];
+      $entryArea.attr('maxlength', maxLength);
+      entryChanged(this);
+    });
+    
+  }
   entryInputInit();
 
 })(taggerlog);
