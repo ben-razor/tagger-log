@@ -18,7 +18,7 @@ html {
 }
 
 body {
-  background-image: url("https://www.toptal.com/designers/subtlepatterns/patterns/y-so-serious-white.png");
+  background-image: url(../img/bg/y-so-serious-white.png);
   font-family: Lato, sans-serif;
   padding-bottom: 70px;
   padding-right: 0px !important;
