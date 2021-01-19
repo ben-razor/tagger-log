@@ -513,7 +513,7 @@ var taggerlog = taggerlog || {};
    * @param {string} entry 
    */
   function cleanEntry(entry) {
-    entry = DOMPurify.sanitize(entry);
+    entry = htmlEntities(entry);
     return entry;
   }
 
