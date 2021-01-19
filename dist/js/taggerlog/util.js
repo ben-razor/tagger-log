@@ -37,4 +37,38 @@ var taggerlog = taggerlog || {};
     console.log(JSON.stringify(obj));
   }
 
+  /**
+   * JQuery plugin to make elem trigger callback after
+   * a specified time.
+   * 
+   * @param {number} time Time in ms
+   * @param {function} callbackHold Function to call at end of timeout (param is $elem)
+   * @param {function} callbackEarly Function to call when elem is released before hold time (param is $elem)
+   */
+  $.fn.HoldButton = function(time, callbackHold, callbackEarly) {
+    return this.each(function() {
+      var $elem = $(this);
+      var id = null;
+      var holdTriggered = false;
+      $elem.data('heldDown', false);
+      $elem.on('mousedown touchstart', function(e) {
+        $elem.data('heldDown', true);
+        id = setTimeout(function($holdButton) { holdTriggered = true; callbackHold($holdButton); }, time, $elem);
+      }).on('mouseup mouseleave touchend', function(e) {
+        var $elem = $(e.target);
+        if($elem.data('heldDown')) {
+          $elem.data('heldDown', false);
+          e.preventDefault();
+          if(!holdTriggered) {
+            callbackEarly($elem);
+          }
+          if(id) {
+            clearTimeout(id);
+          }
+          holdTriggered = false;
+        }
+      })
+    });
+  }
+
 })(taggerlog);

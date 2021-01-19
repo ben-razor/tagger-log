@@ -22,7 +22,7 @@ body {
   font-family: Lato, sans-serif;
   padding-bottom: 70px;
   padding-right: 0px !important;
-  height: 100vh;
+    height: 100vh;
 }
 
 div.jumbotron {
@@ -140,13 +140,22 @@ div.diary-entry .diary-entry-tags {
   cursor: hand;
 }
 
-.diary-tag.combo {
+.diary-tag-combo {
+  display: inline-block; 
+  padding: 5px;
+  margin: 2px 1px 2px 0px;
+  border-radius: 3px;
   border: 1px solid hsl(30, 60%, 40%);
   color: hsl(30, 60%, 40%);
   background-color: white;
 }
 
-.diary-tag.combo.active {
+.diary-tag-combo:hover {
+  cursor: pointer;
+  cursor: hand;
+}
+
+.diary-tag-combo.active {
   background-color: hsl(30, 60%, 40%);
   color: white;
 }

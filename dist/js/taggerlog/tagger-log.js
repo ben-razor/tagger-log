@@ -838,24 +838,35 @@ var taggerlog = taggerlog || {};
    * 
    * @param {string} tag 
    */
-  function toggleTag(tag) {
+  function toggleTag(tag, exclude) {
     let queryTagIndex = queryTags.indexOf(tag);
     let tagActive = queryTagIndex != -1;
     let excludeTagIndex = excludeTags.indexOf(tag);
     let tagExcluded = excludeTagIndex != -1;
     let prevPrimaryTag = queryTags[0];
     
-    if(!tagActive && !tagExcluded) {
-      queryTags.push(tag);
+    if(exclude) {
+      if(tagActive) {
+        queryTags.splice(queryTagIndex, 1);
+      }
+      if(tagExcluded) {
+        excludeTags.splice(excludeTagIndex, 1);
+      }
+      else {
+        excludeTags.push(tag);
+      }
     }
-    if(tagActive) {
-      queryTags.splice(queryTagIndex, 1);
-      excludeTags.push(tag);
+    else {
+      if(!tagActive && !tagExcluded) {
+        queryTags.push(tag);
+      }
+      if(tagActive) {
+        queryTags.splice(queryTagIndex, 1);
+      }
+      if(tagExcluded) {
+        excludeTags.splice(excludeTagIndex, 1);
+      }
     }
-    else if(tagExcluded) {
-      excludeTags.splice(excludeTagIndex, 1);
-    }
-
     let primaryTag = queryTags[0];
 
     let alreadyHaveEntries = tl.entries.length && (primaryTag === prevPrimaryTag);
@@ -1011,6 +1022,14 @@ var taggerlog = taggerlog || {};
       $tagCombos.html(tagCombosHTML);
       $panelTagCombos.removeClass('d-none');
     }
+
+    $('.diary-tag').HoldButton(500, function($holdButton) {
+      var tag = $holdButton.data('tag');
+      toggleTag(tag, true);
+    }, function($holdButton) {
+      var tag = $holdButton.data('tag');
+      toggleTag(tag);
+    });
   }
 
   /**
