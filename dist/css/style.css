@@ -56,7 +56,7 @@ div.small-header {
   vertical-align: middle;
   font-size: 1.5rem;
   color: white;
-  font-family: LatoBold;
+  font-family: LatoBold, sans-serif;
   font-variant: all-small-caps;
   margin-left: 5px;
 } 
@@ -67,7 +67,7 @@ div.small-header {
 } 
 
 h3 {
-  font-family: LatoBold;
+  font-family: LatoBold, sans-serif;
   font-size: 1.5rem;
   color: hsl(30, 30%, 40%);
   font-variant: all-small-caps;
