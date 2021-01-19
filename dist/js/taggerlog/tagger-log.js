@@ -345,10 +345,14 @@ var taggerlog = taggerlog || {};
     return new Promise(function(resolve, reject) {
       query.get({source: "cache"})
       .then(function(querySnapshot) {
+        var mostRecentModify = new Date(1955, 10, 21, 6, 15, 0);
         querySnapshot.forEach(function(doc) {
           let data = doc.data();
           data['id'] = doc.id;
           tl.entries.push(data);
+          if(data['date-modified'] > mostRecentModify) {
+            mostRecentModify = data['date-modified'];
+          }
         });
 
         updateQueryRelatedTags();
@@ -357,10 +361,10 @@ var taggerlog = taggerlog || {};
         query = db.collection("diary-entry").orderBy("date-modified", "desc");
         query = query.where('uid', '==', loggedInUser.uid);
         if(tl.entries.length) {
-          query = query.where('date-modified', '>', tl.entries[0]['date']);
+          query = query.where('date-modified', '>', mostRecentModify);
         }
 
-        query.get().then(function(querySnapshot) {
+        query.get({source: "server"}).then(function(querySnapshot) {
           if(querySnapshot.size) {
             querySnapshot.forEach(function(doc) {
               let data = doc.data();
@@ -368,7 +372,7 @@ var taggerlog = taggerlog || {};
               tl.entries.push(data);
             });
 
-            tl.entries.sort((a, b) => a["date"] > b["date"]);
+            tl.entries.sort((a, b) => a["date"] < b["date"] ? 1 : -1);
             updateQueryRelatedTags();
           }
           
@@ -1446,11 +1450,17 @@ var taggerlog = taggerlog || {};
   function addEntryModifiedField() {
     var db = tl.db;
 
-    let query = db.collection("diary-entry").orderBy("date", "asc");
+    var batch = db.batch();
+    let query = db.collection("diary-entry");
+    query = query.where('uid', '==', tl.loggedInUser.uid);
     query.get().then(function(querySnapshot) {
       querySnapshot.forEach(function(doc) {
-        doc.ref.update({'date-modified': doc.data()["date"]});
-     })
+        //doc.ref.update({'date-modified': doc.data()["date"]});
+        batch.update(doc.ref, {'date-modified': doc.data()["date"]});
+      })
+      batch.commit().then(function() {
+        tl.util.logObject(["batch committed"]);
+      });
     });
   }
   tl.addEntryModifiedField = addEntryModifiedField;

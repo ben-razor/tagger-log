@@ -248,7 +248,7 @@ div.diary-entry .diary-entry-tags {
 
 .diary-control-btn {
   border-radius: 5px;
-  padding: 4px;
+  padding: 0.5em;
   background-color: hsl(30, 60%, 40%); 
   color: white;
   border: 1px solid hsl(30, 60%, 40%);
