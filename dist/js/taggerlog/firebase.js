@@ -38,24 +38,32 @@ var taggerlog = taggerlog || {};
         },
     ];
 
-    var allTags = [];
-    var numEntries = gettingStartedEntries.length;
-    for(var i = 0; i < numEntries; i++) {
-        var entry = gettingStartedEntries[i];
-        var text = entry["text"];
-        var tags = entry["tags"];
-        const entryData = {
-            uid: user.uid,
-            entry: text,
-            date: new Date(Date.now() + (numEntries - i) * 100),
-            "tag-list": tags
-        };
-        tl.db.collection('diary-entry').add(entryData);
-        allTags = allTags.concat(tags);
-    }
-
-    allTags = tl.processTagList(allTags);
-    tl.db.collection("diary-tags").doc(user.uid).set({tags: allTags.join()})
+    return new Promise(function(resolve) {
+      var allTags = [];
+      var numEntries = gettingStartedEntries.length;
+      var batch = tl.db.batch();
+      for(var i = 0; i < numEntries; i++) {
+          var entry = gettingStartedEntries[i];
+          var text = entry["text"];
+          var tags = entry["tags"];
+          const entryData = {
+              uid: user.uid,
+              entry: text,
+              date: new Date(Date.now() + (numEntries - i) * 100),
+              "tag-list": tags,
+              'date-modified': firebase.firestore.FieldValue.serverTimestamp()
+          };
+          var docRef = tl.db.collection('diary-entry').doc();
+          batch.set(docRef, entryData);
+          allTags = allTags.concat(tags);
+      }
+      batch.commit().then(function() {
+        allTags = tl.processTagList(allTags);
+        tl.db.collection("diary-tags").doc(user.uid).set({tags: allTags.join()}).then(function() {
+          resolve();
+        })
+      }) 
+    });
   }
 
   $(function() {
@@ -84,8 +92,9 @@ var taggerlog = taggerlog || {};
     firebase.auth().onAuthStateChanged(function(user) {
       tl.loggedInUser = user;
       if(isNewUser) {
-        initNewUser(user);
-        tl.updateLoggedInUI();
+        initNewUser(user).then(function() {
+          tl.updateLoggedInUI();
+        });
         isNewUser = false;
       }
       else {

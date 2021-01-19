@@ -200,7 +200,8 @@ var taggerlog = taggerlog || {};
         entry: entry,
         date: new Date(date),
         tags: tagString,
-        "tag-list": tags
+        "tag-list": tags,
+        "date-modified": firebase.firestore.FieldValue.serverTimestamp()
       }
 
       var batch = db.batch();
@@ -342,20 +343,33 @@ var taggerlog = taggerlog || {};
     queryRelatedTags = [];
 
     return new Promise(function(resolve, reject) {
-      query.get()
+      query.get({source: "cache"})
       .then(function(querySnapshot) {
-        tl.util.logObject(querySnapshot.metadata);
         querySnapshot.forEach(function(doc) {
           let data = doc.data();
           data['id'] = doc.id;
           tl.entries.push(data);
         });
 
-        updateQueryRelatedTags();
-        resolve(tl.entries);
+        query = db.collection("diary-entry").orderBy("date-modified", "desc");
+        query = query.where('uid', '==', loggedInUser.uid);
+        if(tl.entries.length) {
+          query = query.where('date-modified', '>', tl.entries[0]['date']);
+        }
+        query.get().then(function(querySnapshot) {
+          querySnapshot.forEach(function(doc) {
+            let data = doc.data();
+            data['id'] = doc.id;
+            tl.entries.push(data);
+          });
+
+          tl.entries.sort((a, b) => a["date"] > b["date"]);
+          updateQueryRelatedTags();
+          resolve(tl.entries);
+        });
       })
       .catch(function(error) {
-          tl.util.logError("Error getting documents: ", error)
+          tl.util.logError(["Error getting documents: ", error])
           resolve(tl.entries);
       });
     });
@@ -638,7 +652,8 @@ var taggerlog = taggerlog || {};
         'entry': entry,
         'date': new Date($date.val()),
         'tags': tagString,
-        'tag-list': tags
+        'tag-list': tags,
+        'date-modified': firebase.firestore.FieldValue.serverTimestamp()
       };
 
       db.collection('diary-entry').doc(id).update(newEntry)
@@ -1413,6 +1428,21 @@ var taggerlog = taggerlog || {};
     return allEntries;
   }
   tl.createEntries = createEntries;
+
+  /**
+   * Management function to add a date modified field to entries.
+   */
+  function addEntryModifiedField() {
+    var db = tl.db;
+
+    let query = db.collection("diary-entry").orderBy("date", "asc");
+    query.get().then(function(querySnapshot) {
+      querySnapshot.forEach(function(doc) {
+        doc.ref.update({'date-modified': doc.data()["date"]});
+     })
+    });
+  }
+  tl.addEntryModifiedField = addEntryModifiedField;
 
   /**
    * Called when the input in the entry textarea is changed.
