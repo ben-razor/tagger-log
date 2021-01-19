@@ -328,7 +328,7 @@ div.diary-entry .diary-entry-tags {
 .fancy-finish {
   background-image: url(../img/svg/ui/obb-2.png); 
   background-position: bottom;
-  background-size: cover;
+  background-size: contain;
   background-repeat: no-repeat;
   height: 20px;
 }
