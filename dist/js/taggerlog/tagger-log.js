@@ -351,20 +351,27 @@ var taggerlog = taggerlog || {};
           tl.entries.push(data);
         });
 
+        updateQueryRelatedTags();
+        refreshUI(tl.entries);
+
         query = db.collection("diary-entry").orderBy("date-modified", "desc");
         query = query.where('uid', '==', loggedInUser.uid);
         if(tl.entries.length) {
           query = query.where('date-modified', '>', tl.entries[0]['date']);
         }
-        query.get().then(function(querySnapshot) {
-          querySnapshot.forEach(function(doc) {
-            let data = doc.data();
-            data['id'] = doc.id;
-            tl.entries.push(data);
-          });
 
-          tl.entries.sort((a, b) => a["date"] > b["date"]);
-          updateQueryRelatedTags();
+        query.get().then(function(querySnapshot) {
+          if(querySnapshot.size) {
+            querySnapshot.forEach(function(doc) {
+              let data = doc.data();
+              data['id'] = doc.id;
+              tl.entries.push(data);
+            });
+
+            tl.entries.sort((a, b) => a["date"] > b["date"]);
+            updateQueryRelatedTags();
+          }
+          
           resolve(tl.entries);
         });
       })
@@ -895,8 +902,8 @@ var taggerlog = taggerlog || {};
 
     if(tl.loggedInUser) {
       var uid = tl.loggedInUser.uid;
-      setCookie('query-tags-' + uid, queryTags);
-      setCookie('exclude-tags-' + uid, excludeTags);
+      setItem('query-tags-' + uid, queryTags);
+      setItem('exclude-tags-' + uid, excludeTags);
     }
 
     var activeTagHTML = '';
@@ -1002,24 +1009,28 @@ var taggerlog = taggerlog || {};
   }
 
   /**
-   * Helper function for setting cookies.
+   * Helper function for setting items in local storage.
    * 
    * @param {string} id 
    * @param {object} value 
    */
-  function setCookie(id, value) {
-    window.localStorage.setItem(id, JSON.stringify(value));
-    // Cookies.set(id, JSON.stringify(value), { expires: 365 });
+  function setItem(id, value) {
+    if(tl.loggedInUser) {
+      var uid = tl.loggedInUser.uid;
+      window.localStorage.setItem(uid + id, JSON.stringify(value));
+    }
   }
 
   /**
-   * Helper function for getting cookies.
+   * Helper function for getting item from local storage.
    * 
    * @param {string} id 
    */
-  function getCookie(id) {
-    return window.localStorage.getItem(id); 
-    // return Cookies.get(id);
+  function getItem(id) {
+    if(tl.loggedInUser) {
+      var uid = tl.loggedInUser.uid;
+      return window.localStorage.getItem(uid + id); 
+    }
   }
 
   /**
@@ -1120,14 +1131,14 @@ var taggerlog = taggerlog || {};
     $('.loaded-show').removeClass('d-none');
     if(tl.loggedInUser) {
       var uid = tl.loggedInUser.uid;
-      var cookieQueryTags = getCookie('query-tags-' + uid);
-      var cookieExcludeTags = getCookie('exclude-tags-' + uid);
+      var storedQueryTags = getItem('query-tags-' + uid);
+      var storedExcludeTags = getItem('exclude-tags-' + uid);
 
-      if(cookieQueryTags) {
-        queryTags = JSON.parse(cookieQueryTags);
+      if(storedQueryTags) {
+        queryTags = JSON.parse(storedQueryTags);
       }
-      if(cookieExcludeTags) {
-        excludeTags = JSON.parse(cookieExcludeTags);
+      if(storedExcludeTags) {
+        excludeTags = JSON.parse(storedExcludeTags);
       }
 
       $('.logged-in-show').removeClass('d-none');
