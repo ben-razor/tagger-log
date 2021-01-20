@@ -115,7 +115,7 @@
                 <div id="diary-edit-entry-tags">
                 </div>
                 <div class="pt-2 input-group w-100 d-flex flex-row">
-                  <input type="text" placeholder="Enter tags (separated by commas)" name="new-tag" class="flex-fill" 
+                  <input type="text" name="new-tag" class="flex-fill tagAutoComplete" placeholder="Enter tags (separated by commas)"
                     autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" />
                 </div>
                 <div class="py-2 d-none"> 
@@ -255,7 +255,7 @@
                   <div id="diary-entry-active-tags">
                   </div>
                   <div class="pt-2 input-group w-100 d-flex flex-row">
-                    <input type="text" placeholder="Enter tags (separated by commas)" name="new-tag" class="flex-fill" 
+                    <input type="text" placeholder="Enter tags (separated by commas)" name="new-tag" class="flex-fill tagAutoComplete" 
                       autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" />
                   </div>
                   <div class="py-2 d-flex">
@@ -325,6 +325,8 @@
   </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+<script src="vendor/jquery-textcomplete/jquery.textcomplete.min.js"></script>
+
 <!-- The core Firebase JS SDK is always required and must be listed first -->
 <script defer src="https://www.gstatic.com/firebasejs/8.1.2/firebase-app.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/8.1.2/firebase-auth.js"></script>

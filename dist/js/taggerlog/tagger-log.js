@@ -53,7 +53,7 @@ var taggerlog = taggerlog || {};
   tl.tagCombos = [];
 
   /**
-   * Reset variables to initialize application.
+   * Perform initializations after log in.
    */
   function init() {
     tl.entries = [];
@@ -62,8 +62,17 @@ var taggerlog = taggerlog || {};
     queryRelatedTags = [];
     excludeTags = [];
     queryTags = [];
+
+    initUI();
   }
   tl.init = init;
+
+  /**
+   * Initialize UI elements.
+   */
+  function initUI() {
+    initAutocomplete();
+  }
 
   /**
    * Display an alert using the message from an error object.
@@ -443,6 +452,7 @@ var taggerlog = taggerlog || {};
   function refreshUI(entries) {
     refreshEntryDisplay(entries);
     refreshTagDisplay();
+    initAutocomplete();
   }
 
   /**
@@ -1556,5 +1566,44 @@ var taggerlog = taggerlog || {};
     
   }
   entryInputInit();
+
+  /**
+   * Set up autocomplete.
+   */
+  function initAutocomplete() {
+    var hadComma = false;
+    $('.tagAutoComplete').textcomplete([
+      {
+        match: /(^|\b)(,*\w{1,})$/,// /(^|\w)(\w*(?:\s*\w*))$/,
+        // #4 - Function called at every new keystroke
+        search(query, callback) {
+          console.log(query);
+          if(query.charAt(0) === ',') {
+            hadComma = true;
+          }
+          query = query.replaceAll(',', '');
+          var matching = tl.allTags.filter(tag => tag.startsWith(query)).slice(0, 5);
+          callback(matching);
+        },
+        // #5 - Template used to display each retrieved result
+        template: function(word) {
+          return word;
+        },
+        // #6 - Template used to display the selected result in the textarea
+        replace: function(word, e) {
+          var $elem = $(e.target);
+          var currentText = $elem.val();
+          if(hadComma) {
+            hadComma = false;
+            return ',' + word + ',';
+          }
+          else {
+            return word + ',';
+          }
+        }
+      }
+    ]);
+  }
+  initAutocomplete();
 
 })(taggerlog);
