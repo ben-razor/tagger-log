@@ -410,7 +410,7 @@ var taggerlog = taggerlog || {};
   }
 
   /**
-   * When there are active tags, get's all other tags from
+   * When there are active tags, gets all other tags from
    * records matching tags.
    * 
    * These can then be shown as related tags.
@@ -1452,6 +1452,8 @@ var taggerlog = taggerlog || {};
       alreadyHaveEntries = tl.entries.length && (primaryTag === prevPrimaryTag);
     }
 
+    updateQueryRelatedTags();
+    
     if(alreadyHaveEntries) {
       refreshUI(tl.entries);
     }
