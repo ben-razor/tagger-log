@@ -443,6 +443,7 @@ var taggerlog = taggerlog || {};
   function refreshUI(entries) {
     refreshEntryDisplay(entries);
     refreshTagDisplay();
+    initAutocomplete();
   }
 
   /**
@@ -1556,5 +1557,86 @@ var taggerlog = taggerlog || {};
     
   }
   entryInputInit();
+
+  /**
+   * Set up autocomplete.
+   */
+  function initAutocomplete() {
+    var hadComma = false;
+    $('.tagAutoComplete').textcomplete([
+      {
+          // #3 - Regular expression used to trigger the autocomplete dropdown
+        match: /(^|\b)(,*\w{1,})$/,// /(^|\w)(\w*(?:\s*\w*))$/,
+        // #4 - Function called at every new keystroke
+        search(query, callback) {
+          console.log(query);
+          if(query.charAt(0) === ',') {
+            hadComma = true;
+          }
+          query = query.replaceAll(',', '');
+          var matching = tl.allTags.filter(tag => tag.includes(query));
+          callback(matching)
+          /*
+          lastQuery = query;
+          index.search(lastQuery, { hitsPerPage: NB_RESULTS_DISPLAYED })
+            .then(content => {
+              if (content.query === lastQuery) {
+                callback(content.hits);
+              }
+            })
+            .catch(err => {
+              console.error(err);
+            });
+            */
+        },
+        // #5 - Template used to display each result obtained by the Algolia API
+        template: function(word) {
+          // Returns the highlighted version of the name attribute
+          // return _highlightResult.name.value;
+          return word;
+        },
+        // #6 - Template used to display the selected result in the textarea
+        replace: function(word, e) {
+          var $elem = $(e.target);
+          var currentText = $elem.val();
+          if(hadComma) {
+            hadComma = false;
+            return ',' + word + ',';
+          }
+          else {
+            return word + ',';
+          }
+        }
+      }
+    ]);
+     
+    /*
+$('.tagAutoComplete').autoComplete({
+      resolver: 'custom',
+      events: {
+        search: function(qry, callback, $elem) {
+          var caretPos = $elem.get(0).selectionStart;
+          var currentTag = qry.substring(0, caretPos);
+          var commaPos = currentTag.lastIndexOf(',');
+          if(commaPos > -1) {
+            currentTag = currentTag.substring(commaPos + 1);
+          }
+          currentTag = currentTag.trim();
+
+          tl.util.logObject([currentTag, caretPos]);
+          if(currentTag) {
+            var matching = tl.allTags.filter(tag => tag.includes(currentTag));
+            callback(matching);
+          }
+          else {
+            return false;
+          }
+        }
+      }
+    })
+
+    */
+      }
+  initAutocomplete();
 
 })(taggerlog);

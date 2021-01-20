@@ -348,3 +348,37 @@ div.diary-entry .diary-entry-tags {
 .entry-count-display.max {
   color: hsl(0, 80%, 60%);
 }
+
+#autocomplete-textarea {
+  min-height: 80px;
+  color: #000;
+}
+#autocomplete-textarea a {
+  text-decoration: none;
+  font-weight: normal;
+  color: #181818;
+}
+.dropdown-menu {
+  min-width: 0;
+}
+.dropdown-menu .textcomplete-item a,
+.dropdown-menu .textcomplete-item a:hover {
+  cursor: pointer;
+  font-weight: normal;
+  color: #000;
+  position: relative;
+  padding: 4px 10px;
+}
+.dropdown-menu .textcomplete-item.active a {
+  background: #F0F0F0;
+}
+/* Highlighting of the matching part
+   of each search result */
+.dropdown-menu .textcomplete-item a em {
+  font-style: normal;
+  font-weight: bold;
+}
+.dropdown-menu .textcomplete-footer {
+  border-top: solid 1px #F0F0F0;
+  margin-top: 3px;
+}
