@@ -133,6 +133,8 @@ div.diary-entry .diary-entry-tags {
   border: 1px solid hsl(30, 60%, 60%);
   color: hsl(30, 60%, 60%);
   background-color: white;
+  -moz-user-select: none; -webkit-user-select: none; -ms-user-select:none; 
+  user-select:none;-o-user-select:none;
 }
 
 .diary-tag:hover {
