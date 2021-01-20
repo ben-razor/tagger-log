@@ -53,7 +53,7 @@ var taggerlog = taggerlog || {};
   tl.tagCombos = [];
 
   /**
-   * Reset variables to initialize application.
+   * Perform initializations after log in.
    */
   function init() {
     tl.entries = [];
@@ -62,8 +62,17 @@ var taggerlog = taggerlog || {};
     queryRelatedTags = [];
     excludeTags = [];
     queryTags = [];
+
+    initUI();
   }
   tl.init = init;
+
+  /**
+   * Initialize UI elements.
+   */
+  function initUI() {
+    initAutocomplete();
+  }
 
   /**
    * Display an alert using the message from an error object.
@@ -1565,7 +1574,6 @@ var taggerlog = taggerlog || {};
     var hadComma = false;
     $('.tagAutoComplete').textcomplete([
       {
-          // #3 - Regular expression used to trigger the autocomplete dropdown
         match: /(^|\b)(,*\w{1,})$/,// /(^|\w)(\w*(?:\s*\w*))$/,
         // #4 - Function called at every new keystroke
         search(query, callback) {
@@ -1574,25 +1582,11 @@ var taggerlog = taggerlog || {};
             hadComma = true;
           }
           query = query.replaceAll(',', '');
-          var matching = tl.allTags.filter(tag => tag.includes(query));
-          callback(matching)
-          /*
-          lastQuery = query;
-          index.search(lastQuery, { hitsPerPage: NB_RESULTS_DISPLAYED })
-            .then(content => {
-              if (content.query === lastQuery) {
-                callback(content.hits);
-              }
-            })
-            .catch(err => {
-              console.error(err);
-            });
-            */
+          var matching = tl.allTags.filter(tag => tag.startsWith(query)).slice(0, 5);
+          callback(matching);
         },
-        // #5 - Template used to display each result obtained by the Algolia API
+        // #5 - Template used to display each retrieved result
         template: function(word) {
-          // Returns the highlighted version of the name attribute
-          // return _highlightResult.name.value;
           return word;
         },
         // #6 - Template used to display the selected result in the textarea
@@ -1609,34 +1603,7 @@ var taggerlog = taggerlog || {};
         }
       }
     ]);
-     
-    /*
-$('.tagAutoComplete').autoComplete({
-      resolver: 'custom',
-      events: {
-        search: function(qry, callback, $elem) {
-          var caretPos = $elem.get(0).selectionStart;
-          var currentTag = qry.substring(0, caretPos);
-          var commaPos = currentTag.lastIndexOf(',');
-          if(commaPos > -1) {
-            currentTag = currentTag.substring(commaPos + 1);
-          }
-          currentTag = currentTag.trim();
-
-          tl.util.logObject([currentTag, caretPos]);
-          if(currentTag) {
-            var matching = tl.allTags.filter(tag => tag.includes(currentTag));
-            callback(matching);
-          }
-          else {
-            return false;
-          }
-        }
-      }
-    })
-
-    */
-      }
+  }
   initAutocomplete();
 
 })(taggerlog);
