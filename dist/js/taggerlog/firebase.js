@@ -19,17 +19,22 @@ var taggerlog = taggerlog || {};
   function initNewUser(user) {
     var gettingStartedEntries = [
         {
-            "text": 'This is an entry with some tags. You can click on it to edit or delete it.',
+            "text": 'This is an entry with some tags. Tap it to edit or delete.',
             "tags": ['getting-started', 'entries']
         },
         {
             "text": "The tags panel has the tags from all your entries. " +
-                "Clicking them makes them active.",
+                "Clicking a tag makes it green and ACTIVE.",
             "tags": ['getting-started', 'tags']
         },
         {
             "text": "Only entries matching active tags are displayed.\n\n"  +
-                "Active tags are automatically added to new entries.\n\n",
+                "Active tags are automatically added to new entries.",
+            "tags": ['getting-started', 'tags', 'entries']
+        },
+        {
+            "text": "Holding a tag turns it red, making it EXCLUDED.\n\n" +
+                    "Entries tagged with excluded tags are not displayed.",
             "tags": ['getting-started', 'tags', 'entries']
         },
         {
