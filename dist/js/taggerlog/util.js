@@ -43,7 +43,7 @@ var taggerlog = taggerlog || {};
    * 
    * @param {number} time Time in ms
    * @param {function} callbackHold Function to call at end of timeout (param is $elem)
-   * @param {function} callbackEarly Function to call when elem is released before hold time (param is $elem)
+   * @param {function=} callbackEarly Function to call when elem is released before hold time (param is $elem)
    */
   $.fn.HoldButton = function(time, callbackHold, callbackEarly) {
     return this.each(function() {
@@ -60,7 +60,9 @@ var taggerlog = taggerlog || {};
           $elem.data('heldDown', false);
           e.preventDefault();
           if(!holdTriggered) {
-            callbackEarly($elem);
+            if(callbackEarly) {
+              callbackEarly($elem);
+            }
           }
           if(id) {
             clearTimeout(id);
