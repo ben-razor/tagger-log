@@ -383,3 +383,7 @@ div.diary-entry .diary-entry-tags {
   border-top: solid 1px #F0F0F0;
   margin-top: 3px;
 }
+.dropdown-menu .textcomplete-morematches {
+  text-align: center;
+  color: grey;
+}

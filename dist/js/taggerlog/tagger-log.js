@@ -894,6 +894,7 @@ var taggerlog = taggerlog || {};
 
     let alreadyHaveEntries = tl.entries.length && (primaryTag === prevPrimaryTag);
 
+    updateQueryRelatedTags();
     if(alreadyHaveEntries) {
       refreshUI(tl.entries);
     }
@@ -1453,7 +1454,7 @@ var taggerlog = taggerlog || {};
     }
 
     updateQueryRelatedTags();
-    
+
     if(alreadyHaveEntries) {
       refreshUI(tl.entries);
     }
@@ -1579,13 +1580,19 @@ var taggerlog = taggerlog || {};
         match: /(^|\b)(,*\w{1,})$/,// /(^|\w)(\w*(?:\s*\w*))$/,
         // #4 - Function called at every new keystroke
         search(query, callback) {
-          console.log(query);
           if(query.charAt(0) === ',') {
             hadComma = true;
           }
           query = query.replaceAll(',', '');
-          var matching = tl.allTags.filter(tag => tag.startsWith(query)).slice(0, 5);
+          var matching = tl.allTags.filter(tag => tag.startsWith(query));
+          var numMatches = matching.length;
+          matching = matching.slice(0, 5);
           callback(matching);
+
+          var $dropdown = $('.textcomplete-dropdown');
+          if(matching.length < numMatches && !$dropdown.find('.textcomplete-morematches').length) {
+            $dropdown.html($dropdown.html() + '<li class="textcomplete-morematches">...</li>')
+          }
         },
         // #5 - Template used to display each retrieved result
         template: function(word) {
