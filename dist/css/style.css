@@ -121,7 +121,8 @@ div.diary-entry .diary-entry-tags {
 }
 
 .diary-tag-display.selected {
-  background-color: hsl(30, 60%, 60%);
+  background-color: hsl(100, 40%, 60%);
+  border: 1px solid hsl(100, 60%, 40%);
   color: white;
 }
 
