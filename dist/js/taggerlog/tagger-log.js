@@ -53,6 +53,19 @@ var taggerlog = taggerlog || {};
   tl.tagCombos = [];
 
   /**
+   * Reset variables to initialize application.
+   */
+  function init() {
+    tl.entries = [];
+    tl.allTags = [];
+    tl.tagCombos = [];
+    queryRelatedTags = [];
+    excludeTags = [];
+    queryTags = [];
+  }
+  tl.init = init;
+
+  /**
    * Display an alert using the message from an error object.
    * 
    * @param {Error} error 

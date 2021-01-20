@@ -98,11 +98,13 @@ var taggerlog = taggerlog || {};
       tl.loggedInUser = user;
       if(isNewUser) {
         initNewUser(user).then(function() {
+          tl.init();
           tl.updateLoggedInUI();
         });
         isNewUser = false;
       }
       else {
+        tl.init();
         tl.updateLoggedInUI();
       }
     });
