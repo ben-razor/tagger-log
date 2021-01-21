@@ -115,7 +115,7 @@
                 <div id="diary-edit-entry-tags">
                 </div>
                 <div class="pt-2 input-group w-100 d-flex flex-row">
-                  <input type="text" name="new-tag" class="flex-fill tagAutoComplete" placeholder="Enter tags (separated by commas)"
+                  <input type="text" name="new-tag" class="form-control flex-fill tagAutoComplete" placeholder="Enter tags (separated by commas)"
                     autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" />
                 </div>
                 <div class="py-2 d-none"> 
@@ -255,7 +255,7 @@
                   <div id="diary-entry-active-tags">
                   </div>
                   <div class="pt-2 input-group w-100 d-flex flex-row">
-                    <input type="text" placeholder="Enter tags (separated by commas)" name="new-tag" class="flex-fill tagAutoComplete" 
+                    <input type="text" placeholder="Enter tags (separated by commas)" name="new-tag" class="form-control flex-fill tagAutoComplete" 
                       autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" />
                   </div>
                   <div class="py-2 d-flex">
@@ -291,13 +291,37 @@
                   </div>
                 </div>
               </div>
-              <div id="panel-related-tags" class="d-none">
-                <h3 id="diary-related-tags-header">Related Tags</h3>
+              <div id="panel-related-tags" class="d-none mt-2">
+                <div class="row">
+                  <h3 class="col-7" id="diary-related-tags-header">Related Tags</h3>
+
+                  <div class="col-5 form-outline tl-header-search-basis">
+                    <div class="input-group rounded tl-header-search-container">
+                      <input type="search" class="form-control form-control-sm mb-2 tl-header-search">
+                      <span class="form-control-sm border-0 search-glass">
+                        <i class="fas fa-search"></i>
+                      </span> 
+                    </div>
+                  </div>
+
+                </div>
                 <div id="diary-related-tags">
                 </div>
               </div>
               <div id="panel-all-tags">
-                <h3>All Tags</h3>
+                <div class="row">
+                  <h3 class="col-6">All Tags</h3>
+
+                  <div class="col-6 form-outline tl-header-search-basis">
+                    <div class="input-group rounded tl-header-search-container">
+                      <input type="search" class="form-control form-control-sm mb-2 tl-header-search">
+                      <span class="form-control-sm border-0 search-glass">
+                        <i class="fas fa-search"></i>
+                      </span> 
+                    </div>
+                  </div>
+
+                </div>
                 <div id="diary-tags">
                   <p>Tags will appear here.</p>
                 </div>

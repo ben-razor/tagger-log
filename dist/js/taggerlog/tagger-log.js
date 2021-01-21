@@ -41,7 +41,7 @@ var taggerlog = taggerlog || {};
   var queryRelatedTags = [];
 
   /**
-   * An array of starred tag combinations with titles
+   * An array of starred tag combinations with titles.
    * 
    * E.g. [
    *   { 'title': 'Web', 'tags': 'dev,web' }, 
@@ -51,6 +51,11 @@ var taggerlog = taggerlog || {};
    * @type {string[]}
    */
   tl.tagCombos = [];
+
+  /**
+   * Search term to limit the displayed tags.
+   */
+  var tagSearch = '';
 
   /**
    * Perform initializations after log in.
@@ -72,6 +77,7 @@ var taggerlog = taggerlog || {};
    */
   function initUI() {
     initAutocomplete();
+    initTagSearch();
   }
 
   /**
@@ -895,6 +901,8 @@ var taggerlog = taggerlog || {};
     let alreadyHaveEntries = tl.entries.length && (primaryTag === prevPrimaryTag);
 
     updateQueryRelatedTags();
+    clearTagSearch();
+
     if(alreadyHaveEntries) {
       refreshUI(tl.entries);
     }
@@ -937,6 +945,17 @@ var taggerlog = taggerlog || {};
     let tags = tl.allTags;
     if(queryRelatedTags.length) {
       tags = queryRelatedTags;
+    }
+
+    if(tags.length > 7) {
+      $('.tl-header-search-container').removeClass('d-none');
+      if(tagSearch) {
+        tags = tags.filter(x => x.startsWith(tagSearch));
+      }
+    }
+    else {
+      $('.tl-header-search-container').addClass('d-none');
+      clearTagSearch();
     }
     var noTagsElem = $('#elem-no-tags').html();
 
@@ -1453,6 +1472,7 @@ var taggerlog = taggerlog || {};
       alreadyHaveEntries = tl.entries.length && (primaryTag === prevPrimaryTag);
     }
 
+    clearTagSearch();
     updateQueryRelatedTags();
 
     if(alreadyHaveEntries) {
@@ -1614,5 +1634,25 @@ var taggerlog = taggerlog || {};
     ]);
   }
   initAutocomplete();
+
+  /**
+   * Clear tag search variable and elements.
+   */
+  function clearTagSearch() {
+    tagSearch = '';
+    $('.tl-header-search').val(tagSearch);
+  }
+
+  /**
+   * Set up search box for limiting displayed tags.
+   */
+  function initTagSearch() {
+    clearTagSearch();
+    $('.tl-header-search').on('input', function(e) {
+      tagSearch = $(this).val().trim();
+      refreshTagDisplay();
+    });
+  }
+  initTagSearch();
 
 })(taggerlog);

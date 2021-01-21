@@ -387,3 +387,11 @@ div.diary-entry .diary-entry-tags {
   text-align: center;
   color: grey;
 }
+
+.tl-header-search {
+  vertical-align: middle;
+}
+
+.search-glass {
+  color: grey;
+}
