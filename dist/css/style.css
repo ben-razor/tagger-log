@@ -187,6 +187,10 @@ div.diary-entry .diary-entry-tags {
   margin-right: .5em;
 }
 
+#diary-related-tags-header {
+  white-space: nowrap;
+}
+
 #header-user-img {
   border-radius: 50%;
   width: 2.5rem;
@@ -330,7 +334,7 @@ div.diary-entry .diary-entry-tags {
 }
 
 .fancy-finish {
-  background-image: url(../img/svg/ui/obb-2.png); 
+  background-image: url(../img/svg/ui/obb-3.png); 
   background-position: bottom;
   background-size: contain;
   background-repeat: no-repeat;

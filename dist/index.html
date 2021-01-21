@@ -187,7 +187,7 @@
             <div class="d-inline-block">
                 <img src="img/favicon/favicon-32x32.png">
                 <h1>Tagger Log</h1>
-                <p class="d-none d-md-inline">It keeps track of what you are doing</p> 
+                <p class="d-none d-lg-inline">It keeps track of what you are doing</p> 
             </div>
             <div class="d-inline-block ml-auto">
               <a class="logged-out-show btn btn-outline-light mr-2" onclick="taggerlog.logIn()" role="button" style="text-transform:none">
@@ -245,7 +245,7 @@
         
         <div class="loaded-show d-none">
           <div class="row d-none logged-in-show">
-            <div class="col-md-4 collapse d-md-block" id="diary-new-entry-panel">
+            <div class="col-lg-4 collapse d-lg-block" id="diary-new-entry-panel">
               <h3>New Entry</h3>
               <div class="form-group mt-2">
                 <form id="diary-new-entry" onsubmit="taggerlog.diaryAddEntry(this); return false;">
@@ -267,15 +267,15 @@
                   </div>
                 </form>
               </div>
-              <div class="fancy-finish pb-3 d-md-none" onclick="taggerlog.toggleNewEntry(event)"></div>
+              <div class="fancy-finish pb-3 d-lg-none" onclick="taggerlog.toggleNewEntry(event)"></div>
             </div>
-            <div class="col-md-4" id="diary-entries-panel">
+            <div class="col-lg-4" id="diary-entries-panel">
               <h3 class="">Entries</h3>        
               <div id="recent-entries">
                 Entries will appear here.
               </div>
             </div>
-            <div class="col-md-4 collapse d-md-block order-first order-md-12" id="diary-tags-panel">
+            <div class="col-lg-4 collapse d-lg-block order-first order-lg-12" id="diary-tags-panel">
               <div id="panel-tag-combos" class="d-none">
                 <div id="diary-tag-combos">
                   <p>Tags will appear here.</p>
@@ -293,9 +293,9 @@
               </div>
               <div id="panel-related-tags" class="d-none mt-2">
                 <div class="row">
-                  <h3 class="col-7" id="diary-related-tags-header">Related Tags</h3>
+                  <h3 class="col-6" id="diary-related-tags-header">Related Tags</h3>
 
-                  <div class="col-5 form-outline tl-header-search-basis">
+                  <div class="col-6 form-outline tl-header-search-basis">
                     <div class="input-group rounded tl-header-search-container">
                       <input type="search" class="form-control form-control-sm mb-2 tl-header-search" 
                             autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false">
@@ -328,18 +328,18 @@
                   <p>Tags will appear here.</p>
                 </div>
               </div>
-              <div class="fancy-finish pb-2 mt-2 d-md-none" onclick="taggerlog.toggleTags(event)"></div>
+              <div class="fancy-finish pb-2 mt-2 d-lg-none" onclick="taggerlog.toggleTags(event)"></div>
             </div>
           </div>
-          <div id="diary-controls-toggle" class="fixed-bottom d-none row d-md-none mx-1 justify-content-center">
+          <div id="diary-controls-toggle" class="fixed-bottom d-none row d-lg-none mx-1 justify-content-center">
             <div>
               </div>
           </div>
-          <div id="diary-controls" class="fixed-bottom d-none row d-md-none mx-1 pt-1">
-              <button id="diary-control-new-entry" class="inactive flex-fill diary-control-btn d-inline-block d-md-none m-1" type="button" onclick="taggerlog.toggleNewEntry(event)" data-target="#diary-new-entry" aria-expanded="false" aria-controls="collapseExample">
+          <div id="diary-controls" class="fixed-bottom d-none row d-lg-none mx-1 pt-1">
+              <button id="diary-control-new-entry" class="inactive flex-fill diary-control-btn d-inline-block d-lg-none m-1" type="button" onclick="taggerlog.toggleNewEntry(event)" data-target="#diary-new-entry" aria-expanded="false" aria-controls="collapseExample">
                 New Entry
               </button>
-              <button id="diary-control-tags" class="inactive flex-fill col-6 diary-control-btn d-inline-block d-md-none m-1" type="button" onclick="taggerlog.toggleTags(event)" data-target="#diary-tags" aria-expanded="false" aria-controls="collapseExample">
+              <button id="diary-control-tags" class="inactive flex-fill col-6 diary-control-btn d-inline-block d-lg-none m-1" type="button" onclick="taggerlog.toggleTags(event)" data-target="#diary-tags" aria-expanded="false" aria-controls="collapseExample">
                 Tags
               </button>
           </div>

@@ -948,7 +948,7 @@ var taggerlog = taggerlog || {};
       tags = queryRelatedTags;
     }
 
-    if(tags.length > 7) {
+    if(tags.length - queryTags.length > 7) {
       $('.tl-header-search-container').removeClass('d-none');
       if(tagSearch) {
         tags = tags.filter(x => x.startsWith(tagSearch.toLowerCase()));
