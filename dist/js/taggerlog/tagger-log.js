@@ -1102,78 +1102,6 @@ var taggerlog = taggerlog || {};
   }
 
   /**
-   * Management function to convert csv tags in diary-entry in the db
-   * to array of tags in a field called tag-list.
-   */
-  function tagsToArray() {
-    var db = tl.db;
-    let collection = db.collection("diary-entry");
-
-    collection.get()
-    .then(function(querySnapshot) {
-      querySnapshot.forEach(function(doc) {
-        let data = doc.data();
-        let docTags = data['tags'];
-        let tagStrings = docTags.split(',');
-        let tags = [];
-        for(let tag of tagStrings) {
-          let tagTrimmed = tag.trim();
-          if(tagTrimmed) {
-            tags.push(tagTrimmed);
-          }
-        }
-
-        collection.doc(doc.id).update({'tag-list': tags})
-        .then(function() {
-        })
-        .catch(function(error) {
-          tl.util.logError(error);
-        });
-      });
-    });
-  }
-
-  /**
-   * Management function to regenerate tags on db from the tags
-   * stored in each entry.
-   */
-  function generateTags(user) {
-    var db = tl.db;
-
-    db.collection("diary-entry")
-    .where('uid', '==', user.uid)
-    .get()
-    .then(function(querySnapshot) {
-      var tagSet = new Set();
-      querySnapshot.forEach(function(doc) {
-        var data = doc.data();
-        var docTags = data['tags'];
-        var tagStrings = docTags.split(',');
-        for(var tag of tagStrings) {
-          let tagTrimmed = tag.trim();
-          if(tagTrimmed) {
-            tagSet.add(tagTrimmed);
-          }
-        }
-      });
-      var tags = Array.from(tagSet).sort();
-      var tagString = tags.join(',');
-
-      var tagData = {
-        tags: tagString
-      }
-
-      db.collection("diary-tags").doc(user.uid).set(tagData)
-      .then(function(docRef) {
-      })
-      .catch(function(error) {
-        tl.util.logError("Error adding tags: ", error)
-      });
-    });
-  }
-  tl.generateTags = generateTags;
-
-  /**
    * Hides elements on mobile html while typing in case
    * the static controls hide the form.
    */
@@ -1497,50 +1425,6 @@ var taggerlog = taggerlog || {};
     }
   }
   tl.selectCombo = selectCombo;
-
-  /**
-   * Management function to create a document in a table called entries
-   * that contains all the entries rather than one document per entry.
-   */
-  function createEntries() {
-    var db = tl.db;
-
-    var allEntries = [];
-    let query = db.collection("diary-entry").orderBy("date", "desc");
-    query.get().then(function(querySnapshot) {
-      querySnapshot.forEach(function(doc) {
-        var data = doc.data();
-        delete data.uid;
-        allEntries.push(data);
-      });
-      db.collection('entries').doc().set({
-        uid: tl.loggedInUser.uid,
-        entries: allEntries,
-      });
-    });
-    return allEntries;
-  }
-  tl.createEntries = createEntries;
-
-  /**
-   * Management function to add a date modified field to entries.
-   */
-  function addEntryModifiedField() {
-    var db = tl.db;
-
-    var batch = db.batch();
-    let query = db.collection("diary-entry");
-    query = query.where('uid', '==', tl.loggedInUser.uid);
-    query.get().then(function(querySnapshot) {
-      querySnapshot.forEach(function(doc) {
-        batch.update(doc.ref, {'date-modified': doc.data()["date"]});
-      })
-      batch.commit().then(function() {
-        tl.util.logObject(["batch committed"]);
-      });
-    });
-  }
-  tl.addEntryModifiedField = addEntryModifiedField;
 
   /**
    * Called when the input in the entry textarea is changed.
