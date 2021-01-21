@@ -192,6 +192,7 @@ div.diary-entry .diary-entry-tags {
   width: 2.5rem;
   height: 2.5rem;
   border: 3px solid hsl(30, 60%, 90%);
+  background-color: hsl(30, 60%, 90%);
 }
 
 #header-user-email {

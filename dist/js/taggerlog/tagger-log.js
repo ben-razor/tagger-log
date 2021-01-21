@@ -6,7 +6,8 @@ var taggerlog = taggerlog || {};
 
   var config = {
     "max-length": 400,
-    "combo-title-max-length": 30
+    "combo-title-max-length": 30,
+    "default-user-img": "img/ui/default-user-1-sm.png"
   };
   tl.config = config;
 
@@ -1210,7 +1211,18 @@ var taggerlog = taggerlog || {};
 
       $('.logged-in-show').removeClass('d-none');
       $('.logged-out-show').addClass('d-none');
-      $('#header-user-img').attr('src', loggedInUser.photoURL);
+
+      var photoURL = config["default-user-img"];
+
+      $('#header-user-img').on("error", function() {
+        $(this).attr('src', config["default-user-img"]);
+      });
+
+      if(loggedInUser.photoURL) {
+        photoURL = loggedInUser.photoURL;
+      }
+      $('#header-user-img').attr('src', photoURL);
+
       $('#header-user-name').html(loggedInUser.displayName);
       $('#header-user-email').html(loggedInUser.email);
       $('#diary-controls').removeClass('d-none').addClass('d-flex');
@@ -1654,5 +1666,4 @@ var taggerlog = taggerlog || {};
     });
   }
   initTagSearch();
-
 })(taggerlog);
