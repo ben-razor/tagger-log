@@ -2,11 +2,12 @@
     "name": "tagger-log",
     "version": "1.0.0",
     "scripts": {
-        "build": "babel dist/js -d dist/js-babel"
+        "build": "./process-js"
     },
     "devDependencies": {
         "@babel/cli": "^7.12.10",
         "@babel/core": "^7.12.10",
-        "@babel/preset-env": "^7.12.11"
+        "@babel/preset-env": "^7.12.11",
+        "babel-preset-minify": "^0.5.1"
     }
 }

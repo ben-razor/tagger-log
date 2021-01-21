@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+babel dist/js -d dist/js-babel
+rsync -avz ./dist/js-babel/ ../tagger-log-deploy-temp/dist/js/
+cd ../tagger-log-deploy-temp
+firebase hosting:channel:deploy babel
