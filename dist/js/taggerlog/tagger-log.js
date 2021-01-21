@@ -950,7 +950,7 @@ var taggerlog = taggerlog || {};
     if(tags.length > 7) {
       $('.tl-header-search-container').removeClass('d-none');
       if(tagSearch) {
-        tags = tags.filter(x => x.startsWith(tagSearch));
+        tags = tags.filter(x => x.startsWith(tagSearch.toLowerCase()));
       }
     }
     else {
@@ -1604,7 +1604,7 @@ var taggerlog = taggerlog || {};
             hadComma = true;
           }
           query = query.replaceAll(',', '');
-          var matching = tl.allTags.filter(tag => tag.startsWith(query));
+          var matching = tl.allTags.filter(tag => tag.startsWith(query.toLowerCase()));
           var numMatches = matching.length;
           matching = matching.slice(0, 5);
           callback(matching);
