@@ -239,19 +239,18 @@ var taggerlog = taggerlog || {};
       var tagsRef = db.collection('diary-tags').doc(loggedInUser.uid);
       batch.set(newEntryRef, entryData);
       batch.set(tagsRef, {tags: tl.allTags.join()})
-      batch.commit().then(function() {
-        entryData["id"] = newEntryRef.id;
-        tl.entries.unshift(entryData);
-        updateQueryRelatedTags();
-        refreshUI(tl.entries);
-        $spinner.hide();
-        $button.prop('disabled', false);
-        showAlert('entry-added-alert');
-        $entry.val('');
-      })
-      .catch(function(error) {
+      batch.commit().catch(function(error) {
         entryFailedUpdateUI(error);
       });
+
+      entryData["id"] = newEntryRef.id;
+      tl.entries.unshift(entryData);
+      updateQueryRelatedTags();
+      refreshUI();
+      $spinner.hide();
+      $button.prop('disabled', false);
+      showAlert('entry-added-alert');
+      $entry.val('');
     }
   }
   tl.diaryAddEntry = diaryAddEntry;
@@ -386,7 +385,7 @@ var taggerlog = taggerlog || {};
         });
 
         updateQueryRelatedTags();
-        refreshUI(tl.entries);
+        refreshUI();
 
         query = db.collection("diary-entry").orderBy("date-modified", "desc");
         query = query.where('uid', '==', loggedInUser.uid);
@@ -456,8 +455,8 @@ var taggerlog = taggerlog || {};
    * Performs a refresh of the UI after the full entries list is
    * changed.
    */
-  function refreshUI(entries) {
-    refreshEntryDisplay(entries);
+  function refreshUI() {
+    refreshEntryDisplay();
     refreshTagDisplay();
     initAutocomplete();
   }
@@ -467,7 +466,7 @@ var taggerlog = taggerlog || {};
    * 
    * @param {object[]} entries List of entry data
    */
-  function refreshEntryDisplay(entries) {
+  function refreshEntryDisplay() {
     var tableTemplate = '<div class="diary-entries">{rows}</div>';
     var defaultEntry = $('#elem-no-entries').html();
     var defaultEntryNoMatchingTags = $('#elem-no-entries-for-tags').html();
@@ -485,8 +484,8 @@ var taggerlog = taggerlog || {};
     var tagQueryActive = queryTags.length > 0;
     var excludeQueryActive = excludeTags.length > 0;
 
-    for(var i = 0; i < entries.length; i++) {
-      var data = entries[i];
+    for(var i = 0; i < tl.entries.length; i++) {
+      var data = tl.entries[i];
       var tagList = tl.cleanTags(data['tag-list']);
       var tags = tagList.join();
 
@@ -641,7 +640,6 @@ var taggerlog = taggerlog || {};
    * @param {string} id Entry ID
    */
   function editEntry(id) {
-    var loggedInUser = tl.loggedInUser;
     var db = tl.db;
 
     var $spinner = $('#edit-entry-spinner');
@@ -700,16 +698,7 @@ var taggerlog = taggerlog || {};
 
       db.collection('diary-entry').doc(id).update(newEntry)
       .then(function() {
-        for(var i = 0; i < tl.entries.length; i++) {
-          var entryData = tl.entries[i];
-          if(entryData["id"] == id) {
-            newEntry["id"] = id;
-            tl.entries[i] = newEntry;
-            break;
-          }
-        }
-
-        findOrphanTags(formTagsRemoved).then(function(orphans) {
+          findOrphanTags(formTagsRemoved).then(function(orphans) {
           if(orphans.length) {
             tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
             queryTags = queryTags.filter(item => !orphans.includes(item));
@@ -722,22 +711,28 @@ var taggerlog = taggerlog || {};
           });
         });
         updateQueryRelatedTags();
-        refreshEntryDisplay(tl.entries);
-
-        $spinner.hide();
-        $button.prop('disabled', false);
-        $('#editEntryModal').modal('hide');
-        showAlert('entry-edited-alert');
-        
+        refreshEntryDisplay();
+       
       }).catch(function(error) {
         tl.util.logError(error);
         showAlert('entry-edit-failed-alert');
-        $spinner.hide();
-        $button.prop('disabled', false);
-        $('#editEntryModal').modal('hide');
       });
+
+      for(var i = 0; i < tl.entries.length; i++) {
+        var entryData = tl.entries[i];
+        if(entryData["id"] == id) {
+          newEntry["id"] = id;
+          tl.entries[i] = newEntry;
+          break;
+        }
+      }
+
+      refreshUI();
+      $spinner.hide();
+      $button.prop('disabled', false);
+      $('#editEntryModal').modal('hide');
+      showAlert('entry-edited-alert');
     }
-    
   }
   tl.editEntry = editEntry;
 
@@ -778,25 +773,14 @@ var taggerlog = taggerlog || {};
       let tagList = data['tag-list'];
 
       db.collection('diary-entry').doc(id).delete().then(function() {
-        $spinner.hide();
-        $('#deleteEntryModal').modal('hide');
-        showAlert('entry-deleted-alert');
-        for(var i = 0; i < tl.entries.length; i++) {
-          var entryData = tl.entries[i];
-          if(entryData["id"] == id) {
-            tl.entries.splice(i, 1);
-            break;
-          }
-        }
-        refreshEntryDisplay(tl.entries);
-
+      
         findOrphanTags(tagList).then(function(orphans) {
           if(orphans.length) {
             tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
             queryTags = queryTags.filter(item => !orphans.includes(item));
             saveTags().then(() => {
               getRecentEntries().then(function() {
-                refreshUI(tl.entries);
+                refreshUI();
               });
             });
           }
@@ -805,13 +789,26 @@ var taggerlog = taggerlog || {};
       }).catch(function(error) {
         tl.util.logError(error);
         showAlert('entry-delete-failed-alert');
-        $spinner.hide();
-        $('#deleteEntryModal').modal('hide');
       });
     })
     .catch(function(error) {
       tl.util.logError(error);
     });
+
+    showAlert('entry-deleted-alert');
+
+    for(var i = 0; i < tl.entries.length; i++) {
+      var entryData = tl.entries[i];
+      if(entryData["id"] == id) {
+        tl.entries.splice(i, 1);
+        break;
+      }
+    }
+    refreshEntryDisplay();
+
+    $spinner.hide();
+    $('#deleteEntryModal').modal('hide');
+
   }
   tl.deleteEntry = deleteEntry;
 
@@ -905,11 +902,11 @@ var taggerlog = taggerlog || {};
     clearTagSearch();
 
     if(alreadyHaveEntries) {
-      refreshUI(tl.entries);
+      refreshUI();
     }
     else {
       getRecentEntries().then(function() {
-        refreshUI(tl.entries);
+        refreshUI();
       });
     }
   }
@@ -1169,7 +1166,7 @@ var taggerlog = taggerlog || {};
       });
 
       getRecentEntries().then(function(entries) {
-        refreshUI(entries);
+        refreshUI();
       });
       getTags().then(function() {
         refreshTagDisplay();
@@ -1291,10 +1288,9 @@ var taggerlog = taggerlog || {};
 
     if(existingCombo !== undefined) {
       tl.tagCombos = tl.tagCombos.filter(x => x['tags'] !== tagString)
-      saveTagCombos().then(function() {
-        $elem.removeClass('starred');
-        refreshTagDisplay();
-      });
+      saveTagCombos();
+      $elem.removeClass('starred');
+      refreshTagDisplay();
     }
     else {
       $('#star-tags-modal').on('shown.bs.modal', function () {
@@ -1344,11 +1340,9 @@ var taggerlog = taggerlog || {};
       var tagString = tags.join(',');
       tl.tagCombos.unshift({'title': title, 'tags': tagString});
       $elem.addClass('starred');
-
-      saveTagCombos().then(function() {
-        refreshTagDisplay();
-        $('#star-tags-modal').modal('hide');
-      });
+      refreshTagDisplay();
+      $('#star-tags-modal').modal('hide');
+      saveTagCombos();
     }
   }
   tl.starTags = starTags;
@@ -1416,11 +1410,11 @@ var taggerlog = taggerlog || {};
     updateQueryRelatedTags();
 
     if(alreadyHaveEntries) {
-      refreshUI(tl.entries);
+      refreshUI();
     }
     else {
       getRecentEntries().then(function() {
-        refreshUI(tl.entries);
+        refreshUI();
       });
     }
   }
