@@ -419,29 +419,27 @@ var taggerlog = taggerlog || {};
           if(querySnapshot.size) {
             querySnapshot.forEach(function(doc) {
               let data = doc.data();
-              if(!data['deleted']) {
-                data['id'] = doc.id;
-                data['date'] = data['date'].toDate();
-                data['date-modified'] = data['date-modified'].toDate();
+              data['id'] = doc.id;
+              data['date'] = data['date'].toDate();
+              data['date-modified'] = data['date-modified'].toDate();
 
-                let exists = false;
-                for(var i = 0; i < tl.entries.length; i++) {
-                  var existingEntry = tl.entries[i];
-                  if(existingEntry['id'] === data['id']) {
-                    exists = true;
-                    if(data['deleted']) {
-                      tl.entries.splice(i, 1);
-                    }
-                    else {
-                      tl.entries[i] = data;
-                    }
-                    break;
+              let exists = false;
+              for(var i = 0; i < tl.entries.length; i++) {
+                var existingEntry = tl.entries[i];
+                if(existingEntry['id'] === data['id']) {
+                  exists = true;
+                  if(data['deleted']) {
+                    tl.entries.splice(i, 1);
                   }
-                } 
-
-                if(!exists && !data['deleted']) {
-                    tl.entries.push(data);
+                  else {
+                    tl.entries[i] = data;
+                  }
+                  break;
                 }
+              } 
+
+              if(!exists && !data['deleted']) {
+                  tl.entries.push(data);
               }
             });
 
