@@ -400,3 +400,11 @@ div.diary-entry .diary-entry-tags {
 .search-glass {
   color: grey;
 }
+
+.modernizr.indexeddb, .modernizr.fetch {
+  display: inline-block;
+}
+
+.modernizr.no-indexeddb, .modernizr.no-fetch {
+  display: none;
+}
