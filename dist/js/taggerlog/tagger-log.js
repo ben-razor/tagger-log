@@ -598,39 +598,42 @@ var taggerlog = taggerlog || {};
    */
   function editEntryStart(id) {
     var db = tl.db;
-    db.collection('diary-entry').doc(id).get().then(function(doc) {
-      let data = doc.data();
-      var $form = $('#edit-entry-form');
-      var $entry = $form.find('textarea[name=diary-entry]');
-      var $date = $form.find('[name=diary-date]');
-      $entry.val(data['entry'])
-      var dateInfo = data['date'];
-      var date = new Date(dateInfo['seconds'] * 1000);
-      $date[0].valueAsNumber = date.getTime();
-      $('#edit-entry-button').data('id', id);
-      $('#delete-entry-button-on-popup').data('id', id);
-
-      var tags = data['tag-list'];
-      var tagDisplayTemplate = $('#elem-diary-tag-edit').html();
-      var tagHTML = '';
-      var tagsHTML = '';
-      for(var i = 0; i < tags.length; i++) {
-        tagHTML = tagDisplayTemplate.replaceAll('{tag}', tl.cleanTag(tags[i]));
-        tagHTML = tagHTML.replace('{selected}', 'selected');
-        tagsHTML += tagHTML;
+    var curEntry = null;
+    for(var i = 0; i < tl.entries.length; i++) {
+      curEntry = tl.entries[i];
+      if(curEntry.id === id) {
+        break;
       }
-      $('#diary-edit-entry-tags').html(tagsHTML);
-      $form.find('[name=new-tag]').val('');
-      $('#edit-entry-date').removeClass('show');
-      $('#editEntryModal').on('shown.bs.modal', function () {
-        $('#editEntryModal').find('[name=diary-entry]').focus();
-      });
-      entryInputInit();
-      $('#editEntryModal').modal();
-    })
-    .catch(function(error) {
-      tl.util.logError(error);
+    }
+
+    let data = curEntry;
+    var $form = $('#edit-entry-form');
+    var $entry = $form.find('textarea[name=diary-entry]');
+    var $date = $form.find('[name=diary-date]');
+    $entry.val(data['entry'])
+    var dateInfo = data['date'];
+    var date = new Date(dateInfo['seconds'] * 1000);
+    $date[0].valueAsNumber = date.getTime();
+    $('#edit-entry-button').data('id', id);
+    $('#delete-entry-button-on-popup').data('id', id);
+
+    var tags = data['tag-list'];
+    var tagDisplayTemplate = $('#elem-diary-tag-edit').html();
+    var tagHTML = '';
+    var tagsHTML = '';
+    for(var i = 0; i < tags.length; i++) {
+      tagHTML = tagDisplayTemplate.replaceAll('{tag}', tl.cleanTag(tags[i]));
+      tagHTML = tagHTML.replace('{selected}', 'selected');
+      tagsHTML += tagHTML;
+    }
+    $('#diary-edit-entry-tags').html(tagsHTML);
+    $form.find('[name=new-tag]').val('');
+    $('#edit-entry-date').removeClass('show');
+    $('#editEntryModal').on('shown.bs.modal', function () {
+      $('#editEntryModal').find('[name=diary-entry]').focus();
     });
+    entryInputInit();
+    $('#editEntryModal').modal();
   }
   tl.editEntryStart = editEntryStart;
 
@@ -690,7 +693,7 @@ var taggerlog = taggerlog || {};
       tl.allTags = processTagList(tl.allTags);
       var newEntry = {
         'entry': entry,
-        'date': new Date($date.val()),
+        'date': firebase.firestore.Timestamp.fromDate(new Date($date.val())),
         'tags': tagString,
         'tag-list': tags,
         'date-modified': firebase.firestore.FieldValue.serverTimestamp()
@@ -722,6 +725,7 @@ var taggerlog = taggerlog || {};
         var entryData = tl.entries[i];
         if(entryData["id"] == id) {
           newEntry["id"] = id;
+          newEntry["date"] = newEntry["date"];
           tl.entries[i] = newEntry;
           break;
         }
