@@ -228,7 +228,7 @@ var taggerlog = taggerlog || {};
       const entryData = {
         uid: loggedInUser.uid,
         entry: entry,
-        date: new Date(date),
+        date: date,
         tags: tagString,
         "tag-list": tags,
         "date-modified": firebase.firestore.FieldValue.serverTimestamp()
@@ -316,6 +316,7 @@ var taggerlog = taggerlog || {};
     var db = tl.db;
     let query = db.collection("diary-entry");
     query = query.where('uid', '==', loggedInUser.uid);
+    query = query.where('deleted', '!=', true);
     let storedMatchingTags = [];
     let orphans = [];
     return new Promise((resolve, reject) => {
@@ -378,7 +379,28 @@ var taggerlog = taggerlog || {};
         querySnapshot.forEach(function(doc) {
           let data = doc.data();
           data['id'] = doc.id;
-          tl.entries.push(data);
+          data['date'] = data['date'].toDate();
+          data['date-modified'] = data['date-modified'].toDate();
+          
+          let exists = false;
+          for(var i = 0; i < tl.entries.length; i++) {
+            var existingEntry = tl.entries[i];
+            if(existingEntry['id'] === data['id']) {
+              exists = true;
+              if(data['deleted']) {
+                tl.entries.splice(i, 1);
+              }
+              else {
+                tl.entries[i] = data;
+              }
+              break;
+            }
+          }
+
+          if(!exists && !data['deleted']) {
+            tl.entries.push(data);
+          }
+
           if(data['date-modified'] > mostRecentModify) {
             mostRecentModify = data['date-modified'];
           }
@@ -397,12 +419,35 @@ var taggerlog = taggerlog || {};
           if(querySnapshot.size) {
             querySnapshot.forEach(function(doc) {
               let data = doc.data();
-              data['id'] = doc.id;
-              tl.entries.push(data);
+              if(!data['deleted']) {
+                data['id'] = doc.id;
+                data['date'] = data['date'].toDate();
+                data['date-modified'] = data['date-modified'].toDate();
+
+                let exists = false;
+                for(var i = 0; i < tl.entries.length; i++) {
+                  var existingEntry = tl.entries[i];
+                  if(existingEntry['id'] === data['id']) {
+                    exists = true;
+                    if(data['deleted']) {
+                      tl.entries.splice(i, 1);
+                    }
+                    else {
+                      tl.entries[i] = data;
+                    }
+                    break;
+                  }
+                } 
+
+                if(!exists && !data['deleted']) {
+                    tl.entries.push(data);
+                }
+              }
             });
 
             tl.entries.sort((a, b) => a["date"] < b["date"] ? 1 : -1);
             updateQueryRelatedTags();
+            refreshUI();
           }
           
           resolve(tl.entries);
@@ -611,8 +656,7 @@ var taggerlog = taggerlog || {};
     var $entry = $form.find('textarea[name=diary-entry]');
     var $date = $form.find('[name=diary-date]');
     $entry.val(data['entry'])
-    var dateInfo = data['date'];
-    var date = new Date(dateInfo['seconds'] * 1000);
+    var date = data['date'];
     $date[0].valueAsNumber = date.getTime();
     $('#edit-entry-button').data('id', id);
     $('#delete-entry-button-on-popup').data('id', id);
@@ -693,11 +737,14 @@ var taggerlog = taggerlog || {};
       tl.allTags = processTagList(tl.allTags);
       var newEntry = {
         'entry': entry,
-        'date': firebase.firestore.Timestamp.fromDate(new Date($date.val())),
         'tags': tagString,
         'tag-list': tags,
         'date-modified': firebase.firestore.FieldValue.serverTimestamp()
       };
+      var newDate = new Date($date.val());
+      if(newDate !== new Date().getTime()) {
+        newEntry['date'] = firebase.firestore.Timestamp.fromDate(newDate);
+      }
 
       db.collection('diary-entry').doc(id).update(newEntry)
       .then(function() {
@@ -725,7 +772,7 @@ var taggerlog = taggerlog || {};
         var entryData = tl.entries[i];
         if(entryData["id"] == id) {
           newEntry["id"] = id;
-          newEntry["date"] = newEntry["date"];
+          newEntry["date"] = newDate;
           tl.entries[i] = newEntry;
           break;
         }
@@ -776,7 +823,11 @@ var taggerlog = taggerlog || {};
       let data = doc.data();
       let tagList = data['tag-list'];
 
-      db.collection('diary-entry').doc(id).delete().then(function() {
+      db.collection('diary-entry').doc(id)
+      .update({ 
+        'deleted': true,
+        "date-modified": firebase.firestore.FieldValue.serverTimestamp()
+      }).then(function() {
       
         findOrphanTags(tagList).then(function(orphans) {
           if(orphans.length) {
@@ -1548,4 +1599,26 @@ var taggerlog = taggerlog || {};
     });
   }
   initTagSearch();
+
+  /**
+   * Function that could be modified to get realtime updates.
+   */
+  function listenForChanges() {
+    tl.db.collection('diary-entry')
+    .where('uid', '==', tl.loggedInUser.uid)
+    .onSnapshot(function(snapshot) {
+      snapshot.docChanges().forEach(function(change) {
+        if (change.type === "added") {
+            console.log("New: ", change.doc.data());
+        }
+        if (change.type === "modified") {
+            console.log("Mod: ", change.doc.data());
+        }
+        if (change.type === "removed") {
+            console.log("Remove: ", change.doc.data());
+        }
+      })
+    });
+  }
+
 })(taggerlog);
