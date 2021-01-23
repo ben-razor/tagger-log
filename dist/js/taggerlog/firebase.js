@@ -6,12 +6,12 @@ var taggerlog = taggerlog || {};
   tl.loggedInUser = null;
 
   var firebaseConfig = {
-    apiKey: "AIzaSyBB82hE6xrDRnr7e_wnftgQwrbOWrbhgcs",
-    authDomain: "diarystore.firebaseapp.com",
-    projectId: "diarystore",
-    storageBucket: "diarystore.appspot.com",
-    messagingSenderId: "719415357807",
-    appId: "1:719415357807:web:9d7542eb704b4bc430f89a"
+    apiKey: 'AIzaSyBB82hE6xrDRnr7e_wnftgQwrbOWrbhgcs',
+    authDomain: 'diarystore.firebaseapp.com',
+    projectId: 'diarystore',
+    storageBucket: 'diarystore.appspot.com',
+    messagingSenderId: '719415357807',
+    appId: '1:719415357807:web:9d7542eb704b4bc430f89a'
   };
 
   var isNewUser = false;
@@ -19,27 +19,27 @@ var taggerlog = taggerlog || {};
   function initNewUser(user) {
     var gettingStartedEntries = [
         {
-            "text": 'This is an entry with some tags. Tap it to edit or delete.',
-            "tags": ['getting-started', 'entries']
+            'text': 'This is an entry with some tags. Tap it to edit or delete.',
+            'tags': ['getting-started', 'entries']
         },
         {
-            "text": "The tags panel has the tags from all your entries. " +
-                "Clicking a tag makes it green and ACTIVE.",
-            "tags": ['getting-started', 'tags']
+            'text': 'The tags panel has the tags from all your entries. ' +
+                'Clicking a tag makes it green and ACTIVE.',
+            'tags': ['getting-started', 'tags']
         },
         {
-            "text": "Only entries matching active tags are displayed.\n\n"  +
-                "Active tags are automatically added to new entries.",
-            "tags": ['getting-started', 'tags', 'entries']
+            'text': 'Only entries matching active tags are displayed.\n\n'  +
+                'Active tags are automatically added to new entries.',
+            'tags': ['getting-started', 'tags', 'entries']
         },
         {
-            "text": "Holding a tag turns it red, making it EXCLUDED.\n\n" +
-                    "Entries tagged with excluded tags are not displayed.",
-            "tags": ['getting-started', 'tags', 'entries']
+            'text': 'Holding a tag turns it red, making it EXCLUDED.\n\n' +
+                    'Entries tagged with excluded tags are not displayed.',
+            'tags': ['getting-started', 'tags', 'entries']
         },
         {
-            "text": "This is demo application. Any entries will be lost!",
-            "tags": ['warning', 'this-is-a-demo'] 
+            'text': 'This is demo application. Any entries will be lost!',
+            'tags': ['warning', 'this-is-a-demo'] 
         },
     ];
 
@@ -49,13 +49,13 @@ var taggerlog = taggerlog || {};
       var batch = tl.db.batch();
       for(var i = 0; i < numEntries; i++) {
           var entry = gettingStartedEntries[i];
-          var text = entry["text"];
-          var tags = entry["tags"];
+          var text = entry['text'];
+          var tags = entry['tags'];
           const entryData = {
               uid: user.uid,
               entry: text,
               date: new Date(Date.now() + (numEntries - i) * 100),
-              "tag-list": tags,
+              'tag-list': tags,
               'date-modified': firebase.firestore.FieldValue.serverTimestamp()
           };
           var docRef = tl.db.collection('diary-entry').doc();
@@ -64,7 +64,7 @@ var taggerlog = taggerlog || {};
       }
       batch.commit().then(function() {
         allTags = tl.processTagList(allTags);
-        tl.db.collection("diary-tags").doc(user.uid).set({tags: allTags.join()}).then(function() {
+        tl.db.collection('diary-tags').doc(user.uid).set({tags: allTags.join()}).then(function() {
           resolve();
         })
       }) 
@@ -75,8 +75,8 @@ var taggerlog = taggerlog || {};
     firebase.initializeApp(firebaseConfig);
 
     tl.db = firebase.firestore();
-    if (location.hostname === "localhost") {
-      tl.db.useEmulator("localhost", 8080);
+    if (location.hostname === 'localhost') {
+      tl.db.useEmulator('localhost', 8080);
       firebase.auth().useEmulator('http://localhost:9099/');
     }
     firebase.firestore().enablePersistence()

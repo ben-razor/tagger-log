@@ -73,13 +73,13 @@ var taggerlog = taggerlog || {};
      * @param {string[]} tags 
      */
     this.verifyTags = function(tags) {
-      let maxTags = this.tagErrorConfig["tag-format-max-tags"]["data"]["max-tags"];
+      let maxTags = this.tagErrorConfig['tag-format-max-tags']['data']['max-tags'];
 
       if(tags.length == 0) {
-        this.addError("", "tags-empty");
+        this.addError('', 'tags-empty');
       }
       else if(tags.length > maxTags) {
-        this.addError("", "tag-format-max-tags");
+        this.addError('', 'tag-format-max-tags');
       }
 
       for(let tag of tags) {
@@ -94,18 +94,18 @@ var taggerlog = taggerlog || {};
      * @param {string} tag 
      */
     this.verifyTag = function(tag) {
-      let tagMaxLength = this.tagErrorConfig["tag-format-max-length"]["data"]["max-length"];
+      let tagMaxLength = this.tagErrorConfig['tag-format-max-length']['data']['max-length'];
 
       if(!tag) {
-        this.addError("", "tag-empty");
+        this.addError('', 'tag-empty');
       }
 
       if(tag.length > tagMaxLength) {
-        this.addError(tag, "tag-format-max-length");
+        this.addError(tag, 'tag-format-max-length');
       }
       const regex = /^[a-z0-9- ]+$/i;
       if(!regex.test(tag)) {
-        this.addError(tag, "tag-format-valid-chars");
+        this.addError(tag, 'tag-format-valid-chars');
       }
     }
   }
@@ -123,7 +123,7 @@ var taggerlog = taggerlog || {};
 
     let tagSet = new Set();
 
-    let tagStrings = tagStr.split(",");
+    let tagStrings = tagStr.split(',');
     for(var i = 0; i < tagStrings.length; i++) {
       var tag = tagStrings[i]
       tagStrings[i] = tag.trim();

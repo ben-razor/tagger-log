@@ -22,7 +22,7 @@ var taggerlog = taggerlog || {};
    */
   tl.allTags = [];
   /**
-   * The "active" tags which limit displayed entries and are auto 
+   * The 'active' tags which limit displayed entries and are auto 
    * attached to new entries. Sorted and unique.
    * @type {string[]}
    */
@@ -87,8 +87,8 @@ var taggerlog = taggerlog || {};
    * @param {Error} error 
    */
   function alertError(error) {
-    var $alertElem = $("#entry-error-alert");
-    var $alertTextElem = $("#entry-error-text");
+    var $alertElem = $('#entry-error-alert');
+    var $alertTextElem = $('#entry-error-text');
     $alertTextElem.html(error.message);
     $alertElem.fadeTo(2000, 1000).delay(2000).slideUp(500);
   }
@@ -107,15 +107,15 @@ var taggerlog = taggerlog || {};
 
     var tagErrorInfo = tl.tagErrorConfig[id];
     if(tagErrorInfo) {
-      var replace = tagErrorInfo["data"];
+      var replace = tagErrorInfo['data'];
       if(replace) {
         for(var string in replace) {
           alertText = alertText.replaceAll('{' + string + '}', replace[string]);
         }
       }
     }
-    var $alertElem = $("#" + elemPrefix + "-alert");
-    var $alertTextElem = $("#" + elemPrefix + "-text");
+    var $alertElem = $('#' + elemPrefix + '-alert');
+    var $alertTextElem = $('#' + elemPrefix + '-text');
     $alertTextElem.html(alertText);
     $alertElem.fadeTo(2000, 1000).delay(2000).slideUp(500);
   }
@@ -128,8 +128,8 @@ var taggerlog = taggerlog || {};
    */
   function showAlert(id) {
     var alertText = $('#text-' + id).html();
-    var $alertElem = $("#entry-alert");
-    var $alertTextElem = $("#entry-alert-text");
+    var $alertElem = $('#entry-alert');
+    var $alertTextElem = $('#entry-alert-text');
     $alertTextElem.html(alertText);
     $alertElem.fadeTo(2000, 1000).slideUp(500);
   }
@@ -192,12 +192,12 @@ var taggerlog = taggerlog || {};
 
     var $form = $(form);
     var $entry = $form.find('textarea[name=diary-entry]');
-    var entry = $entry.val().substring(0, config["max-length"]);
+    var entry = $entry.val().substring(0, config['max-length']);
     var dateStr = $form.find('[name=diary-date]').val();
 
     var errors = [];    
     if(!entry) {
-      errors.push(new EntryError("entry-empty"));
+      errors.push(new EntryError('entry-empty'));
     }
     var $elem = $form.find('[name=new-tag]');
     var tagStr = $elem.val();
@@ -221,7 +221,7 @@ var taggerlog = taggerlog || {};
       tl.allTags = processTagList(tl.allTags);
 
       let date = new Date();
-      if(dateStr && dateStr !== "") {
+      if(dateStr && dateStr !== '') {
         date = new Date(dateStr);
       }
 
@@ -230,8 +230,8 @@ var taggerlog = taggerlog || {};
         entry: entry,
         date: date,
         tags: tagString,
-        "tag-list": tags,
-        "date-modified": firebase.firestore.FieldValue.serverTimestamp()
+        'tag-list': tags,
+        'date-modified': firebase.firestore.FieldValue.serverTimestamp()
       }
 
       var batch = db.batch();
@@ -243,7 +243,7 @@ var taggerlog = taggerlog || {};
         entryFailedUpdateUI(error);
       });
 
-      entryData["id"] = newEntryRef.id;
+      entryData['id'] = newEntryRef.id;
       tl.entries.unshift(entryData);
       updateQueryRelatedTags();
       refreshUI();
@@ -265,7 +265,7 @@ var taggerlog = taggerlog || {};
     var $button = $('#diary-submit');
     var errorReason = errors[0].reason;
     
-    tl.util.logError("Error adding document: " + errorReason);
+    tl.util.logError('Error adding document: ' + errorReason);
     $spinner.hide();
     $button.prop('disabled', false);
     showErrorAlert(errors[0]);
@@ -282,7 +282,7 @@ var taggerlog = taggerlog || {};
     tl.util.logError(JSON.stringify(errors));
     $spinner.hide();
     $button.prop('disabled', false);
-    showErrorAlert(errors[0], "edit-error");
+    showErrorAlert(errors[0], 'edit-error');
   }
 
   /**
@@ -294,12 +294,12 @@ var taggerlog = taggerlog || {};
     var loggedInUser = tl.loggedInUser;
     var db = tl.db;
     return new Promise((resolve, reject) => {
-      db.collection("diary-tags").doc(loggedInUser.uid).set({tags: tl.allTags.join()})
+      db.collection('diary-tags').doc(loggedInUser.uid).set({tags: tl.allTags.join()})
       .then(function(docRef) {
         resolve();
       })
       .catch(function(error) {
-        reject("Error adding tags: " + error.toString());
+        reject('Error adding tags: ' + error.toString());
       });
     });
   }
@@ -314,7 +314,7 @@ var taggerlog = taggerlog || {};
   function findOrphanTags(tags) {
     var loggedInUser = tl.loggedInUser;
     var db = tl.db;
-    let query = db.collection("diary-entry");
+    let query = db.collection('diary-entry');
     query = query.where('uid', '==', loggedInUser.uid);
     query = query.where('deleted', '!=', true);
     let storedMatchingTags = [];
@@ -357,7 +357,7 @@ var taggerlog = taggerlog || {};
     var loggedInUser = tl.loggedInUser;
     var db = tl.db;
 
-    let query = db.collection("diary-entry").orderBy("date", "desc");
+    let query = db.collection('diary-entry').orderBy('date', 'desc');
     query = query.where('uid', '==', loggedInUser.uid);
 
     let tagQueryActive = false;
@@ -373,7 +373,7 @@ var taggerlog = taggerlog || {};
     queryRelatedTags = [];
 
     return new Promise(function(resolve, reject) {
-      query.get({source: "cache"})
+      query.get({source: 'cache'})
       .then(function(querySnapshot) {
         var mostRecentModify = new Date(1955, 10, 21, 6, 15, 0);
         querySnapshot.forEach(function(doc) {
@@ -409,13 +409,13 @@ var taggerlog = taggerlog || {};
         updateQueryRelatedTags();
         refreshUI();
 
-        query = db.collection("diary-entry").orderBy("date-modified", "desc");
+        query = db.collection('diary-entry').orderBy('date-modified', 'desc');
         query = query.where('uid', '==', loggedInUser.uid);
         if(tl.entries.length) {
           query = query.where('date-modified', '>', mostRecentModify);
         }
 
-        query.get({source: "server"}).then(function(querySnapshot) {
+        query.get({source: 'server'}).then(function(querySnapshot) {
           if(querySnapshot.size) {
             querySnapshot.forEach(function(doc) {
               let data = doc.data();
@@ -443,7 +443,7 @@ var taggerlog = taggerlog || {};
               }
             });
 
-            tl.entries.sort((a, b) => a["date"] < b["date"] ? 1 : -1);
+            tl.entries.sort((a, b) => a['date'] < b['date'] ? 1 : -1);
             updateQueryRelatedTags();
             refreshUI();
           }
@@ -452,7 +452,7 @@ var taggerlog = taggerlog || {};
         });
       })
       .catch(function(error) {
-          tl.util.logError(["Error getting documents: ", error])
+          tl.util.logError(['Error getting documents: ', error])
           resolve(tl.entries);
       });
     });
@@ -597,8 +597,8 @@ var taggerlog = taggerlog || {};
    */
   function cleanTitle(entry) {
     entry = DOMPurify.sanitize(entry);
-    // entry = entry.replace(/[\x00-\x1F\x21-\x2F\x3A-\x40\x7B-\x9F]/g, "");
-    entry = entry.replace(/[\r\n\t]/g, "");
+    // entry = entry.replace(/[\x00-\x1F\x21-\x2F\x3A-\x40\x7B-\x9F]/g, '');
+    entry = entry.replace(/[\r\n\t]/g, '');
     return entry;
   }
 
@@ -621,16 +621,16 @@ var taggerlog = taggerlog || {};
     var linkTemplate = '<a href="{link}" target="_blank" onclick="event.stopPropagation();">{linkDisplay}</a>';
     entry = entry.replace(/^(http.*)$/gm, function(match) {
       if(isValidURL(match)) {
-        var line = linkTemplate.replace("{link}", match);
-        line = line.replace("{linkDisplay}", match);
+        var line = linkTemplate.replace('{link}', match);
+        line = line.replace('{linkDisplay}', match);
         return line;
       }
       else {
         return match;
       }
     });
-    entry = entry.replaceAll("*", "&bull;");
-    entry = entry.replaceAll("\n", "<br />");
+    entry = entry.replaceAll('*', '&bull;');
+    entry = entry.replaceAll('\n', '<br />');
     return entry;
   }
 
@@ -692,12 +692,12 @@ var taggerlog = taggerlog || {};
     $spinner.show();
     $button.prop('disabled', true);
     const $form = $('#edit-entry-form');
-    const entry = $form.find('textarea[name=diary-entry]').val().substring(0, config["max-length"]);
+    const entry = $form.find('textarea[name=diary-entry]').val().substring(0, config['max-length']);
     const $date = $form.find('[name=diary-date]');
 
     var errors = [];    
     if(!entry) {
-      errors.push(new EntryError("entry-empty"));
+      errors.push(new EntryError('entry-empty'));
     }
 
     var formTags = [];
@@ -768,9 +768,9 @@ var taggerlog = taggerlog || {};
 
       for(var i = 0; i < tl.entries.length; i++) {
         var entryData = tl.entries[i];
-        if(entryData["id"] == id) {
-          newEntry["id"] = id;
-          newEntry["date"] = newDate;
+        if(entryData['id'] == id) {
+          newEntry['id'] = id;
+          newEntry['date'] = newDate;
           tl.entries[i] = newEntry;
           break;
         }
@@ -824,7 +824,7 @@ var taggerlog = taggerlog || {};
       db.collection('diary-entry').doc(id)
       .update({ 
         'deleted': true,
-        "date-modified": firebase.firestore.FieldValue.serverTimestamp()
+        'date-modified': firebase.firestore.FieldValue.serverTimestamp()
       }).then(function() {
       
         findOrphanTags(tagList).then(function(orphans) {
@@ -852,7 +852,7 @@ var taggerlog = taggerlog || {};
 
     for(var i = 0; i < tl.entries.length; i++) {
       var entryData = tl.entries[i];
-      if(entryData["id"] == id) {
+      if(entryData['id'] == id) {
         tl.entries.splice(i, 1);
         break;
       }
@@ -874,7 +874,7 @@ var taggerlog = taggerlog || {};
     var tagSet = new Set(tagList);
     var tags = Array.from(tagSet).sort();
     for(var i = tagList.length - 1; i >= 0; i--) {
-      if(tags[i] == "") {
+      if(tags[i] == '') {
         tags.splice(i, 1);
       }
     }
@@ -889,7 +889,7 @@ var taggerlog = taggerlog || {};
     var db = tl.db;
 
     return new Promise(function(resolve, reject) {
-      db.collection("diary-tags").doc(tl.loggedInUser.uid)
+      db.collection('diary-tags').doc(tl.loggedInUser.uid)
       .get()
       .then(function(doc) {
           let data = doc.data();
@@ -900,7 +900,7 @@ var taggerlog = taggerlog || {};
           else {
             tl.allTags = [];
           }
-          db.collection("diary-tag-combos").doc(tl.loggedInUser.uid)
+          db.collection('diary-tag-combos').doc(tl.loggedInUser.uid)
           .get()
           .then(function(doc) {
             let data = doc.data();
@@ -1190,10 +1190,10 @@ var taggerlog = taggerlog || {};
       $('.logged-in-show').removeClass('d-none');
       $('.logged-out-show').addClass('d-none');
 
-      var photoURL = config["default-user-img"];
+      var photoURL = config['default-user-img'];
 
-      $('#header-user-img').on("error", function() {
-        $(this).attr('src', config["default-user-img"]);
+      $('#header-user-img').on('error', function() {
+        $(this).attr('src', config['default-user-img']);
       });
 
       if(loggedInUser.photoURL) {
@@ -1378,7 +1378,7 @@ var taggerlog = taggerlog || {};
       showErrorAlert(new EntryError('starred-title-empty'), 'star-tags-error');
     }
     else {
-      title = cleanedTitle.trim().substring(0, tl.config["combo-title-max-length"]);
+      title = cleanedTitle.trim().substring(0, tl.config['combo-title-max-length']);
 
       var tags = [];
       $tags.each(function() {
@@ -1415,12 +1415,12 @@ var taggerlog = taggerlog || {};
     var loggedInUser = tl.loggedInUser;
     var db = tl.db;
     return new Promise((resolve, reject) => {
-      db.collection("diary-tag-combos").doc(loggedInUser.uid).set({"tag-combos": tl.tagCombos})
+      db.collection('diary-tag-combos').doc(loggedInUser.uid).set({'tag-combos': tl.tagCombos})
       .then(function(docRef) {
         resolve();
       })
       .catch(function(error) {
-        reject("Error adding tags: " + error.toString());
+        reject('Error adding tags: ' + error.toString());
       });
     });
   }
@@ -1486,7 +1486,7 @@ var taggerlog = taggerlog || {};
     var $countElem = $('#' + countElem);
 
     var entryType = $elem.data('entry-type');
-    var configID = [entryType, "max-length"].join('-');
+    var configID = [entryType, 'max-length'].join('-');
     var entryMaxLength = config[configID];
     var count = $elem.val().length;
     $countElem.removeClass('max warning');
@@ -1520,7 +1520,7 @@ var taggerlog = taggerlog || {};
 
     $entryAreas.each(function() {
       var $entryArea = $(this);
-      var configID = "max-length";
+      var configID = 'max-length';
       var entryType = $entryArea.data('entryType');
       if(entryType) {
         configID = entryType + '-' + configID;
@@ -1606,14 +1606,14 @@ var taggerlog = taggerlog || {};
     .where('uid', '==', tl.loggedInUser.uid)
     .onSnapshot(function(snapshot) {
       snapshot.docChanges().forEach(function(change) {
-        if (change.type === "added") {
-            console.log("New: ", change.doc.data());
+        if (change.type === 'added') {
+            console.log('New: ', change.doc.data());
         }
-        if (change.type === "modified") {
-            console.log("Mod: ", change.doc.data());
+        if (change.type === 'modified') {
+            console.log('Mod: ', change.doc.data());
         }
-        if (change.type === "removed") {
-            console.log("Remove: ", change.doc.data());
+        if (change.type === 'removed') {
+            console.log('Remove: ', change.doc.data());
         }
       })
     });
