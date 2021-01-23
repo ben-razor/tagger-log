@@ -225,6 +225,7 @@ div.diary-entry .diary-entry-tags {
 
 .front-page-main p {
   font-family: MarckScript, sans-serif;
+  font-display: swap;
   color: hsl(30, 50%, 20%);
 }
 
