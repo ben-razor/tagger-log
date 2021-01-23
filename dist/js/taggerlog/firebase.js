@@ -109,6 +109,10 @@ var taggerlog = taggerlog || {};
       }
     });
 
+    setTimeout(function() {
+      tl.init();
+      tl.updateLoggedInUI();
+    }, 2000);
   });
 
   /**
@@ -124,6 +128,9 @@ var taggerlog = taggerlog || {};
    */
   function logIn() {
     var provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
     firebase.auth().signInWithPopup(provider).then(function(result) {
       if(result.additionalUserInfo.isNewUser) {
         isNewUser = true;
