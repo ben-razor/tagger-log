@@ -791,14 +791,6 @@ var taggerlog = taggerlog || {};
    * @param {string} id Entry ID
    */
   function deleteEntryStart(id) {
-    var db = tl.db;
-    db.collection('diary-entry').doc(id).get().then(function(doc) {
-      let data = doc.data();
-    })
-    .catch(function(error) {
-      tl.util.logError(error);
-    });
-
     $('#delete-entry-button').data('id', id);
     $('#editEntryModal').modal('hide');
     $('#deleteEntryModal').modal();
@@ -811,11 +803,9 @@ var taggerlog = taggerlog || {};
    * @param {string} id Entry ID
    */
   function deleteEntry(id) {
-    var loggedInUser = tl.loggedInUser;
     var db = tl.db;
     var $spinner = $('#delete-entry-spinner');
     $spinner.show();
-    let orphanTags = [];
 
     db.collection('diary-entry').doc(id).get().then(function(doc) {
       let data = doc.data();
@@ -861,7 +851,6 @@ var taggerlog = taggerlog || {};
 
     $spinner.hide();
     $('#deleteEntryModal').modal('hide');
-
   }
   tl.deleteEntry = deleteEntry;
 
