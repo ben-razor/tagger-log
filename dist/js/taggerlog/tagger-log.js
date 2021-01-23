@@ -316,21 +316,23 @@ var taggerlog = taggerlog || {};
     var db = tl.db;
     let query = db.collection('diary-entry');
     query = query.where('uid', '==', loggedInUser.uid);
-    query = query.where('deleted', '!=', true);
     let storedMatchingTags = [];
     let orphans = [];
+
     return new Promise((resolve, reject) => {
       if(tags.length > 0) {
         query = query.where('tag-list', 'array-contains-any', tags);
       }
-      query.get()
+      query.get({source: 'cache'})
       .then(function(querySnapshot) {
         querySnapshot.forEach(function(doc) {
           let data = doc.data();
-          let tagList  = data['tag-list'];
-          for(let tag of tagList) {
-            if(!storedMatchingTags.includes(tag) && tags.includes(tag)) {
-              storedMatchingTags.push(tag);
+          if(!data['deleted']) {
+            let tagList  = data['tag-list'];
+            for(let tag of tagList) {
+              if(!storedMatchingTags.includes(tag) && tags.includes(tag)) {
+                storedMatchingTags.push(tag);
+              }
             }
           }
         })
@@ -360,10 +362,8 @@ var taggerlog = taggerlog || {};
     let query = db.collection('diary-entry').orderBy('date', 'desc');
     query = query.where('uid', '==', loggedInUser.uid);
 
-    let tagQueryActive = false;
     if(queryTags.length > 0) {
       query = query.where('tag-list', 'array-contains-any', queryTags);
-      tagQueryActive = true;
     }
     else {
       query = query.limit(10);
