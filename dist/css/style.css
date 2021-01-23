@@ -228,14 +228,7 @@ div.diary-entry .diary-entry-tags {
   color: hsl(30, 50%, 20%);
 }
 
-.front-page-main p.quoted:before {
-  content: '"';
-  font-family: serif;
-  font-size: 160%;
-}
-
-.front-page-main p.quoted::after {
-  content: '"';
+.big-quote {
   font-family: serif;
   font-size: 160%;
 }
