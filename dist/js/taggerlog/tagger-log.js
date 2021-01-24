@@ -58,19 +58,49 @@ var taggerlog = taggerlog || {};
    */
   var tagSearch = '';
 
+  /**
+   * Default data store used to wrap any specific data store
+   * and only forward messages if one is set.
+   * 
+   * @param {object} dataStore 
+   */
   function TLDataStoreWrapper(dataStore) {
     this.dataStore = dataStore;
 
+    /**
+     * Calls init on any attached data store.
+     */
     this.init = function() {
       if(this.dataStore) {
         this.dataStore.init();
       }
     }
 
+    /**
+     * Calls deleteEntry on any attached data store.
+     * 
+     * @param {string} id 
+     */
     this.deleteEntry = function(id) {
       if(this.dataStore) {
         this.dataStore.deleteEntry(id);
       }
+    }
+
+    /**
+     * Adds an entry to any attached data store.
+     * 
+     * @param {object} entryData 
+     * @returns {string} The id of the added entry
+     */
+    this.addEntry = function(entryData) {
+      var entryID = null;
+
+      if(this.dataStore) {
+        entryID = this.dataStore.addEntry(entryData)
+      }
+
+      return entryID;
     }
   }
 
@@ -87,6 +117,9 @@ var taggerlog = taggerlog || {};
     tl.dataStore = new TLDataStoreWrapper(dataStore);
   }
 
+  /**
+   * On load, initialize any attached data stores.
+   */
   $(function() {
     if(tl.dataStore) {
       tl.dataStore.init();
@@ -251,7 +284,6 @@ var taggerlog = taggerlog || {};
     else {
       tags = tl.cleanTags(tags);
       tags = processTagList(tags);
-      var tagString = tags.join();
       tl.allTags = tl.allTags.concat(tags);
       tl.allTags = processTagList(tl.allTags);
 
@@ -264,21 +296,11 @@ var taggerlog = taggerlog || {};
         uid: loggedInUser.uid,
         entry: entry,
         date: date,
-        tags: tagString,
-        'tag-list': tags,
-        'date-modified': firebase.firestore.FieldValue.serverTimestamp()
+        'tag-list': tags
       }
+      
+      entryData['id'] = tl.dataStore.addEntry(entryData);
 
-      var batch = db.batch();
-      var newEntryRef = db.collection('diary-entry').doc();
-      var tagsRef = db.collection('diary-tags').doc(loggedInUser.uid);
-      batch.set(newEntryRef, entryData);
-      batch.set(tagsRef, {tags: tl.allTags.join()})
-      batch.commit().catch(function(error) {
-        entryFailedUpdateUI(error);
-      });
-
-      entryData['id'] = newEntryRef.id;
       tl.entries.unshift(entryData);
       updateQueryRelatedTags();
       refreshUI();
@@ -305,6 +327,7 @@ var taggerlog = taggerlog || {};
     $button.prop('disabled', false);
     showErrorAlert(errors[0]);
   }
+  tl.entryFailedUpdateUI = entryFailedUpdateUI;
 
   /**
    * Display errors with entry and update entry edit UI.
@@ -769,17 +792,23 @@ var taggerlog = taggerlog || {};
       editFailedUpdateUI(errors);
     }
     else {
-      var tagString = tags.join();
       tl.allTags = tl.allTags.concat(tags);
       tl.allTags = processTagList(tl.allTags);
       var newEntry = {
         'entry': entry,
-        'tags': tagString,
         'tag-list': tags,
         'date-modified': firebase.firestore.FieldValue.serverTimestamp()
       };
       var newDate = new Date($date.val());
-      if(newDate !== new Date().getTime()) {
+
+      var currentEntry = null;
+      for(var i = 0; i < tl.entries.length; i++) {
+        if(tl.entries[i]['id'] == id) {
+          currentEntry = tl.entries[i];
+        }
+      }
+       
+      if(newDate.getTime() !== currentEntry['date'].getTime()) {
         newEntry['date'] = firebase.firestore.Timestamp.fromDate(newDate);
       }
 

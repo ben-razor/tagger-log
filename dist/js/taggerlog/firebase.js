@@ -99,6 +99,9 @@ var taggerlog = taggerlog || {};
 
   function TLInterfaceFirebase(tl) {
 
+    /**
+     * Initialize firebase and set tl.db to point at firestore.
+     */
     this.init = function() {
       firebase.initializeApp(firebaseConfig);
 
@@ -144,6 +147,14 @@ var taggerlog = taggerlog || {};
       });
     }
 
+    /**
+     * Delete and entry from firestore.
+     * 
+     * Uses findOrphanTags to find any tags that are no longer in use
+     * and remove them.
+     * 
+     * @param {string} id 
+     */
     this.deleteEntry = function(id) {
       var db = tl.db;
 
@@ -177,6 +188,33 @@ var taggerlog = taggerlog || {};
       .catch(function(error) {
         tl.util.logError(error);
       });
+    }
+
+    /**
+     * Adds an entry to firestore.
+     * 
+     * Updates the diary-tags to contain any new tags.
+     * 
+     * @param {object} entryData 
+     */
+    this.addEntry = function(entryData) {
+      var db = tl.db;
+
+      entryData['date-modified'] = this.getCurrentTimestamp();
+      var batch = db.batch();
+      var newEntryRef = db.collection('diary-entry').doc();
+      var tagsRef = db.collection('diary-tags').doc(tl.loggedInUser.uid);
+      batch.set(newEntryRef, entryData);
+      batch.set(tagsRef, {tags: tl.allTags.join()})
+      batch.commit().catch(function(error) {
+        tl.entryFailedUpdateUI(error);
+      });
+
+      return newEntryRef.id;
+    }
+
+    this.getCurrentTimestamp = function() {
+      return firebase.firestore.FieldValue.serverTimestamp();
     }
   }
 
