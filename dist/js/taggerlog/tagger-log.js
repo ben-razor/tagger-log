@@ -260,7 +260,6 @@ var taggerlog = taggerlog || {};
    */
   function diaryAddEntry(form) {
     var loggedInUser = tl.loggedInUser;
-    var db = tl.db;
 
     var $spinner = $('#add-entry-spinner');
     var $button = $('#diary-submit');
@@ -353,24 +352,12 @@ var taggerlog = taggerlog || {};
   }
 
   /**
-   * Save tags to firestore.
-   * 
-   * @returns {Promise}
+   * Refresh user interface after all tags saved.
    */
-  function saveTags() {
-    var loggedInUser = tl.loggedInUser;
-    var db = tl.db;
-    return new Promise((resolve, reject) => {
-      db.collection('diary-tags').doc(loggedInUser.uid).set({tags: tl.allTags.join()})
-      .then(function(docRef) {
-        resolve();
-      })
-      .catch(function(error) {
-        reject('Error adding tags: ' + error.toString());
-      });
-    });
+  function saveTagsRefresh() {
+    tl.refreshTagDisplay();
   }
-  tl.saveTags = saveTags;
+  tl.saveTagsRefresh = saveTagsRefresh;
 
   /**
    * Searches for any tags in the input array that are not
@@ -713,7 +700,6 @@ var taggerlog = taggerlog || {};
    * @param {string} id Entry ID
    */
   function editEntryStart(id) {
-    var db = tl.db;
     var curEntry = null;
     for(var i = 0; i < tl.entries.length; i++) {
       curEntry = tl.entries[i];

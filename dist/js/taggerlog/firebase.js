@@ -98,6 +98,7 @@ var taggerlog = taggerlog || {};
   tl.logIn = logIn;
 
   function TLInterfaceFirebase(tl) {
+    let that = this;
 
     /**
      * Initialize firebase and set tl.db to point at firestore.
@@ -172,11 +173,7 @@ var taggerlog = taggerlog || {};
             if(orphans.length) {
               tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
               tl.queryTags = tl.queryTags.filter(item => !orphans.includes(item));
-              tl.saveTags().then(() => {
-                tl.getRecentEntries().then(function() {
-                  tl.refreshUI();
-                });
-              });
+              that.saveTags();
             }
           });
 
@@ -230,9 +227,7 @@ var taggerlog = taggerlog || {};
               tl.refreshUI(tl.entries);
             });
           }
-          tl.saveTags().then(() => {
-            tl.refreshTagDisplay();
-          });
+          that.saveTags();
         });
         tl.updateQueryRelatedTags();
         tl.refreshEntryDisplay();
@@ -240,6 +235,24 @@ var taggerlog = taggerlog || {};
       }).catch(function(error) {
         tl.util.logError(error);
         tl.showAlert('entry-edit-failed-alert');
+      });
+    }
+
+    /**
+     * Save all tags to firestore.
+     * 
+     * @returns {Promise}
+     */
+    this.saveTags = function() {
+      var loggedInUser = tl.loggedInUser;
+      var db = tl.db;
+
+      db.collection('diary-tags').doc(loggedInUser.uid).set({tags: tl.allTags.join()})
+      .then(function(docRef) {
+        tl.saveTagsRefresh();
+      })
+      .catch(function(error) {
+        tl.util.logError(error);
       });
     }
 
