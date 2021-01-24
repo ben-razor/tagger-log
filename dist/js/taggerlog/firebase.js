@@ -198,12 +198,12 @@ var taggerlog = taggerlog || {};
      * @param {object} entryData 
      */
     this.addEntry = function(entryData) {
-      var db = tl.db;
+      let db = tl.db;
 
       entryData['date-modified'] = this.getCurrentTimestamp();
-      var batch = db.batch();
-      var newEntryRef = db.collection('diary-entry').doc();
-      var tagsRef = db.collection('diary-tags').doc(tl.loggedInUser.uid);
+      let batch = db.batch();
+      let newEntryRef = db.collection('diary-entry').doc();
+      let tagsRef = db.collection('diary-tags').doc(tl.loggedInUser.uid);
       batch.set(newEntryRef, entryData);
       batch.set(tagsRef, {tags: tl.allTags.join()})
       batch.commit().catch(function(error) {
@@ -213,6 +213,42 @@ var taggerlog = taggerlog || {};
       return newEntryRef.id;
     }
 
+    this.editEntry = function(id, currentEntry, newEntry) {
+      let db = tl.db;
+
+      let tagsRemoved = currentEntry['tag-list'].filter(x => !newEntry['tag-list'].includes(x));
+
+      newEntry['date-modified'] = firebase.firestore.FieldValue.serverTimestamp();
+
+      db.collection('diary-entry').doc(id).update(newEntry)
+      .then(function() {
+          tl.findOrphanTags(tagsRemoved).then(function(orphans) {
+          if(orphans.length) {
+            tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
+            tl.queryTags = tl.queryTags.filter(item => !orphans.includes(item));
+            tl.getRecentEntries().then(function() {
+              tl.refreshUI(tl.entries);
+            });
+          }
+          tl.saveTags().then(() => {
+            tl.refreshTagDisplay();
+          });
+        });
+        tl.updateQueryRelatedTags();
+        tl.refreshEntryDisplay();
+       
+      }).catch(function(error) {
+        tl.util.logError(error);
+        tl.showAlert('entry-edit-failed-alert');
+      });
+    }
+
+    /**
+     * Get the special serverTimestamp field for marking updated
+     * and deleted records.
+     * 
+     * @returns {object} firebase.firestore.Timestamp
+     */
     this.getCurrentTimestamp = function() {
       return firebase.firestore.FieldValue.serverTimestamp();
     }

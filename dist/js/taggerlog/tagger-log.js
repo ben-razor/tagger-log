@@ -102,6 +102,15 @@ var taggerlog = taggerlog || {};
 
       return entryID;
     }
+
+    /**
+     * Edits an entry in any attached data store.
+     */
+    this.editEntry = function(id, currentEntry, entryData) {
+      if(this.dataStore) {
+        this.dataStore.editEntry(id, currentEntry, entryData);
+      }
+    }
   }
 
   /**
@@ -554,6 +563,7 @@ var taggerlog = taggerlog || {};
 
     return queryRelatedTags;
   }
+  tl.updateQueryRelatedTags = updateQueryRelatedTags;
 
   /**
    * Performs a refresh of the UI after the full entries list is
@@ -630,6 +640,7 @@ var taggerlog = taggerlog || {};
     var $recentEntriesElem = $('#recent-entries');
     $recentEntriesElem.html(tableHTML);
   }
+  tl.refreshEntryDisplay = refreshEntryDisplay;
 
   /**
    * Converts HTML special characters to enties like &entity_name;
@@ -747,8 +758,6 @@ var taggerlog = taggerlog || {};
    * @param {string} id Entry ID
    */
   function editEntry(id) {
-    var db = tl.db;
-
     var $spinner = $('#edit-entry-spinner');
     var $button = $('#edit-entry-button');
     $spinner.show();
@@ -796,43 +805,19 @@ var taggerlog = taggerlog || {};
       tl.allTags = processTagList(tl.allTags);
       var newEntry = {
         'entry': entry,
-        'tag-list': tags,
-        'date-modified': firebase.firestore.FieldValue.serverTimestamp()
+        'tag-list': tags
       };
       var newDate = new Date($date.val());
+      newEntry['date'] = newDate;
 
-      var currentEntry = null;
+      let currentEntry = null;
       for(var i = 0; i < tl.entries.length; i++) {
-        if(tl.entries[i]['id'] == id) {
+        if(tl.entries[i].id === id) {
           currentEntry = tl.entries[i];
         }
       }
-       
-      if(newDate.getTime() !== currentEntry['date'].getTime()) {
-        newEntry['date'] = firebase.firestore.Timestamp.fromDate(newDate);
-      }
 
-      db.collection('diary-entry').doc(id).update(newEntry)
-      .then(function() {
-          findOrphanTags(formTagsRemoved).then(function(orphans) {
-          if(orphans.length) {
-            tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
-            tl.queryTags = tl.queryTags.filter(item => !orphans.includes(item));
-            getRecentEntries().then(function() {
-              refreshUI(tl.entries);
-            });
-          }
-          saveTags().then(() => {
-            refreshTagDisplay();
-          });
-        });
-        updateQueryRelatedTags();
-        refreshEntryDisplay();
-       
-      }).catch(function(error) {
-        tl.util.logError(error);
-        showAlert('entry-edit-failed-alert');
-      });
+      tl.dataStore.editEntry(id, currentEntry, newEntry);
 
       for(var i = 0; i < tl.entries.length; i++) {
         var entryData = tl.entries[i];
@@ -1152,6 +1137,7 @@ var taggerlog = taggerlog || {};
       toggleTag(tag);
     });
   }
+  tl.refreshTagDisplay = refreshTagDisplay;
 
   /**
    * Helper function for setting items in local storage.
