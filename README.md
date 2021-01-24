@@ -1,4 +1,4 @@
-# tagger-log
+# Tagger Log
 A micro log web and mobile application using Google Firebase.
 
 Logs can be tagged.
