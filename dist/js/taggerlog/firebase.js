@@ -71,52 +71,6 @@ var taggerlog = taggerlog || {};
     });
   }
 
-  $(function() {
-    firebase.initializeApp(firebaseConfig);
-
-    tl.db = firebase.firestore();
-    if (location.hostname === 'localhost') {
-      tl.db.useEmulator('localhost', 8080);
-      firebase.auth().useEmulator('http://localhost:9099/');
-    }
-    firebase.firestore().enablePersistence()
-    .catch(function(err) {
-      if (err.code == 'failed-precondition') {
-          // Multiple tabs open, persistence can only be enabled
-          // in one tab at a a time.
-          // ...
-      } else if (err.code == 'unimplemented') {
-          // The current browser does not support all of the
-          // features required to enable persistence
-          // ...
-      }
-      tl.util.logError(err.message);   
-    });
-
-    let timerID = setTimeout(function() {
-      tl.init();
-      tl.updateLoggedInUI();
-    }, 2000);
-
-    firebase.auth().onAuthStateChanged(function(user) {
-      tl.loggedInUser = user;
-      clearTimeout(timerID);
-
-      if(isNewUser) {
-        initNewUser(user).then(function() {
-          tl.init();
-          tl.updateLoggedInUI();
-        });
-        isNewUser = false;
-      }
-      else {
-        tl.init();
-        tl.updateLoggedInUI();
-      }
-    });
-
-  });
-
   /**
    * Log out.
    */
@@ -142,5 +96,90 @@ var taggerlog = taggerlog || {};
     });
   }
   tl.logIn = logIn;
+
+  function TLInterfaceFirebase(tl) {
+
+    this.init = function() {
+      firebase.initializeApp(firebaseConfig);
+
+      tl.db = firebase.firestore();
+      if (location.hostname === 'localhost') {
+        tl.db.useEmulator('localhost', 8080);
+        firebase.auth().useEmulator('http://localhost:9099/');
+      }
+      firebase.firestore().enablePersistence()
+      .catch(function(err) {
+        if (err.code == 'failed-precondition') {
+            // Multiple tabs open, persistence can only be enabled
+            // in one tab at a a time.
+            // ...
+        } else if (err.code == 'unimplemented') {
+            // The current browser does not support all of the
+            // features required to enable persistence
+            // ...
+        }
+        tl.util.logError(err.message);   
+      });
+
+      let timerID = setTimeout(function() {
+        tl.init();
+        tl.updateLoggedInUI();
+      }, 2000);
+
+      firebase.auth().onAuthStateChanged(function(user) {
+        tl.loggedInUser = user;
+        clearTimeout(timerID);
+
+        if(isNewUser) {
+          initNewUser(user).then(function() {
+            tl.init();
+            tl.updateLoggedInUI();
+          });
+          isNewUser = false;
+        }
+        else {
+          tl.init();
+          tl.updateLoggedInUI();
+        }
+      });
+    }
+
+    this.deleteEntry = function(id) {
+      var db = tl.db;
+
+      db.collection('diary-entry').doc(id).get().then(function(doc) {
+        let data = doc.data();
+        let tagList = data['tag-list'];
+
+        db.collection('diary-entry').doc(id)
+        .update({ 
+          'deleted': true,
+          'date-modified': firebase.firestore.FieldValue.serverTimestamp()
+        }).then(function() {
+        
+          tl.findOrphanTags(tagList).then(function(orphans) {
+            if(orphans.length) {
+              tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
+              tl.queryTags = tl.queryTags.filter(item => !orphans.includes(item));
+              tl.saveTags().then(() => {
+                tl.getRecentEntries().then(function() {
+                  tl.refreshUI();
+                });
+              });
+            }
+          });
+
+        }).catch(function(error) {
+          tl.util.logError(error);
+          tl.showAlert('entry-delete-failed-alert');
+        });
+      })
+      .catch(function(error) {
+        tl.util.logError(error);
+      });
+    }
+  }
+
+  tl.setDataStore(new TLInterfaceFirebase(tl));
 
 })(taggerlog);

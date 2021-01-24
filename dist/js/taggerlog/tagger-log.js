@@ -26,7 +26,7 @@ var taggerlog = taggerlog || {};
    * attached to new entries. Sorted and unique.
    * @type {string[]}
    */
-  var queryTags = [];
+  tl.queryTags = [];
   /**
    * Entries with a tag in excludeTags will not be displayed.
    * Sorted and unique.
@@ -58,6 +58,41 @@ var taggerlog = taggerlog || {};
    */
   var tagSearch = '';
 
+  function TLDataStoreWrapper(dataStore) {
+    this.dataStore = dataStore;
+
+    this.init = function() {
+      if(this.dataStore) {
+        this.dataStore.init();
+      }
+    }
+
+    this.deleteEntry = function(id) {
+      if(this.dataStore) {
+        this.dataStore.deleteEntry(id);
+      }
+    }
+  }
+
+  /**
+   * An object that provides methods to read and write data.
+   */
+  tl.dataStore = new TLDataStoreWrapper();
+
+  /**
+   * Sets the interface that will be used for reading and 
+   * writing data.
+   */
+  tl.setDataStore = function(dataStore) {
+    tl.dataStore = new TLDataStoreWrapper(dataStore);
+  }
+
+  $(function() {
+    if(tl.dataStore) {
+      tl.dataStore.init();
+    }
+  });
+
   /**
    * Perform initializations after log in.
    */
@@ -67,7 +102,7 @@ var taggerlog = taggerlog || {};
     tl.tagCombos = [];
     queryRelatedTags = [];
     excludeTags = [];
-    queryTags = [];
+    tl.queryTags = [];
 
     initUI();
   }
@@ -202,7 +237,7 @@ var taggerlog = taggerlog || {};
     var $elem = $form.find('[name=new-tag]');
     var tagStr = $elem.val();
     var tags = tl.tagCSVToTags(tagStr, false);
-    tags = tags.concat(queryTags);
+    tags = tags.concat(tl.queryTags);
 
     let tagVerifier = new tl.TagVerifier(tl.tagErrorConfig);
     tagVerifier.verifyTags(tags);
@@ -303,6 +338,7 @@ var taggerlog = taggerlog || {};
       });
     });
   }
+  tl.saveTags = saveTags;
 
   /**
    * Searches for any tags in the input array that are not
@@ -349,6 +385,7 @@ var taggerlog = taggerlog || {};
       });
     });
   }
+  tl.findOrphanTags = findOrphanTags;
 
   /**
    * Gets recent entries from the database and formats them for display.
@@ -362,8 +399,8 @@ var taggerlog = taggerlog || {};
     let query = db.collection('diary-entry').orderBy('date', 'desc');
     query = query.where('uid', '==', loggedInUser.uid);
 
-    if(queryTags.length > 0) {
-      query = query.where('tag-list', 'array-contains-any', queryTags);
+    if(tl.queryTags.length > 0) {
+      query = query.where('tag-list', 'array-contains-any', tl.queryTags);
     }
     else {
       query = query.limit(10);
@@ -457,6 +494,7 @@ var taggerlog = taggerlog || {};
       });
     });
   }
+  tl.getRecentEntries = getRecentEntries;
 
   /**
    * When there are active tags, gets all other tags from
@@ -466,7 +504,7 @@ var taggerlog = taggerlog || {};
    */
   function updateQueryRelatedTags() {
     queryRelatedTags = [];
-    let tagQueryActive = queryTags.length > 0;
+    let tagQueryActive = tl.queryTags.length > 0;
 
     for(var i = 0; i < tl.entries.length; i++) {
       var data = tl.entries[i];
@@ -475,7 +513,7 @@ var taggerlog = taggerlog || {};
 
       var containsQueryTags = true;
       if(tagQueryActive) {
-        if(!queryTags.every(r => tagList.indexOf(r) >= 0)) {
+        if(!tl.queryTags.every(r => tagList.indexOf(r) >= 0)) {
           containsQueryTags = false;
         }
       }
@@ -503,6 +541,7 @@ var taggerlog = taggerlog || {};
     refreshTagDisplay();
     initAutocomplete();
   }
+  tl.refreshUI = refreshUI;
 
   /**
    * Displays the entries for the currently active tags.
@@ -524,7 +563,7 @@ var taggerlog = taggerlog || {};
     </div>`;
     var rows = '';
 
-    var tagQueryActive = queryTags.length > 0;
+    var tagQueryActive = tl.queryTags.length > 0;
     var excludeQueryActive = excludeTags.length > 0;
 
     for(var i = 0; i < tl.entries.length; i++) {
@@ -534,7 +573,7 @@ var taggerlog = taggerlog || {};
 
       var containsQueryTags = true;
       if(tagQueryActive) {
-        if(!queryTags.every(r => tagList.indexOf(r) >= 0)) {
+        if(!tl.queryTags.every(r => tagList.indexOf(r) >= 0)) {
           containsQueryTags = false;
         }
       }
@@ -553,7 +592,7 @@ var taggerlog = taggerlog || {};
       }
     }
 
-    var hasSelectedTags = queryTags.length > 0 || excludeTags.length > 0;
+    var hasSelectedTags = tl.queryTags.length > 0 || excludeTags.length > 0;
 
     if(rows == '') {
       if(hasSelectedTags) {
@@ -749,7 +788,7 @@ var taggerlog = taggerlog || {};
           findOrphanTags(formTagsRemoved).then(function(orphans) {
           if(orphans.length) {
             tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
-            queryTags = queryTags.filter(item => !orphans.includes(item));
+            tl.queryTags = tl.queryTags.filter(item => !orphans.includes(item));
             getRecentEntries().then(function() {
               refreshUI(tl.entries);
             });
@@ -803,40 +842,10 @@ var taggerlog = taggerlog || {};
    * @param {string} id Entry ID
    */
   function deleteEntry(id) {
-    var db = tl.db;
     var $spinner = $('#delete-entry-spinner');
     $spinner.show();
 
-    db.collection('diary-entry').doc(id).get().then(function(doc) {
-      let data = doc.data();
-      let tagList = data['tag-list'];
-
-      db.collection('diary-entry').doc(id)
-      .update({ 
-        'deleted': true,
-        'date-modified': firebase.firestore.FieldValue.serverTimestamp()
-      }).then(function() {
-      
-        findOrphanTags(tagList).then(function(orphans) {
-          if(orphans.length) {
-            tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
-            queryTags = queryTags.filter(item => !orphans.includes(item));
-            saveTags().then(() => {
-              getRecentEntries().then(function() {
-                refreshUI();
-              });
-            });
-          }
-        });
-
-      }).catch(function(error) {
-        tl.util.logError(error);
-        showAlert('entry-delete-failed-alert');
-      });
-    })
-    .catch(function(error) {
-      tl.util.logError(error);
-    });
+    tl.dataStore.deleteEntry(id);
 
     showAlert('entry-deleted-alert');
 
@@ -908,15 +917,15 @@ var taggerlog = taggerlog || {};
    * @param {string} tag 
    */
   function toggleTag(tag, exclude) {
-    let queryTagIndex = queryTags.indexOf(tag);
+    let queryTagIndex = tl.queryTags.indexOf(tag);
     let tagActive = queryTagIndex != -1;
     let excludeTagIndex = excludeTags.indexOf(tag);
     let tagExcluded = excludeTagIndex != -1;
-    let prevPrimaryTag = queryTags[0];
+    let prevPrimaryTag = tl.queryTags[0];
     
     if(exclude) {
       if(tagActive) {
-        queryTags.splice(queryTagIndex, 1);
+        tl.queryTags.splice(queryTagIndex, 1);
       }
       if(tagExcluded) {
         excludeTags.splice(excludeTagIndex, 1);
@@ -927,16 +936,16 @@ var taggerlog = taggerlog || {};
     }
     else {
       if(!tagActive && !tagExcluded) {
-        queryTags.push(tag);
+        tl.queryTags.push(tag);
       }
       if(tagActive) {
-        queryTags.splice(queryTagIndex, 1);
+        tl.queryTags.splice(queryTagIndex, 1);
       }
       if(tagExcluded) {
         excludeTags.splice(excludeTagIndex, 1);
       }
     }
-    let primaryTag = queryTags[0];
+    let primaryTag = tl.queryTags[0];
 
     let alreadyHaveEntries = tl.entries.length && (primaryTag === prevPrimaryTag);
 
@@ -987,7 +996,7 @@ var taggerlog = taggerlog || {};
       tags = queryRelatedTags;
     }
 
-    if(tags.length - queryTags.length > 7) {
+    if(tags.length - tl.queryTags.length > 7) {
       $('.tl-header-search-container').removeClass('d-none');
       if(tagSearch) {
         tags = tags.filter(x => x.startsWith(tagSearch.toLowerCase()));
@@ -1001,14 +1010,14 @@ var taggerlog = taggerlog || {};
 
     if(tl.loggedInUser) {
       var uid = tl.loggedInUser.uid;
-      setItem('query-tags-' + uid, queryTags);
+      setItem('query-tags-' + uid, tl.queryTags);
       setItem('exclude-tags-' + uid, excludeTags);
     }
 
     var activeTagHTML = '';
     var activeTagsHTML = '';
-    for(var i = 0; i < queryTags.length; i++) {
-      activeTagHTML = tagDisplayTemplate.replaceAll('{tag}', tl.cleanTag(queryTags[i]));
+    for(var i = 0; i < tl.queryTags.length; i++) {
+      activeTagHTML = tagDisplayTemplate.replaceAll('{tag}', tl.cleanTag(tl.queryTags[i]));
       activeTagHTML = activeTagHTML.replace('{selected}', 'selected');
       activeTagsHTML += activeTagHTML;
     }
@@ -1017,8 +1026,8 @@ var taggerlog = taggerlog || {};
     var prevTag = '';
     var numTags = tags.length;
 
-    for(var i = 0; i < queryTags.length; i++) {
-      var tag = tl.cleanTag(queryTags[i]);
+    for(var i = 0; i < tl.queryTags.length; i++) {
+      var tag = tl.cleanTag(tl.queryTags[i]);
       replacedTemplate = tagTemplate.replaceAll('{tag}', tag);
       replacedTemplate = replacedTemplate.replaceAll('{selected}', 'selected');
       queryTagHTML += replacedTemplate;
@@ -1045,10 +1054,10 @@ var taggerlog = taggerlog || {};
 
     if(tags.length) {
       for(var tag of tags) {
-        if(queryTags.indexOf(tag) > -1 || excludeTags.indexOf(tag) > -1) {
+        if(tl.queryTags.indexOf(tag) > -1 || excludeTags.indexOf(tag) > -1) {
           continue;
         }
-        let showingAllTags = !queryTags.length && !excludeTags.length;
+        let showingAllTags = !tl.queryTags.length && !excludeTags.length;
         if(showingAllTags) {
           if(numTags > 7 && prevTag && tag.charAt(0) != prevTag.charAt(0)) {
             tagHTML += '<br />';
@@ -1170,7 +1179,7 @@ var taggerlog = taggerlog || {};
       var storedExcludeTags = getItem('exclude-tags-' + uid);
 
       if(storedQueryTags) {
-        queryTags = JSON.parse(storedQueryTags);
+        tl.queryTags = JSON.parse(storedQueryTags);
       }
       if(storedExcludeTags) {
         excludeTags = JSON.parse(storedExcludeTags);
@@ -1421,17 +1430,17 @@ var taggerlog = taggerlog || {};
     var $elem = $(elem);
     var tagString = $elem.data('tag');
     var tags = tagString.split(',');
-    let prevPrimaryTag = queryTags[0];
+    let prevPrimaryTag = tl.queryTags[0];
     let alreadyHaveEntries = false;
 
     if($elem.hasClass('active')) {
       excludeTags = [];
-      queryTags = [];
+      tl.queryTags = [];
       $elem.removeClass('active');
       $('.selected-tags-star').removeClass('starred');
     }
     else {
-      queryTags = [];
+      tl.queryTags = [];
       excludeTags = [];
       for(var i = 0; i < tags.length; i++) {
         var tag = tags[i];
@@ -1439,11 +1448,11 @@ var taggerlog = taggerlog || {};
           excludeTags.push(tag.substring(1));
         }
         else {
-          queryTags.push(tag);
+          tl.queryTags.push(tag);
         }
       }
     
-      let primaryTag = queryTags[0];
+      let primaryTag = tl.queryTags[0];
 
       alreadyHaveEntries = tl.entries.length && (primaryTag === prevPrimaryTag);
     }
