@@ -140,6 +140,24 @@ var taggerlog = taggerlog || {};
         this.dataStore.saveTagCombos();
       }
     }
+
+    /**
+     * Request log in to any attached data store.
+     */
+    this.logIn = function() {
+      if(this.dataStore) {
+        this.dataStore.logIn();
+      }
+    }
+
+    /**
+     * Request log out from any attached data store.
+     */
+    this.logOut = function() {
+      if(this.dataStore) {
+        this.dataStore.logOut();
+      }
+    }
   }
 
   /**
@@ -186,6 +204,16 @@ var taggerlog = taggerlog || {};
     initAutocomplete();
     initTagSearch();
   }
+
+  function logIn() {
+    this.dataStore.logIn();
+  }
+  tl.logIn = logIn;
+
+  function logOut() {
+    this.dataStore.logOut();
+  }
+  tl.logOut = logOut;
 
   /**
    * Display an alert to reflect actions carried out on entries.

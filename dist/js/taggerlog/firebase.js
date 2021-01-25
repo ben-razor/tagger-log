@@ -71,32 +71,7 @@ var taggerlog = taggerlog || {};
     });
   }
 
-  /**
-   * Log out.
-   */
-  function logOut() {
-    firebase.auth().signOut();
-  }
-  tl.logOut = logOut;
-
-  /**
-   * Start sign in procedure using firebase auth ui.
-   */
-  function logIn() {
-    var provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({
-      prompt: 'select_account'
-    });
-    firebase.auth().signInWithPopup(provider).then(function(result) {
-      if(result.additionalUserInfo.isNewUser) {
-        isNewUser = true;
-      }
-    }).catch(function(error) {
-      tl.util.logError(error);
-    });
-  }
-  tl.logIn = logIn;
-
+  
   function TLInterfaceFirebase(tl) {
     let that = this;
 
@@ -146,6 +121,30 @@ var taggerlog = taggerlog || {};
           tl.updateLoggedInUI();
         }
       });
+    }
+
+    /**
+     * Start sign in procedure using firebase auth ui.
+     */
+    this.logIn = function() {
+      var provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      firebase.auth().signInWithPopup(provider).then(function(result) {
+        if(result.additionalUserInfo.isNewUser) {
+          isNewUser = true;
+        }
+      }).catch(function(error) {
+        tl.util.logError(error);
+      });
+    }
+
+    /**
+     * Log out.
+     */
+    this.logOut = function() {
+      firebase.auth().signOut();
     }
 
     /**
