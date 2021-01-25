@@ -39,7 +39,7 @@ var taggerlog = taggerlog || {};
    * on, includes the queryTags themselves. Sorted and unique.
    * @type {string[]}
    */
-  var queryRelatedTags = [];
+  tl.queryRelatedTags = [];
 
   /**
    * An array of starred tag combinations with titles.
@@ -111,6 +111,35 @@ var taggerlog = taggerlog || {};
         this.dataStore.editEntry(id, currentEntry, entryData);
       }
     }
+
+    /**
+     * Requests attached data store to retrieve all entries
+     * matching the current query tags.
+     */
+    this.getEntries = function() {
+      if(this.dataStore) {
+        this.dataStore.getEntries();
+      }
+    }
+
+    /**
+     * Requests attached data store to retrieve all tags and
+     * tag combos.
+     */
+    this.getTags = function() {
+      if(this.dataStore) {
+        this.dataStore.getTags();
+      }
+    }
+
+    /**
+     * Requests attached data store to save tag combos.
+     */
+    this.saveTagCombos = function() {
+      if(this.dataStore) {
+        this.dataStore.saveTagCombos();
+      }
+    }
   }
 
   /**
@@ -142,7 +171,7 @@ var taggerlog = taggerlog || {};
     tl.entries = [];
     tl.allTags = [];
     tl.tagCombos = [];
-    queryRelatedTags = [];
+    tl.queryRelatedTags = [];
     excludeTags = [];
     tl.queryTags = [];
 
@@ -360,160 +389,49 @@ var taggerlog = taggerlog || {};
   tl.saveTagsRefresh = saveTagsRefresh;
 
   /**
-   * Searches for any tags in the input array that are not
-   * present on any entries in the database.
-   *  
-   * @param {string[]} tags 
-   * @returns {Promise} Resolves to an array of orphaned tag strings
-   */
-  function findOrphanTags(tags) {
-    var loggedInUser = tl.loggedInUser;
-    var db = tl.db;
-    let query = db.collection('diary-entry');
-    query = query.where('uid', '==', loggedInUser.uid);
-    let storedMatchingTags = [];
-    let orphans = [];
-
-    return new Promise((resolve, reject) => {
-      if(tags.length > 0) {
-        query = query.where('tag-list', 'array-contains-any', tags);
-      }
-      query.get({source: 'cache'})
-      .then(function(querySnapshot) {
-        querySnapshot.forEach(function(doc) {
-          let data = doc.data();
-          if(!data['deleted']) {
-            let tagList  = data['tag-list'];
-            for(let tag of tagList) {
-              if(!storedMatchingTags.includes(tag) && tags.includes(tag)) {
-                storedMatchingTags.push(tag);
-              }
-            }
-          }
-        })
-      
-        for(let tag of tags) {
-          if(!storedMatchingTags.includes(tag)) {
-            orphans.push(tag);
-          }
-        }
-        resolve(orphans);
-      })
-      .catch(function(error) {
-        reject(error);
-      });
-    });
-  }
-  tl.findOrphanTags = findOrphanTags;
-
-  /**
-   * Gets recent entries from the database and formats them for display.
+   * Adds an entry to tl.entries.
    * 
-   * Also finds the tags related to the currently active tags.
+   * If the entry exists, replaces the existing entry that has the same id.
+   * 
+   * If the entry has the deleted field set to true, deletes the record
+   * from tl.entries.
+   * 
+   * @param {object} data
    */
-  function getRecentEntries() {
-    var loggedInUser = tl.loggedInUser;
-    var db = tl.db;
-
-    let query = db.collection('diary-entry').orderBy('date', 'desc');
-    query = query.where('uid', '==', loggedInUser.uid);
-
-    if(tl.queryTags.length > 0) {
-      query = query.where('tag-list', 'array-contains-any', tl.queryTags);
-    }
-    else {
-      query = query.limit(10);
-    }
-
-    tl.entries = [];
-    queryRelatedTags = [];
-
-    return new Promise(function(resolve, reject) {
-      query.get({source: 'cache'})
-      .then(function(querySnapshot) {
-        var mostRecentModify = new Date(1955, 10, 21, 6, 15, 0);
-        querySnapshot.forEach(function(doc) {
-          let data = doc.data();
-          data['id'] = doc.id;
-          data['date'] = data['date'].toDate();
-          data['date-modified'] = data['date-modified'].toDate();
-          
-          let exists = false;
-          for(var i = 0; i < tl.entries.length; i++) {
-            var existingEntry = tl.entries[i];
-            if(existingEntry['id'] === data['id']) {
-              exists = true;
-              if(data['deleted']) {
-                tl.entries.splice(i, 1);
-              }
-              else {
-                tl.entries[i] = data;
-              }
-              break;
-            }
-          }
-
-          if(!exists && !data['deleted']) {
-            tl.entries.push(data);
-          }
-
-          if(data['date-modified'] > mostRecentModify) {
-            mostRecentModify = data['date-modified'];
-          }
-        });
-
-        updateQueryRelatedTags();
-        refreshUI();
-
-        query = db.collection('diary-entry').orderBy('date-modified', 'desc');
-        query = query.where('uid', '==', loggedInUser.uid);
-        if(tl.entries.length) {
-          query = query.where('date-modified', '>', mostRecentModify);
+  function insertEntry(data) {
+    let exists = false;
+    for(var i = 0; i < tl.entries.length; i++) {
+      var existingEntry = tl.entries[i];
+      if(existingEntry['id'] === data['id']) {
+        exists = true;
+        if(data['deleted']) {
+          tl.entries.splice(i, 1);
         }
+        else {
+          tl.entries[i] = data;
+        }
+        break;
+      }
+    }
 
-        query.get({source: 'server'}).then(function(querySnapshot) {
-          if(querySnapshot.size) {
-            querySnapshot.forEach(function(doc) {
-              let data = doc.data();
-              data['id'] = doc.id;
-              data['date'] = data['date'].toDate();
-              data['date-modified'] = data['date-modified'].toDate();
+    if(!exists && !data['deleted']) {
+      let inserted = false;
 
-              let exists = false;
-              for(var i = 0; i < tl.entries.length; i++) {
-                var existingEntry = tl.entries[i];
-                if(existingEntry['id'] === data['id']) {
-                  exists = true;
-                  if(data['deleted']) {
-                    tl.entries.splice(i, 1);
-                  }
-                  else {
-                    tl.entries[i] = data;
-                  }
-                  break;
-                }
-              } 
+      for(var i = 0; i < tl.entries.length; i++) {
+        var entry = tl.entries[i];
+        if(data['date'].getTime() >= entry['date'].getTime()) {
+          tl.entries.splice(i, 0, data);
+          inserted = true;
+          break;
+        }
+      }
 
-              if(!exists && !data['deleted']) {
-                  tl.entries.push(data);
-              }
-            });
-
-            tl.entries.sort((a, b) => a['date'] < b['date'] ? 1 : -1);
-            updateQueryRelatedTags();
-            refreshUI();
-          }
-          
-          resolve(tl.entries);
-        });
-      })
-      .catch(function(error) {
-          tl.util.logError(['Error getting documents: ', error])
-          resolve(tl.entries);
-      });
-    });
+      if(!inserted) {
+        tl.entries.push(data);
+      }
+    }
   }
-  tl.getRecentEntries = getRecentEntries;
+  tl.insertEntry = insertEntry;
 
   /**
    * When there are active tags, gets all other tags from
@@ -522,7 +440,7 @@ var taggerlog = taggerlog || {};
    * These can then be shown as related tags.
    */
   function updateQueryRelatedTags() {
-    queryRelatedTags = [];
+    tl.queryRelatedTags = [];
     let tagQueryActive = tl.queryTags.length > 0;
 
     for(var i = 0; i < tl.entries.length; i++) {
@@ -539,16 +457,16 @@ var taggerlog = taggerlog || {};
 
       if(containsQueryTags) {
         if(tagQueryActive) {
-          queryRelatedTags = queryRelatedTags.concat(tagList);
+          tl.queryRelatedTags = tl.queryRelatedTags.concat(tagList);
         }
       }
     }
 
     if(tagQueryActive) {
-      queryRelatedTags = processTagList(queryRelatedTags); 
+      tl.queryRelatedTags = processTagList(tl.queryRelatedTags); 
     }
 
-    return queryRelatedTags;
+    return tl.queryRelatedTags;
   }
   tl.updateQueryRelatedTags = updateQueryRelatedTags;
 
@@ -881,35 +799,25 @@ var taggerlog = taggerlog || {};
   tl.processTagList = processTagList;
 
   /**
-   * Gets all tags from the database and updates the tag UI.
+   * Callback for when a data store changes the allTags array.
+   * 
+   * @param {string[]} allTags 
    */
-  function getTags() {
-    var db = tl.db;
-
-    return new Promise(function(resolve, reject) {
-      db.collection('diary-tags').doc(tl.loggedInUser.uid)
-      .get()
-      .then(function(doc) {
-          let data = doc.data();
-          let tagString = data['tags'];
-          if(tagString) {
-            tl.allTags = processTagList(tagString.split(','));
-          }
-          else {
-            tl.allTags = [];
-          }
-          db.collection('diary-tag-combos').doc(tl.loggedInUser.uid)
-          .get()
-          .then(function(doc) {
-            let data = doc.data();
-            if(data) {
-              tl.tagCombos = data['tag-combos'];
-            }
-            resolve();
-          });
-      });
-    });
+  function setAllTags(allTags) {
+    tl.allTags = allTags;
+    refreshTagDisplay();
   }
+  tl.setAllTags = setAllTags;
+
+  /**
+   * Callback for when a data store changes the tagCombos array.
+   * @param {string[]} tagCombos 
+   */
+  function setTagCombos(tagCombos) {
+    tl.tagCombos = tagCombos;
+    refreshTagDisplay();
+  }
+  tl.setTagCombos = setTagCombos;
 
   /**
    * Makes a tag active/deactivated.
@@ -956,9 +864,7 @@ var taggerlog = taggerlog || {};
       refreshUI();
     }
     else {
-      getRecentEntries().then(function() {
-        refreshUI();
-      });
+      tl.dataStore.getEntries();
     }
   }
   tl.toggleTag = toggleTag;
@@ -992,8 +898,8 @@ var taggerlog = taggerlog || {};
     var queryTagCombo = [];
     var replacedTemplate = '';
     let tags = tl.allTags;
-    if(queryRelatedTags.length) {
-      tags = queryRelatedTags;
+    if(tl.queryRelatedTags.length) {
+      tags = tl.queryRelatedTags;
     }
 
     if(tags.length - tl.queryTags.length > 7) {
@@ -1217,12 +1123,8 @@ var taggerlog = taggerlog || {};
         showWhenNotTyping();
       });
 
-      getRecentEntries().then(function(entries) {
-        refreshUI();
-      });
-      getTags().then(function() {
-        refreshTagDisplay();
-      });
+      tl.dataStore.getEntries();
+      tl.dataStore.getTags();
     }
     else {
       $('.logged-in-show').addClass('d-none');
@@ -1340,7 +1242,7 @@ var taggerlog = taggerlog || {};
 
     if(existingCombo !== undefined) {
       tl.tagCombos = tl.tagCombos.filter(x => x['tags'] !== tagString)
-      saveTagCombos();
+      tl.dataStore.saveTagCombos();
       $elem.removeClass('starred');
       refreshTagDisplay();
     }
@@ -1394,7 +1296,7 @@ var taggerlog = taggerlog || {};
       $elem.addClass('starred');
       refreshTagDisplay();
       $('#star-tags-modal').modal('hide');
-      saveTagCombos();
+      tl.dataStore.saveTagCombos();
     }
   }
   tl.starTags = starTags;
@@ -1406,23 +1308,6 @@ var taggerlog = taggerlog || {};
     return tl.tagCombos;
   }
   tl.getTagCombos = getTagCombos;
-
-  /**
-   * Save the array of favourite tag combinations to the db.
-   */
-  function saveTagCombos() {
-    var loggedInUser = tl.loggedInUser;
-    var db = tl.db;
-    return new Promise((resolve, reject) => {
-      db.collection('diary-tag-combos').doc(loggedInUser.uid).set({'tag-combos': tl.tagCombos})
-      .then(function(docRef) {
-        resolve();
-      })
-      .catch(function(error) {
-        reject('Error adding tags: ' + error.toString());
-      });
-    });
-  }
 
   /**
    * Makes the tags in a combo active/excluded.
@@ -1465,9 +1350,7 @@ var taggerlog = taggerlog || {};
       refreshUI();
     }
     else {
-      getRecentEntries().then(function() {
-        refreshUI();
-      });
+      tl.dataStore.getEntries();
     }
   }
   tl.selectCombo = selectCombo;
@@ -1596,26 +1479,5 @@ var taggerlog = taggerlog || {};
     });
   }
   initTagSearch();
-
-  /**
-   * Function that could be modified to get realtime updates.
-   */
-  function listenForChanges() {
-    tl.db.collection('diary-entry')
-    .where('uid', '==', tl.loggedInUser.uid)
-    .onSnapshot(function(snapshot) {
-      snapshot.docChanges().forEach(function(change) {
-        if (change.type === 'added') {
-            console.log('New: ', change.doc.data());
-        }
-        if (change.type === 'modified') {
-            console.log('Mod: ', change.doc.data());
-        }
-        if (change.type === 'removed') {
-            console.log('Remove: ', change.doc.data());
-        }
-      })
-    });
-  }
 
 })(taggerlog);
