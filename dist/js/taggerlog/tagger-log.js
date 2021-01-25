@@ -188,18 +188,6 @@ var taggerlog = taggerlog || {};
   }
 
   /**
-   * Display an alert using the message from an error object.
-   * 
-   * @param {Error} error 
-   */
-  function alertError(error) {
-    var $alertElem = $('#entry-error-alert');
-    var $alertTextElem = $('#entry-error-text');
-    $alertTextElem.html(error.message);
-    $alertElem.fadeTo(2000, 1000).delay(2000).slideUp(500);
-  }
-
-  /**
    * Display an alert to reflect actions carried out on entries.
    * 
    * @param {object} error An error object
@@ -240,33 +228,6 @@ var taggerlog = taggerlog || {};
     $alertElem.fadeTo(2000, 1000).slideUp(500);
   }
   tl.showAlert = showAlert;
-
-  /**
-   * Adds extra tags to the tag selector pre the form being submitted.
-   * @param {Object} $form JQuery form element
-   */
-  function createNewTag($form) {
-    var $tagSelect = $form.find('[name=tag-selector]');
-    let selected = $tagSelect.val();
-
-    var $elem = $form.find('[name=new-tag]');
-    var tagStr = $elem.val();
-    var tags = tl.tagCSVToTags(tagStr);
-
-    let tagVerifier = new tl.TagVerifier(tl.tagErrorConfig);
-    tagVerifier.verifyTags(tags);
-
-    if(tagVerifier.errors.length == 0) {
-      tl.allTags = processTagList(tl.allTags.concat(tags));
-      selected = selected.concat(tags);
-      $tagSelect.val(selected);
-      $tagSelect.selectpicker('refresh');
-      $elem.val('');
-    }
-    else {
-      tl.util.logError(tagVerifier.errors);
-    }
-  }
 
   /**
    * Class for communicating an errors with entries.
