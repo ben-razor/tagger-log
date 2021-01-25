@@ -450,6 +450,11 @@ var taggerlog = taggerlog || {};
     }
   }
 
-  tl.setDataStore(new TLInterfaceFirebase(tl));
+  if(window['AndroidInterface']) {
+    tl.setDataStore(window['AndroidInterface']);
+  }
+  else {
+    tl.setDataStore(new TLInterfaceFirebase(tl));
+  }
 
 })(taggerlog);

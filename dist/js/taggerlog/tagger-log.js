@@ -205,11 +205,17 @@ var taggerlog = taggerlog || {};
     initTagSearch();
   }
 
+  /**
+   * Perform log in steps for storage provider.
+   */
   function logIn() {
     this.dataStore.logIn();
   }
   tl.logIn = logIn;
 
+  /**
+   * Perform log out steps for storage provider.
+   */
   function logOut() {
     this.dataStore.logOut();
   }
