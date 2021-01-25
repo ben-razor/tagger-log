@@ -222,6 +222,25 @@ var taggerlog = taggerlog || {};
   tl.logOut = logOut;
 
   /**
+   * Set user data.
+   * 
+   * User fields:
+   * 
+   * var user = {
+   *   uid: String,
+   *   displayName: String,
+   *   email: String,
+   *   photoURL: String
+   * }
+   * 
+   * @param {object} user 
+   */
+  tl.setUser = function(user) {
+    tl.loggedInUser = user;
+    tl.updateLoggedInUI();
+  }
+
+  /**
    * Display an alert to reflect actions carried out on entries.
    * 
    * @param {object} error An error object
