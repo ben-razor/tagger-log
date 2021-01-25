@@ -1445,8 +1445,6 @@ var taggerlog = taggerlog || {};
         },
         // #6 - Template used to display the selected result in the textarea
         replace: function(word, e) {
-          var $elem = $(e.target);
-          var currentText = $elem.val();
           if(hadComma) {
             hadComma = false;
             return ',' + word + ',';
