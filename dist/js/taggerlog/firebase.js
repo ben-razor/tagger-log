@@ -389,11 +389,7 @@ var taggerlog = taggerlog || {};
       .then(function(doc) {
           let data = doc.data();
           let tagString = data['tags'];
-          let allTags = [];
-          if(tagString) {
-            allTags = tl.processTagList(tagString.split(','));
-          }
-          tl.setAllTags(allTags);
+          tl.setAllTags(tagString);
 
           db.collection('diary-tag-combos').doc(tl.loggedInUser.uid)
           .get()

@@ -831,9 +831,14 @@ var taggerlog = taggerlog || {};
   /**
    * Callback for when a data store changes the allTags array.
    * 
-   * @param {string[]} allTags 
+   * @param {string[]} CSV string of tags 
    */
-  function setAllTags(allTags) {
+function setAllTags(tagString) {
+    let allTags = [];
+
+    if(tagString) {
+      allTags = processTagList(tagString.split(','));
+    }
     tl.allTags = allTags;
     refreshTagDisplay();
   }
