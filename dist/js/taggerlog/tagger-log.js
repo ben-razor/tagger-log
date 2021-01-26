@@ -846,9 +846,14 @@ function setAllTags(tagString) {
 
   /**
    * Callback for when a data store changes the tagCombos array.
-   * @param {string[]} tagCombos 
+   * 
+   * @param {string[]} tagCombos
+   * @param {boolean=} isJSON Is tagCombos an object or JSON representation
    */
-  function setTagCombos(tagCombos) {
+  function setTagCombos(tagCombos, isJSON) {
+    if(isJSON) {
+      tagCombos = JSON.parse(tagCombos);
+    }
     tl.tagCombos = tagCombos;
     refreshTagDisplay();
   }
