@@ -341,7 +341,7 @@ var taggerlog = taggerlog || {};
 
           tl.insertEntry(data);
 
-          if(data['date-modified'] > mostRecentModify) {
+          if(data['date-modified'].getTime() > mostRecentModify.getTime()) {
             mostRecentModify = data['date-modified'];
           }
         });
