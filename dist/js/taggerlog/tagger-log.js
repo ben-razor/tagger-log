@@ -59,6 +59,15 @@ var taggerlog = taggerlog || {};
   var tagSearch = '';
 
   /**
+   * Helper method to convert an object to JSON.
+   * 
+   * @param {object} data 
+   */
+  tl.json = function(data) {
+    return JSON.stringify(data);
+  }
+
+  /**
    * Default data store used to wrap any specific data store
    * and only forward messages if one is set.
    * 
