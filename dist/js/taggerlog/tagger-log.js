@@ -412,8 +412,15 @@ var taggerlog = taggerlog || {};
    * 
    * @param {object} data
    */
-  function insertEntry(data) {
+  function insertEntry(data, isJSON) {
     let exists = false;
+
+    if(isJSON) {
+      data = JSON.parse(data);
+      data['date'] = new Date(data['date']);
+      data['date-modified'] = new Date(data['date-modified']);
+    }
+
     for(var i = 0; i < tl.entries.length; i++) {
       var existingEntry = tl.entries[i];
       if(existingEntry['id'] === data['id']) {
