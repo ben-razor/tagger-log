@@ -837,7 +837,7 @@ var taggerlog = taggerlog || {};
    * 
    * @param {string[]} CSV string of tags 
    */
-function setAllTags(tagString) {
+  function setAllTags(tagString) {
     let allTags = [];
 
     if(tagString) {
@@ -847,6 +847,22 @@ function setAllTags(tagString) {
     refreshTagDisplay();
   }
   tl.setAllTags = setAllTags;
+
+  /**
+   * Remove tags from allTags and queryTags.
+   * 
+   * @param {string[]} tagString 
+   */
+  function removeTags(tagString) {
+    let tags = tagString.split();
+
+    if(tags.length) {
+      tl.allTags = tl.allTags.filter(item => !tags.includes(item));
+      tl.queryTags = tl.queryTags.filter(item => !tags.includes(item));
+      tl.saveTagsRefresh();
+   }
+  }
+  tl.removeTags = removeTags;
 
   /**
    * Callback for when a data store changes the tagCombos array.
