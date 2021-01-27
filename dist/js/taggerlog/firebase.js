@@ -284,41 +284,34 @@ var taggerlog = taggerlog || {};
      */
     this.findOrphanTags = function(tags) {
       var db = tl.db;
-
-      let storedMatchingTags = [];
       let orphans = [];
 
-      let query = db.collection('diary-entry');
-      query = query.where('uid', '==', tl.loggedInUser.uid);
-
       return new Promise((resolve, reject) => {
-        if(tags.length > 0) {
+        if(tags.length) {
+          let storedTagSet = new Set();
+          let query = db.collection('diary-entry');
+          query = query.where('uid', '==', tl.loggedInUser.uid);
           query = query.where('tag-list', 'array-contains-any', tags);
-        }
-        query.get({source: 'cache'})
-        .then(function(querySnapshot) {
-          querySnapshot.forEach(function(doc) {
-            let data = doc.data();
-            if(!data['deleted']) {
-              let tagList  = data['tag-list'];
-              for(let tag of tagList) {
-                if(!storedMatchingTags.includes(tag) && tags.includes(tag)) {
-                  storedMatchingTags.push(tag);
+
+          query.get({source: 'cache'}).then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+              let data = doc.data();
+              if(!data['deleted']) {
+                for(let tag of data['tag-list']) {
+                  storedTagSet.add(tag);
                 }
               }
-            }
+            })
+            orphans = tags.filter(tag => !storedTagSet.has(tag));
+            resolve(orphans);
           })
-        
-          for(let tag of tags) {
-            if(!storedMatchingTags.includes(tag)) {
-              orphans.push(tag);
-            }
-          }
+          .catch(function(error) {
+            reject(error);
+          });
+        }
+        else {
           resolve(orphans);
-        })
-        .catch(function(error) {
-          reject(error);
-        });
+        }
       });
     }
 
