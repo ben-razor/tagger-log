@@ -209,14 +209,30 @@ var taggerlog = taggerlog || {};
     }
 
     /**
+     * Converts a JSON version of an entry to a javascript object.
+     * 
+     * @param {string} entryJSON 
+     */
+    this.entryFromJSON = function(entryJSON) {
+      let entry = JSON.parse(entryJSON);
+      entry['date'] = new Date(entry['date']);
+      if(entry['date-modified']) {
+        entry['date-modified'] = new Date(entry['date-modified']);
+      }
+      return entry;
+    }
+
+    /**
      * Edit an entry in the firestore.
      * 
      * @param {string} id 
-     * @param {object} currentEntry 
-     * @param {object} newEntry 
+     * @param {object} currentEntryJSON 
+     * @param {object} newEntryJSON
      */
-    this.editEntry = function(id, currentEntry, newEntry) {
+    this.editEntry = function(id, currentEntryJSON, newEntryJSON) {
       let db = tl.db;
+      let currentEntry = this.entryFromJSON(currentEntryJSON);
+      let newEntry = this.entryFromJSON(newEntryJSON);
 
       let tagsRemoved = currentEntry['tag-list'].filter(x => !newEntry['tag-list'].includes(x));
 

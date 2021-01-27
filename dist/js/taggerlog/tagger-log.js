@@ -99,7 +99,7 @@ var taggerlog = taggerlog || {};
     /**
      * Adds an entry to any attached data store.
      * 
-     * @param {object} entryData JSON string 
+     * @param {object} entryDataJSON entry as JSON 
      * @returns {string} The id of the added entry
      */
     this.addEntry = function(entryDataJSON) {
@@ -114,10 +114,13 @@ var taggerlog = taggerlog || {};
 
     /**
      * Edits an entry in any attached data store.
+     * 
+     * @param {object} currentEntryJSON entry as JSON 
+     * @param {object} entryDataJSON entry as JSON 
      */
-    this.editEntry = function(id, currentEntry, entryData) {
+    this.editEntry = function(id, currentEntryJSON, entryDataJSON) {
       if(this.dataStore) {
-        this.dataStore.editEntry(id, currentEntry, entryData);
+        this.dataStore.editEntry(id, currentEntryJSON, entryDataJSON);
       }
     }
 
@@ -752,7 +755,7 @@ var taggerlog = taggerlog || {};
         }
       }
 
-      tl.dataStore.editEntry(id, currentEntry, newEntry);
+      tl.dataStore.editEntry(id, tl.json(currentEntry), tl.json(newEntry));
 
       for(var i = 0; i < tl.entries.length; i++) {
         var entryData = tl.entries[i];
