@@ -99,14 +99,14 @@ var taggerlog = taggerlog || {};
     /**
      * Adds an entry to any attached data store.
      * 
-     * @param {object} entryData 
+     * @param {object} entryData JSON string 
      * @returns {string} The id of the added entry
      */
-    this.addEntry = function(entryData) {
+    this.addEntry = function(entryDataJSON) {
       var entryID = null;
 
       if(this.dataStore) {
-        entryID = this.dataStore.addEntry(entryData)
+        entryID = this.dataStore.addEntry(entryDataJSON)
       }
 
       return entryID;
@@ -360,7 +360,7 @@ var taggerlog = taggerlog || {};
         'tag-list': tags
       }
       
-      entryData['id'] = tl.dataStore.addEntry(entryData);
+      entryData['id'] = tl.dataStore.addEntry(JSON.stringify(entryData));
 
       tl.entries.unshift(entryData);
       updateQueryRelatedTags();

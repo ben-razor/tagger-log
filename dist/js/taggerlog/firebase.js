@@ -190,10 +190,12 @@ var taggerlog = taggerlog || {};
      * 
      * @param {object} entryData 
      */
-    this.addEntry = function(entryData) {
+    this.addEntry = function(entryDataJSON) {
+      let entryData = JSON.parse(entryDataJSON);
       let db = tl.db;
 
       entryData['date-modified'] = this.getCurrentTimestamp();
+      entryData['date'] = new Date(entryData['date']);
       let batch = db.batch();
       let newEntryRef = db.collection('diary-entry').doc();
       let tagsRef = db.collection('diary-tags').doc(tl.loggedInUser.uid);
