@@ -212,6 +212,7 @@ var taggerlog = taggerlog || {};
   function initUI() {
     initAutocomplete();
     initTagSearch();
+    updateLoggedInUI();
   }
 
   /**

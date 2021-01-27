@@ -102,7 +102,6 @@ var taggerlog = taggerlog || {};
 
       let timerID = setTimeout(function() {
         tl.init();
-        tl.updateLoggedInUI();
       }, 2000);
 
       firebase.auth().onAuthStateChanged(function(user) {
@@ -112,13 +111,11 @@ var taggerlog = taggerlog || {};
         if(isNewUser) {
           initNewUser(user).then(function() {
             tl.init();
-            tl.updateLoggedInUI();
           });
           isNewUser = false;
         }
         else {
           tl.init();
-          tl.updateLoggedInUI();
         }
       });
     }
