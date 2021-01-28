@@ -360,6 +360,7 @@ var taggerlog = taggerlog || {};
         uid: loggedInUser.uid,
         entry: entry,
         date: date,
+        deleted: false,
         'tag-list': tags
       }
       

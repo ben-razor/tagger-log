@@ -385,6 +385,30 @@ var taggerlog = taggerlog || {};
         tl.util.logObject(error);
       });
     }
+    
+    tl.addDeletedField = function() {
+      let db = tl.db;
+      let records = [];
+
+      let batch = db.batch();
+
+      db.collection('diary-entry')
+      .where('uid', '==', tl.loggedInUser.uid)
+      .get({source: 'server'}).then(function(querySnapshot) {
+        querySnapshot.forEach(function(doc) {
+          let data = doc.data();
+          console.log(data['deleted']);
+          records.push(doc.data());
+          if(!data['deleted']) {
+            let ref = db.collection("diary-entry").doc(doc.id);
+            batch.update(ref, {'deleted': false});
+          }
+        })
+
+        batch.commit(); 
+        tl.util.logObject(['num records', records.length]);
+      });
+    }
 
     /**
      * Gets all tags from the database.
