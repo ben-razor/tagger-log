@@ -341,7 +341,8 @@ var taggerlog = taggerlog || {};
 
       query.get({source: 'cache'})
       .then(function(querySnapshot) {
-        var mostRecentModify = new Date(1955, 10, 21, 6, 15, 0);
+        var mostRecentModify = null;
+
         querySnapshot.forEach(function(doc) {
           let data = doc.data();
           data['id'] = doc.id;
@@ -350,7 +351,7 @@ var taggerlog = taggerlog || {};
 
           tl.insertEntry(data);
 
-          if(data['date-modified'].getTime() > mostRecentModify.getTime()) {
+          if(!mostRecentModify || data['date-modified'].getTime() > mostRecentModify.getTime()) {
             mostRecentModify = data['date-modified'];
           }
         });
@@ -360,7 +361,7 @@ var taggerlog = taggerlog || {};
 
         query = db.collection('diary-entry').orderBy('date-modified', 'desc');
         query = query.where('uid', '==', loggedInUser.uid);
-        if(tl.entries.length) {
+        if(mostRecentModify) {
           query = query.where('date-modified', '>', mostRecentModify);
         }
 
