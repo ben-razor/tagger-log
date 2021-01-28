@@ -244,7 +244,7 @@ var taggerlog = taggerlog || {};
           if(orphans.length) {
             tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
             tl.queryTags = tl.queryTags.filter(item => !orphans.includes(item));
-            that.getRecentEntries();
+            that.getEntries();
           }
           that.saveTags();
         });
@@ -327,6 +327,7 @@ var taggerlog = taggerlog || {};
 
       let query = db.collection('diary-entry').orderBy('date', 'desc');
       query = query.where('uid', '==', loggedInUser.uid);
+      query = query.where('deleted', '==', false);
 
       if(tl.queryTags.length > 0) {
         query = query.where('tag-list', 'array-contains-any', tl.queryTags);
