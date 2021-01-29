@@ -47,7 +47,7 @@ div.small-header {
 }
 
 .btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
-  background-color: hsl(30, 80%, 40%) !important; 
+  background-color: hsl(30, 100%, 45%) !important; 
   border-color: hsl(30, 90%, 30%) !important;
   color: white;
 }
@@ -448,14 +448,15 @@ div.diary-entry .diary-entry-tags {
   height: 100%;
   width: 80%;
   margin: auto;
-  background-image: url("../img/testimonial/lion-round-5.jpg");
+  background-image: url("../img/testimonial/lion-round-6.jpg");
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
 }
 
 .front-page-main .btn {
-  padding: 0.75rem 3rem;
+  padding: 0.5rem 2rem;
   margin: auto;
-  background-color: hsl(31, 82%, 41%) !important; 
+  background-color: hsl(30, 100%, 45%) !important; 
+  font-size: 150%;
 }
