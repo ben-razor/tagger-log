@@ -35,6 +35,7 @@ div.small-header {
 
 .content {
   min-height: 100vh;
+  height: 100vh;
 }
 
 .main-content {
@@ -227,6 +228,7 @@ div.diary-entry .diary-entry-tags {
   font-family: MarckScript, sans-serif;
   font-display: swap;
   color: hsl(30, 50%, 20%);
+  font-size: 110%;
 }
 
 .big-quote {
@@ -242,11 +244,14 @@ div.diary-entry .diary-entry-tags {
 }
 
 @media (min-width: 600px) {
+  .front-page-main {
+    padding-bottom: 4em;
+  }
   .front-page-main img {
     width: 50%;
   }
   .front-page-main p {
-    font-size: 150%; 
+    font-size: 120%; 
   }
 }
 
@@ -408,4 +413,47 @@ div.diary-entry .diary-entry-tags {
 
 .modernizr.no-indexeddb, .modernizr.no-fetch {
   display: none;
+}
+
+.vc-page-outer {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.vc-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.front-page-main {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  margin: auto;
+  max-width: 40em;
+  max-height: 25em;
+  padding-bottom: 2em;
+  border-radius: 5px;
+}
+
+.front-page-main .image-container {
+  flex: 1 1 auto;
+  border-radius: 5px;
+}
+
+.front-page-main .image {
+  height: 100%;
+  width: 80%;
+  margin: auto;
+  background-image: url("../img/testimonial/lion-round-1.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.front-page-main .btn {
+  margin: auto;
 }
