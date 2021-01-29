@@ -251,7 +251,7 @@ div.diary-entry .diary-entry-tags {
     width: 50%;
   }
   .front-page-main p {
-    font-size: 120%; 
+    font-size: 140%; 
   }
 }
 
@@ -434,7 +434,7 @@ div.diary-entry .diary-entry-tags {
   height: 100%;
   margin: auto;
   max-width: 40em;
-  max-height: 25em;
+  max-height: 34em;
   padding-bottom: 2em;
   border-radius: 5px;
 }

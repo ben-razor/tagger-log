@@ -182,7 +182,7 @@ var taggerlog = taggerlog || {};
    * writing data.
    */
   tl.setDataStore = function(dataStore) {
-    tl.dataStore = new TLDataStoreWrapper(dataStore);
+    tl.dataStore = new TLDataStoreWrapper(dataStore); 
   }
 
   /**
