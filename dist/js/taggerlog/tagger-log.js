@@ -186,12 +186,18 @@ var taggerlog = taggerlog || {};
   }
 
   /**
-   * On load, initialize any attached data stores.
+   * On load, initialize attached data stores.
    */
   $(function() {
-    if(tl.dataStore) {
-      tl.dataStore.init();
+
+    if(window['AndroidInterface']) {
+      tl.setDataStore(window['AndroidInterface']);
     }
+    else {
+      tl.setDataStore(new tl.TLInterfaceFirebase(tl));
+    }
+
+    tl.dataStore.init();
   });
 
   /**

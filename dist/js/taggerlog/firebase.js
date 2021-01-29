@@ -72,7 +72,7 @@ var taggerlog = taggerlog || {};
   }
 
   
-  function TLInterfaceFirebase(tl) {
+  tl.TLInterfaceFirebase = function(tl) {
     let that = this;
 
     /**
@@ -455,12 +455,4 @@ var taggerlog = taggerlog || {};
       return firebase.firestore.FieldValue.serverTimestamp();
     }
   }
-
-  if(window['AndroidInterface']) {
-    tl.setDataStore(window['AndroidInterface']);
-  }
-  else {
-    tl.setDataStore(new TLInterfaceFirebase(tl));
-  }
-
 })(taggerlog);
