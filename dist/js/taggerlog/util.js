@@ -73,4 +73,42 @@ var taggerlog = taggerlog || {};
     });
   }
 
+  /**
+   * JQuery plugin to make elem trigger callback when pulled.
+   * 
+   * @param {function=} callbackStarted Function to call at touch/mouse start (param Event e)
+   * @param {function=} callbackPulling Function to call at touch/mouse move (params Event e, dx, dy)
+   * @param {function=} callbackReleased Function to call when released/left (param Event e)
+   */
+  $.fn.Pullable = function(callbackStarted, callbackPulling, callbackReleased) {
+    return this.each(function() {
+      var $elem = $(this);
+
+      $elem.on('mousedown touchstart', function(e) {
+        e.preventDefault();
+        $elem.data('beingPulled', true);
+        $elem.data('pullX', e.pageX);
+        $elem.data('pullY', e.pageY);
+        if(callbackStarted) {
+          callbackStarted(e);
+        }
+      })
+      .on('mousemove touchmove', function(e) {
+        if($elem.data('beingPulled')) {
+          if(callbackPulling) {
+            let dx = e.pageX - $elem.data('pullX');
+            let dy = e.pageY - $elem.data('pullY');
+
+            callbackPulling(e, dx, dy);
+          }
+        }
+      })
+      .on('mouseup mouseleave touchend', function(e) {
+        $elem.data('beingPulled', false);
+        if(callbackReleased) {
+          callbackReleased(e);
+        }
+      });
+    })
+  }
 })(taggerlog);
