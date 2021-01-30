@@ -531,7 +531,7 @@ var taggerlog = taggerlog || {};
     var tableTemplate = '<div class="diary-entries">{rows}</div>';
     var defaultEntry = $('#elem-no-entries').html();
     var defaultEntryNoMatchingTags = $('#elem-no-entries-for-tags').html();
-    var rowTemplate = `<div class="diary-entry" onclick="taggerlog.entryClicked('{entry-id}')">
+    var rowTemplate = `<div class="diary-entry noselect" onclick="taggerlog.entryClicked(event, '{entry-id}')">
       <div class="diary-entry-text">{entry}</div>
       <div>
         <div class="row">
@@ -585,6 +585,17 @@ var taggerlog = taggerlog || {};
     var tableHTML = tableTemplate.replace('{rows}', rows)        
     var $recentEntriesElem = $('#recent-entries');
     $recentEntriesElem.html(tableHTML);
+
+    $('#recent-entries').Pullable(null, function(e, dx, dy) {
+      if(dy < 80) {
+        let top = `${dy}px`;
+        $('.refresh-spinner').stop();
+        $('.refresh-spinner').css('height', top);
+      }
+    },
+    function(e) {
+      $('.refresh-spinner').animate({'height': "0px"}, 500);
+    })
   }
   tl.refreshEntryDisplay = refreshEntryDisplay;
 
@@ -1257,12 +1268,19 @@ var taggerlog = taggerlog || {};
    * 
    * @param {string} entryID 
    */
-  function entryClicked(entryID) {
-    var selection = window.getSelection();
-    var selecting = selection.toString().length; 
-    
-    if(!selecting) {
-      editEntryStart(entryID);
+  function entryClicked(e, entryID) {
+    var $elem = $(e.target);
+    var $pulledParent = $elem.closest('.pullable');
+    var dragging = $pulledParent.hasClass('pullClick');
+
+    if(!dragging) {
+      var selection = window.getSelection();
+      var selecting = selection.toString().length; 
+      $pulledParent.data('beingPulled', false);
+      
+      if(!selecting) {
+        editEntryStart(entryID);
+      }
     }
   }
   tl.entryClicked = entryClicked;

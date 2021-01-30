@@ -7,6 +7,7 @@ babel dist/js -d dist/js-babel
 rsync -avz ./dist/* ../tagger-log-deploy-temp/dist/
 rsync -avz ./dist/js-babel/ ../tagger-log-deploy-temp/dist/js/
 rsync -avz ./dist/* $android_dir/web/
+rsync -avz ./dist/js-babel/ $android_dir/web/js/
 sed -i "/delete-on-mobile/d" $android_dir/web/index.html
 cd ../tagger-log-deploy-temp
 firebase hosting:channel:deploy babel

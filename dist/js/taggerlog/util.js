@@ -37,6 +37,32 @@ var taggerlog = taggerlog || {};
     console.log(JSON.stringify(obj));
   }
 
+
+  /**
+   * @param {event} e Check if event was touch not mouse
+   */
+  function isTouch(e) {
+    return e.originalEvent && e.originalEvent.touches;
+  }
+  tl.util.isTouch = isTouch;
+
+  /**
+   * Get an object to access pageX and pageY on.
+   * 
+   * Returns event for desktop or e.originalEvent.touches
+   * for mobile.
+   * 
+   * @param {event} e 
+   */
+  function getTouchInfo(e) {
+      var touchInfo = e;
+      if(isTouch(e)) {
+          touchInfo = e.originalEvent.touches[0];
+      }
+      return touchInfo;
+  }
+  tl.util.getTouchInfo = getTouchInfo;
+
   /**
    * JQuery plugin to make elem trigger callback after
    * a specified time.
@@ -76,6 +102,9 @@ var taggerlog = taggerlog || {};
   /**
    * JQuery plugin to make elem trigger callback when pulled.
    * 
+   * Adds the class pullClick to the element so onclick handlers on contained
+   * elements can check and not trigger if this is set in a parent.
+   * 
    * @param {function=} callbackStarted Function to call at touch/mouse start (param Event e)
    * @param {function=} callbackPulling Function to call at touch/mouse move (params Event e, dx, dy)
    * @param {function=} callbackReleased Function to call when released/left (param Event e)
@@ -83,31 +112,62 @@ var taggerlog = taggerlog || {};
   $.fn.Pullable = function(callbackStarted, callbackPulling, callbackReleased) {
     return this.each(function() {
       var $elem = $(this);
-
+      $elem.addClass('pullable');
+      
       $elem.on('mousedown touchstart', function(e) {
-        e.preventDefault();
-        $elem.data('beingPulled', true);
-        $elem.data('pullX', e.pageX);
-        $elem.data('pullY', e.pageY);
+        $elem.data('pullStarted', true);
+        $elem.data('pullStartX', getTouchInfo(e).pageX);
+        $elem.data('pullStartY', getTouchInfo(e).pageY);
         if(callbackStarted) {
           callbackStarted(e);
         }
       })
       .on('mousemove touchmove', function(e) {
-        if($elem.data('beingPulled')) {
+        if($elem.data('pullStarted') || $elem.data('beingPulled')) {
+          $elem.data('pullStarted', false);
+          e.preventDefault();
           if(callbackPulling) {
-            let dx = e.pageX - $elem.data('pullX');
-            let dy = e.pageY - $elem.data('pullY');
+            let pageX = getTouchInfo(e).pageX;
+            let pageY = getTouchInfo(e).pageY;
 
-            callbackPulling(e, dx, dy);
+            let dx = pageX - $elem.data('pullStartX');
+            let dy = pageY - $elem.data('pullStartY');
+
+            let prevX = $elem.data('pullX') || 0;
+            let prevY = $elem.data('pullY') || 0;
+            let dxMove = pageX - prevX;
+            let dyMove = pageY - prevY;
+
+            if(dxMove || dyMove) {
+              $elem.data('beingPulled', true);
+              $elem.addClass('pullClick');
+              callbackPulling(e, dx, dy);
+            }
+
+            $elem.data('pullX', pageX);
+            $elem.data('pullY', pageY);
           }
         }
       })
-      .on('mouseup mouseleave touchend', function(e) {
+      .on('mouseup mouseleave', function(e) {
+        $elem.data('pullStarted', false);
         $elem.data('beingPulled', false);
         if(callbackReleased) {
           callbackReleased(e);
         }
+      })
+      .on('touchend', function(e) {
+        $elem.data('pullStarted', false);
+        $elem.data('beingPulled', false);
+        $elem.removeClass('pullClick');
+        if(callbackReleased) {
+          callbackReleased(e);
+        }
+      })
+      .on('click', function(e) {
+        $elem.data('pullStarted', false);
+        $elem.data('beingPulled', false);
+        $elem.removeClass('pullClick');
       });
     })
   }
