@@ -417,20 +417,32 @@ var taggerlog = taggerlog || {};
     }
 
     /**
-     * Gets all tags from the database.
+     * Calls runTagQuery to get tags and combos from cache first
+     * and then get from server.
      */
     this.getTags = function() {
+      this.runTagQuery('cache');
+      this.runTagQuery('server');
+    }
+
+    /**
+     * Runs query to get tags and tag combos from cache
+     * or server.
+     * 
+     * @param {string} source cache|server
+     */
+    this.runTagQuery = function(source) {
       var db = tl.db;
 
       db.collection('diary-tags').doc(tl.loggedInUser.uid)
-      .get()
+      .get({'source': source})
       .then(function(doc) {
           let data = doc.data();
           let tagString = data['tags'];
           tl.setAllTags(tagString);
 
           db.collection('diary-tag-combos').doc(tl.loggedInUser.uid)
-          .get()
+          .get({'source': source})
           .then(function(doc) {
             let data = doc.data();
             if(data) {
