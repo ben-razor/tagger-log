@@ -591,6 +591,10 @@ var taggerlog = taggerlog || {};
     let triggered = false;
 
     $('#recent-entries').Pullable(function() { triggered = false; }, function(e, dx, dy) {
+      if(!window.scrollY == 0) {
+        return;
+      }
+
       const maxElemHeight = 80;
 
       if(dy >= maxElemHeight) { 

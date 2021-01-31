@@ -330,7 +330,7 @@ var taggerlog = taggerlog || {};
 
       if(doReload) {
         console.log('Full reload!!');
-        this.getEntriesFromServer();
+        this.getEntriesFromServer(null, tl.queryTags);
       }
       else {
         let query = db.collection('diary-entry').orderBy('date', 'desc');
@@ -380,9 +380,10 @@ var taggerlog = taggerlog || {};
      * Refresh all entries from firestore. Optionally starting from a specified
      * modification date.
      * 
-     * @param {Date} startDateTime Get records modified after this date/time.
+     * @param {Date=} startDateTime Get records modified after this date/time.
+     * @param {string[]=} queryTags Get records with these tags
      */
-    this.getEntriesFromServer = function(startDateTime) {
+    this.getEntriesFromServer = function(startDateTime, queryTags) {
       var db = tl.db;
       var loggedInUser = tl.loggedInUser;
       
@@ -390,6 +391,10 @@ var taggerlog = taggerlog || {};
       query = query.where('uid', '==', loggedInUser.uid);
       if(startDateTime) {
         query = query.where('date-modified', '>', startDateTime);
+      }
+
+      if(queryTags) {
+        query = query.where('tag-list', 'array-contains-any', queryTags);
       }
 
       query.get({source: 'server'}).then(function(querySnapshot) {
