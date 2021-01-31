@@ -56,7 +56,8 @@ var taggerlog = taggerlog || {};
               entry: text,
               date: new Date(Date.now() + (numEntries - i) * 100),
               'tag-list': tags,
-              'date-modified': firebase.firestore.FieldValue.serverTimestamp()
+              'date-modified': firebase.firestore.FieldValue.serverTimestamp(),
+              deleted: false
           };
           var docRef = tl.db.collection('diary-entry').doc();
           batch.set(docRef, entryData);

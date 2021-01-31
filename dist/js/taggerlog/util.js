@@ -57,7 +57,7 @@ var taggerlog = taggerlog || {};
   function getTouchInfo(e) {
       var touchInfo = e;
       if(isTouch(e)) {
-          touchInfo = e.originalEvent.touches[0];
+        touchInfo = e.originalEvent.touches[0];
       }
       return touchInfo;
   }
@@ -115,7 +115,6 @@ var taggerlog = taggerlog || {};
       $elem.addClass('pullable');
       
       $elem.on('mousedown touchstart', function(e) {
-        $elem.data('pullStarted', true);
         $elem.data('pullStartX', getTouchInfo(e).pageX);
         $elem.data('pullStartY', getTouchInfo(e).pageY);
         if(callbackStarted) {
@@ -125,10 +124,12 @@ var taggerlog = taggerlog || {};
       .on('mousemove touchmove', function(e) {
         if($elem.data('pullStarted') || $elem.data('beingPulled')) {
           $elem.data('pullStarted', false);
-          e.preventDefault();
+          
           if(callbackPulling) {
             let pageX = getTouchInfo(e).pageX;
             let pageY = getTouchInfo(e).pageY;
+            let clientX = getTouchInfo(e).clientX;
+            let clientY = getTouchInfo(e).clientY;
 
             let dx = pageX - $elem.data('pullStartX');
             let dy = pageY - $elem.data('pullStartY');

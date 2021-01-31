@@ -587,7 +587,13 @@ var taggerlog = taggerlog || {};
     $recentEntriesElem.html(tableHTML);
 
     $('#recent-entries').Pullable(null, function(e, dx, dy) {
-      if(dy < 80) {
+      const maxElemHeight = 80;
+
+      if(dy >= maxElemHeight) { 
+        dy = maxElemHeight;
+      }
+
+      if(dy <= maxElemHeight) { 
         let top = `${dy}px`;
         $('.refresh-spinner').stop();
         $('.refresh-spinner').css('height', top);
