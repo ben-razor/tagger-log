@@ -127,10 +127,12 @@ var taggerlog = taggerlog || {};
     /**
      * Requests attached data store to retrieve all entries
      * matching the current query tags.
+     * 
+     * @param {boolean=} doReload Get all from server, no cache.
      */
-    this.getEntries = function() {
+    this.getEntries = function(doReload) {
       if(this.dataStore) {
-        this.dataStore.getEntries();
+        this.dataStore.getEntries(doReload);
       }
     }
 
@@ -586,11 +588,19 @@ var taggerlog = taggerlog || {};
     var $recentEntriesElem = $('#recent-entries');
     $recentEntriesElem.html(tableHTML);
 
-    $('#recent-entries').Pullable(null, function(e, dx, dy) {
+    let triggered = false;
+
+    $('#recent-entries').Pullable(function() { triggered = false; }, function(e, dx, dy) {
       const maxElemHeight = 80;
 
       if(dy >= maxElemHeight) { 
         dy = maxElemHeight;
+
+        if(!triggered) {
+          console.log('triggered!');
+          tl.dataStore.getEntries(true);
+          triggered = true;
+        }
       }
 
       if(dy <= maxElemHeight) { 

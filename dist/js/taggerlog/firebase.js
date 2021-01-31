@@ -321,71 +321,93 @@ var taggerlog = taggerlog || {};
      * 
      * Tries the cache first, then server for any more recently modified 
      * records.
+     * 
+     * @param {boolean=} doReload Get all from server, no cache.
      */
-    this.getEntries = function() {
+    this.getEntries = function(doReload) {
       var db = tl.db;
       var loggedInUser = tl.loggedInUser;
 
-      let query = db.collection('diary-entry').orderBy('date', 'desc');
-      query = query.where('uid', '==', loggedInUser.uid);
-      query = query.where('deleted', '==', false);
-
-      if(tl.queryTags.length > 0) {
-        query = query.where('tag-list', 'array-contains-any', tl.queryTags);
+      if(doReload) {
+        console.log('Full reload!!');
+        this.getEntriesFromServer();
       }
       else {
-        query = query.limit(10);
-      }
-
-      tl.entries = [];
-      tl.queryRelatedTags = [];
-
-      query.get({source: 'cache'})
-      .then(function(querySnapshot) {
-        var mostRecentModify = null;
-
-        querySnapshot.forEach(function(doc) {
-          let data = doc.data();
-          data['id'] = doc.id;
-          data['date'] = data['date'].toDate();
-          data['date-modified'] = data['date-modified'].toDate();
-
-          tl.insertEntry(data);
-
-          if(!mostRecentModify || data['date-modified'].getTime() > mostRecentModify.getTime()) {
-            mostRecentModify = data['date-modified'];
-          }
-        });
-
-        tl.updateQueryRelatedTags();
-        tl.refreshUI();
-
-        query = db.collection('diary-entry').orderBy('date-modified', 'desc');
+        let query = db.collection('diary-entry').orderBy('date', 'desc');
         query = query.where('uid', '==', loggedInUser.uid);
-        if(mostRecentModify) {
-          query = query.where('date-modified', '>', mostRecentModify);
+        query = query.where('deleted', '==', false);
+
+        if(tl.queryTags.length > 0) {
+          query = query.where('tag-list', 'array-contains-any', tl.queryTags);
+        }
+        else {
+          query = query.limit(10);
         }
 
-        query.get({source: 'server'}).then(function(querySnapshot) {
-          if(querySnapshot.size) {
-            querySnapshot.forEach(function(doc) {
-              let data = doc.data();
-              data['id'] = doc.id;
-              data['date'] = data['date'].toDate();
-              data['date-modified'] = data['date-modified'].toDate();
+        tl.entries = [];
+        tl.queryRelatedTags = [];
 
-              tl.insertEntry(data);
-            });
+        query.get({source: 'cache'})
+        .then(function(querySnapshot) {
+          var mostRecentModify = null;
 
-            tl.updateQueryRelatedTags();
-            tl.refreshUI();
-          }
-          
+          querySnapshot.forEach(function(doc) {
+            let data = doc.data();
+            data['id'] = doc.id;
+            data['date'] = data['date'].toDate();
+            data['date-modified'] = data['date-modified'].toDate();
+
+            tl.insertEntry(data);
+
+            if(!mostRecentModify || data['date-modified'].getTime() > mostRecentModify.getTime()) {
+              mostRecentModify = data['date-modified'];
+            }
+          });
+
+          tl.updateQueryRelatedTags();
           tl.refreshUI();
+
+          that.getEntriesFromServer(mostRecentModify);
+
+        })
+        .catch(function(error) {
+          tl.util.logObject(error);
         });
-      })
-      .catch(function(error) {
-        tl.util.logObject(error);
+      }
+    }
+
+    /**
+     * Refresh all entries from firestore. Optionally starting from a specified
+     * modification date.
+     * 
+     * @param {Date} startDateTime Get records modified after this date/time.
+     */
+    this.getEntriesFromServer = function(startDateTime) {
+      var db = tl.db;
+      var loggedInUser = tl.loggedInUser;
+      
+      let query = db.collection('diary-entry').orderBy('date-modified', 'desc');
+      query = query.where('uid', '==', loggedInUser.uid);
+      if(startDateTime) {
+        query = query.where('date-modified', '>', startDateTime);
+      }
+
+      query.get({source: 'server'}).then(function(querySnapshot) {
+        if(querySnapshot.size) {
+          querySnapshot.forEach(function(doc) {
+            let data = doc.data();
+            data['id'] = doc.id;
+            data['date'] = data['date'].toDate();
+            data['date-modified'] = data['date-modified'].toDate();
+
+            tl.insertEntry(data);
+          });
+
+          tl.updateQueryRelatedTags();
+          tl.refreshUI();
+        }
+
+        tl.refreshUI();
       });
     }
 

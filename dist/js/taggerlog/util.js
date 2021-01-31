@@ -115,6 +115,7 @@ var taggerlog = taggerlog || {};
       $elem.addClass('pullable');
       
       $elem.on('mousedown touchstart', function(e) {
+        $elem.data('pullStarted', true);
         $elem.data('pullStartX', getTouchInfo(e).pageX);
         $elem.data('pullStartY', getTouchInfo(e).pageY);
         if(callbackStarted) {
