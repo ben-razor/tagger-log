@@ -600,15 +600,18 @@ var taggerlog = taggerlog || {};
           console.log('triggered!');
           tl.dataStore.getEntries(true);
           triggered = true;
+          let top = `${dy}px`;
+          $('.refresh-spinner').stop();
+          $('.refresh-spinner').css('height', top);
+          $('.refresh-spinner').delay(1000).animate({'height': "0px"}, 500);
         }
       }
-
-      if(dy <= maxElemHeight) { 
+      else {
         let top = `${dy}px`;
         $('.refresh-spinner').stop();
         $('.refresh-spinner').css('height', top);
       }
-    },
+   },
     function(e) {
       $('.refresh-spinner').animate({'height': "0px"}, 500);
     })
