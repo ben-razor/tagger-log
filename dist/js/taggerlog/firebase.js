@@ -393,7 +393,7 @@ var taggerlog = taggerlog || {};
         query = query.where('date-modified', '>', startDateTime);
       }
 
-      if(queryTags) {
+      if(queryTags && queryTags.length > 0) {
         query = query.where('tag-list', 'array-contains-any', queryTags);
       }
 

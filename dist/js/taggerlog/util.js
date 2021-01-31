@@ -76,11 +76,39 @@ var taggerlog = taggerlog || {};
       var $elem = $(this);
       var id = null;
       var holdTriggered = false;
+      let startPos = [0,0];
       $elem.data('heldDown', false);
       $elem.on('mousedown touchstart', function(e) {
         $elem.data('heldDown', true);
+        let touchInfo = getTouchInfo(e);
+        startPos = [touchInfo.screenX, touchInfo.screenY];
         id = setTimeout(function($holdButton) { holdTriggered = true; callbackHold($holdButton); }, time, $elem);
-      }).on('mouseup mouseleave touchend', function(e) {
+      })
+      .on('mousemove touchmove', function(e) {
+        if($elem.data('heldDown')) {
+          let touchInfo = getTouchInfo(e);
+          const DRAG_DIST = 10;
+          let dx = Math.abs(touchInfo.screenX - startPos[0]);
+          let dy = Math.abs(touchInfo.screenY - startPos[1]);
+          let dragged = dx > DRAG_DIST || dy > DRAG_DIST;
+
+          if(dragged) {
+            $elem.data('heldDown', false);
+            if(id) {
+              clearTimeout(id);
+            }
+            holdTriggered = false;
+          }
+        }
+      })
+      .on('mouseleave', function(e) {
+        if(id) {
+          clearTimeout(id);
+        }
+        $elem.data('heldDown', false);
+        holdTriggered = false;
+      })
+      .on('mouseup touchend', function(e) {
         var $elem = $(e.target);
         if($elem.data('heldDown')) {
           $elem.data('heldDown', false);

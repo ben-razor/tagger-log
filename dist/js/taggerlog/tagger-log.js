@@ -1122,7 +1122,7 @@ var taggerlog = taggerlog || {};
       $panelTagCombos.removeClass('d-none');
     }
 
-    $('.diary-tag').HoldButton(250, function($holdButton) {
+    $('.diary-tag').HoldButton(350, function($holdButton) {
       var tag = $holdButton.data('tag');
       toggleTag(tag, true);
     }, function($holdButton) {
