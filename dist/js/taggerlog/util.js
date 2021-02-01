@@ -73,11 +73,13 @@ var taggerlog = taggerlog || {};
    */
   $.fn.HoldButton = function(time, callbackHold, callbackEarly) {
     return this.each(function() {
-      var $elem = $(this);
-      var id = null;
-      var holdTriggered = false;
+      let $elem = $(this);
+      let id = null;
+      let holdTriggered = false;
       let startPos = [0,0];
+
       $elem.data('heldDown', false);
+
       $elem.on('mousedown touchstart', function(e) {
         $elem.data('heldDown', true);
         let touchInfo = getTouchInfo(e);
@@ -87,7 +89,7 @@ var taggerlog = taggerlog || {};
       .on('mousemove touchmove', function(e) {
         if($elem.data('heldDown')) {
           let touchInfo = getTouchInfo(e);
-          const DRAG_DIST = 10;
+          const DRAG_DIST = 8;
           let dx = Math.abs(touchInfo.screenX - startPos[0]);
           let dy = Math.abs(touchInfo.screenY - startPos[1]);
           let dragged = dx > DRAG_DIST || dy > DRAG_DIST;
@@ -102,10 +104,10 @@ var taggerlog = taggerlog || {};
         }
       })
       .on('mouseleave', function(e) {
+        $elem.data('heldDown', false);
         if(id) {
           clearTimeout(id);
         }
-        $elem.data('heldDown', false);
         holdTriggered = false;
       })
       .on('mouseup touchend', function(e) {
@@ -143,6 +145,7 @@ var taggerlog = taggerlog || {};
       $elem.addClass('pullable');
       
       $elem.on('mousedown touchstart', function(e) {
+        $('body').css('overscroll-behavior', 'none');
         $elem.data('pullStarted', true);
         $elem.data('pullStartX', getTouchInfo(e).pageX);
         $elem.data('pullStartY', getTouchInfo(e).pageY);
@@ -157,8 +160,6 @@ var taggerlog = taggerlog || {};
           if(callbackPulling) {
             let pageX = getTouchInfo(e).pageX;
             let pageY = getTouchInfo(e).pageY;
-            let clientX = getTouchInfo(e).clientX;
-            let clientY = getTouchInfo(e).clientY;
 
             let dx = pageX - $elem.data('pullStartX');
             let dy = pageY - $elem.data('pullStartY');
@@ -180,6 +181,7 @@ var taggerlog = taggerlog || {};
         }
       })
       .on('mouseup mouseleave', function(e) {
+        $('body').css('overscroll-behavior', '');
         $elem.data('pullStarted', false);
         $elem.data('beingPulled', false);
         if(callbackReleased) {
@@ -187,6 +189,7 @@ var taggerlog = taggerlog || {};
         }
       })
       .on('touchend', function(e) {
+        $('body').css('overscroll-behavior', '');
         $elem.data('pullStarted', false);
         $elem.data('beingPulled', false);
         $elem.removeClass('pullClick');
