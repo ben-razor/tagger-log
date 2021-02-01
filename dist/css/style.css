@@ -214,10 +214,6 @@ div.diary-entry .diary-entry-tags {
   width: 80%;
 }
 
-.front-page-main img {
-  width: 70%;
-}
-
 .front-page-main h1 {
   font-size: 3rem;
   font-family: Lato, sans-serif;
@@ -439,6 +435,13 @@ div.diary-entry .diary-entry-tags {
   border-radius: 5px;
 }
 
+.front-page-main img.testimonial {
+  width: 70%;
+  border: 20px solid hsl(30, 99%, 45%); 
+  background-color: white;
+  margin: auto;
+}
+
 .front-page-main .image-container {
   flex: 1 1 auto;
   border-radius: 5px;
@@ -448,7 +451,7 @@ div.diary-entry .diary-entry-tags {
   height: 100%;
   width: 80%;
   margin: auto;
-  background-image: url("../img/testimonial/lion-round-6.jpg");
+  background-image: url("../img/testimonial/lion-round-9.jpg");
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
