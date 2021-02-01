@@ -205,13 +205,17 @@ var taggerlog = taggerlog || {};
   /**
    * Perform initializations after log in.
    */
-  function init() {
+  function init(isNewUser) {
     tl.entries = [];
     tl.allTags = [];
     tl.tagCombos = [];
     tl.queryRelatedTags = [];
     excludeTags = [];
     tl.queryTags = [];
+
+    if(isNewUser) {
+      initNewUser();
+    }
 
     initUI();
   }
@@ -241,6 +245,30 @@ var taggerlog = taggerlog || {};
     this.dataStore.logOut();
   }
   tl.logOut = logOut;
+
+  /**
+   * Creates getting started entries for new users.
+   */
+  function initNewUser() {
+    var numEntries = tl.gettingStartedEntries.length;
+
+    for(var i = 0; i < numEntries; i++) {
+      var entry = tl.gettingStartedEntries[i];
+      var text = entry['text'];
+      var tags = entry['tags'];
+
+      const entryData = {
+          uid: tl.loggedInUser.uid,
+          entry: text,
+          date: new Date(Date.now() + (numEntries - i) * 100),
+          'tag-list': tags,
+          deleted: false
+      };
+
+      addEntryAndTags(entryData);
+    }
+  }
+  tl.initNewUser = initNewUser;
 
   /**
    * Set user data.
@@ -356,8 +384,6 @@ var taggerlog = taggerlog || {};
     else {
       tags = tl.cleanTags(tags);
       tags = processTagList(tags);
-      tl.allTags = tl.allTags.concat(tags);
-      tl.allTags = processTagList(tl.allTags);
 
       let date = new Date();
       if(dateStr && dateStr !== '') {
@@ -371,10 +397,9 @@ var taggerlog = taggerlog || {};
         deleted: false,
         'tag-list': tags
       }
-      
-      entryData['id'] = tl.dataStore.addEntry(JSON.stringify(entryData));
 
-      tl.entries.unshift(entryData);
+      addEntryAndTags(entryData); 
+
       updateQueryRelatedTags();
       refreshUI();
       $spinner.hide();
@@ -384,6 +409,24 @@ var taggerlog = taggerlog || {};
     }
   }
   tl.diaryAddEntry = diaryAddEntry;
+
+  /**
+   * Takes an entry, passes it to datastore for saving.
+   * 
+   * Updates the entry list and tags locally.
+   * 
+   * @param {object} entryData 
+   */
+  function addEntryAndTags(entryData) {
+    let tags = entryData['tag-list'];
+
+    tl.allTags = tl.allTags.concat(tags);
+    tl.allTags = processTagList(tl.allTags);
+    entryData['id'] = tl.dataStore.addEntry(JSON.stringify(entryData));
+
+    tl.entries.unshift(entryData);
+  }
+  tl.addEntryAndTags = addEntryAndTags;
 
   /**
    * Display errors with entry and update entry submit UI.

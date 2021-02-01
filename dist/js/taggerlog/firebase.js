@@ -17,38 +17,13 @@ var taggerlog = taggerlog || {};
   var isNewUser = false;
 
   function initNewUser(user) {
-    var gettingStartedEntries = [
-        {
-            'text': 'This is an entry with some tags. Tap it to edit or delete.',
-            'tags': ['getting-started', 'entries']
-        },
-        {
-            'text': 'The tags panel has the tags from all your entries. ' +
-                'Clicking a tag makes it green and ACTIVE.',
-            'tags': ['getting-started', 'tags']
-        },
-        {
-            'text': 'Only entries matching active tags are displayed.\n\n'  +
-                'Active tags are automatically added to new entries.',
-            'tags': ['getting-started', 'tags', 'entries']
-        },
-        {
-            'text': 'Holding a tag turns it red, making it EXCLUDED.\n\n' +
-                    'Entries tagged with excluded tags are not displayed.',
-            'tags': ['getting-started', 'tags', 'entries']
-        },
-        {
-            'text': 'This is demo application. Any entries will be lost!',
-            'tags': ['warning', 'this-is-a-demo'] 
-        },
-    ];
 
     return new Promise(function(resolve) {
       var allTags = [];
-      var numEntries = gettingStartedEntries.length;
+      var numEntries = tl.gettingStartedEntries.length;
       var batch = tl.db.batch();
       for(var i = 0; i < numEntries; i++) {
-          var entry = gettingStartedEntries[i];
+          var entry = tl.gettingStartedEntries[i];
           var text = entry['text'];
           var tags = entry['tags'];
           const entryData = {
@@ -72,7 +47,6 @@ var taggerlog = taggerlog || {};
     });
   }
 
-  
   tl.TLInterfaceFirebase = function(tl) {
     let that = this;
 
@@ -103,16 +77,14 @@ var taggerlog = taggerlog || {};
 
       let timerID = setTimeout(function() {
         tl.init();
-      }, 2000);
+      }, 3000);
 
       firebase.auth().onAuthStateChanged(function(user) {
         tl.loggedInUser = user;
         clearTimeout(timerID);
 
         if(isNewUser) {
-          initNewUser(user).then(function() {
-            tl.init();
-          });
+          tl.init(isNewUser);
           isNewUser = false;
         }
         else {
