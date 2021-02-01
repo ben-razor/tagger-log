@@ -316,9 +316,6 @@ var taggerlog = taggerlog || {};
           query = query.limit(10);
         }
 
-        tl.entries = [];
-        tl.queryRelatedTags = [];
-
         query.get({source: 'cache'})
         .then(function(querySnapshot) {
           var mostRecentModify = null;
@@ -327,12 +324,17 @@ var taggerlog = taggerlog || {};
             let data = doc.data();
             data['id'] = doc.id;
             data['date'] = data['date'].toDate();
-            data['date-modified'] = data['date-modified'].toDate();
+            
+            // Records can be returned with date-modified set to null 
+            // if serverTimestamp has not yet been calculated
+            if(data['date-modified']) {
+              data['date-modified'] = data['date-modified'].toDate();
 
-            tl.insertEntry(data);
+              tl.insertEntry(data);
 
-            if(!mostRecentModify || data['date-modified'].getTime() > mostRecentModify.getTime()) {
-              mostRecentModify = data['date-modified'];
+              if(!mostRecentModify || data['date-modified'].getTime() > mostRecentModify.getTime()) {
+                mostRecentModify = data['date-modified'];
+              }
             }
           });
 
@@ -375,9 +377,13 @@ var taggerlog = taggerlog || {};
             let data = doc.data();
             data['id'] = doc.id;
             data['date'] = data['date'].toDate();
-            data['date-modified'] = data['date-modified'].toDate();
 
-            tl.insertEntry(data);
+            // Records can be returned with date-modified set to null 
+            // if serverTimestamp has not yet been calculated
+            if(data['date-modified']) {
+              data['date-modified'] = data['date-modified'].toDate();
+              tl.insertEntry(data);
+            }
           });
 
           tl.updateQueryRelatedTags();
