@@ -260,7 +260,7 @@ var taggerlog = taggerlog || {};
       const entryData = {
           uid: tl.loggedInUser.uid,
           entry: text,
-          date: new Date(Date.now() + (numEntries - i) * 100),
+          date: new Date(Date.now() - i * 1000),
           'tag-list': tags,
           deleted: false
       };
@@ -424,7 +424,7 @@ var taggerlog = taggerlog || {};
     tl.allTags = processTagList(tl.allTags);
     entryData['id'] = tl.dataStore.addEntry(JSON.stringify(entryData));
 
-    tl.entries.unshift(entryData);
+    insertEntry(entryData);
   }
   tl.addEntryAndTags = addEntryAndTags;
 
