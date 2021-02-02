@@ -1223,8 +1223,8 @@ var taggerlog = taggerlog || {};
    */
   function updateLoggedInUI() {
     var loggedInUser = tl.loggedInUser;
-    $('.loading-show').addClass('d-none');
-    $('.loaded-show').removeClass('d-none');
+    $('.loading-show').fadeOut(600, () => $(this).addClass('d-none'));
+    $('.loaded-show').removeClass('d-none').hide().delay(300).fadeIn(1000);
     if(tl.loggedInUser) {
       var uid = tl.loggedInUser.uid;
       var storedQueryTags = getItem('query-tags-' + uid);
@@ -1237,7 +1237,7 @@ var taggerlog = taggerlog || {};
         excludeTags = JSON.parse(storedExcludeTags);
       }
 
-      $('.logged-in-show').removeClass('d-none').hide().fadeIn(1000);
+      $('.logged-in-show').removeClass('d-none');
       $('.logged-out-show').addClass('d-none');
 
       var photoURL = config['default-user-img'];
