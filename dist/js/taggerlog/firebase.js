@@ -77,7 +77,7 @@ var taggerlog = taggerlog || {};
 
       let timerID = setTimeout(function() {
         tl.init();
-      }, 3000);
+      }, 5000);
 
       firebase.auth().onAuthStateChanged(function(user) {
         tl.loggedInUser = user;

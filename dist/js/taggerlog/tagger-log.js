@@ -1236,7 +1236,7 @@ var taggerlog = taggerlog || {};
         excludeTags = JSON.parse(storedExcludeTags);
       }
 
-      $('.logged-in-show').removeClass('d-none');
+      $('.logged-in-show').removeClass('d-none').hide().fadeIn(1000);
       $('.logged-out-show').addClass('d-none');
 
       var photoURL = config['default-user-img'];
