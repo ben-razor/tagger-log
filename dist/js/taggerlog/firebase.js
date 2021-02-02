@@ -370,6 +370,9 @@ var taggerlog = taggerlog || {};
       if(queryTags && queryTags.length > 0) {
         query = query.where('tag-list', 'array-contains-any', queryTags);
       }
+      else {
+        query = query.limit(10);
+      }
 
       query.get({source: 'server'}).then(function(querySnapshot) {
         if(querySnapshot.size) {
