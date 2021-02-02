@@ -438,7 +438,7 @@ var taggerlog = taggerlog || {};
     var $button = $('#diary-submit');
     var errorReason = errors[0].reason;
     
-    tl.util.logError('Error adding document: ' + errorReason);
+    tl.util.logObject(['Error adding document:', errors]);
     $spinner.hide();
     $button.prop('disabled', false);
     showErrorAlert(errors[0]);

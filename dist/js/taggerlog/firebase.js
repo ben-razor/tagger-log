@@ -175,7 +175,7 @@ var taggerlog = taggerlog || {};
       batch.set(newEntryRef, entryData);
       batch.set(tagsRef, {tags: tl.allTags.join()})
       batch.commit().catch(function(error) {
-        tl.entryFailedUpdateUI(error);
+        tl.entryFailedUpdateUI([error]);
       });
 
       return newEntryRef.id;
