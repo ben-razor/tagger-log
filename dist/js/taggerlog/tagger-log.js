@@ -651,6 +651,7 @@ var taggerlog = taggerlog || {};
           $('.refresh-spinner').stop();
           $('.refresh-spinner').css('height', top);
           $('.refresh-spinner').delay(1000).animate({'height': "0px"}, 500);
+          $('#recent-entries').fadeOut(400).fadeIn(1500);
         }
       }
       else {
