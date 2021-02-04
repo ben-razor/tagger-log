@@ -301,7 +301,6 @@ var taggerlog = taggerlog || {};
       var loggedInUser = tl.loggedInUser;
 
       if(doReload) {
-        console.log('Full reload!!');
         this.getEntriesFromServer(null, tl.queryTags);
       }
       else {

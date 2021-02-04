@@ -486,3 +486,7 @@ div.diary-entry .diary-entry-tags {
   cursor: pointer;
   cursor: hand;
 }
+
+.noScroll {
+  touch-action: none;
+}

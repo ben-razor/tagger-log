@@ -644,10 +644,11 @@ var taggerlog = taggerlog || {};
         dy = maxElemHeight;
 
         if(!triggered) {
-          console.log('triggered!');
-          tl.dataStore.getEntries(true);
+          setTimeout(function() {
+            tl.dataStore.getEntries(true);
+          }, 800);
           triggered = true;
-          let top = `${dy}px`;
+          let top = `${maxElemHeight}px`;
           $('.refresh-spinner').stop();
           $('.refresh-spinner').css('height', top);
           $('.refresh-spinner').delay(1000).animate({'height': "0px"}, 500);
