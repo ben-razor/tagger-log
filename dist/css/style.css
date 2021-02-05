@@ -418,7 +418,7 @@ div.diary-entry .diary-entry-tags {
 }
 
 .vc-content {
-  flex: 1 1 auto;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
 }
@@ -448,6 +448,7 @@ div.diary-entry .diary-entry-tags {
 }
 
 .front-page-main .image {
+  min-height: 160px;
   height: 100%;
   width: 80%;
   margin: auto;
