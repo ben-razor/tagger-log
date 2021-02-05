@@ -662,6 +662,7 @@ var taggerlog = taggerlog || {};
       }
    },
     function(e) {
+      console.log('pull end cb');
       $('.refresh-spinner').animate({'height': "0px"}, 500);
     })
   }

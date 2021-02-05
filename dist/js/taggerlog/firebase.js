@@ -340,7 +340,7 @@ var taggerlog = taggerlog || {};
           tl.updateQueryRelatedTags();
           tl.refreshUI();
 
-          that.getEntriesFromServer(mostRecentModify);
+          that.getEntriesFromServer(mostRecentModify, tl.queryTags);
 
         })
         .catch(function(error) {
