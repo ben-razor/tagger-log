@@ -492,3 +492,11 @@ div.diary-entry .diary-entry-tags {
 .noScroll {
   touch-action: none;
 }
+
+.tagAutoComplete {
+  word-spacing: .3em;
+}
+
+.tagAutoComplete:placeholder-shown {
+  word-spacing: unset;
+}
