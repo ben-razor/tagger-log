@@ -632,13 +632,15 @@ var taggerlog = taggerlog || {};
     $recentEntriesElem.html(tableHTML);
 
     let triggered = false;
-
+    let $refreshSpinner = $('.refresh-spinner');
+    var refreshSpinner = $refreshSpinner.get()[0];
+    
     $('#recent-entries').Pullable(function() { triggered = false; }, function(e, dx, dy) {
-      if(!window.scrollY == 0) {
+      if(window.scrollY >= 1) {
         return;
       }
 
-      const maxElemHeight = 80;
+      const maxElemHeight = 100;
 
       if(dy >= maxElemHeight) { 
         dy = maxElemHeight;
@@ -649,21 +651,24 @@ var taggerlog = taggerlog || {};
           }, 800);
           triggered = true;
           let top = `${maxElemHeight}px`;
-          $('.refresh-spinner').stop();
-          $('.refresh-spinner').css('height', top);
-          $('.refresh-spinner').delay(1000).animate({'height': "0px"}, 500);
+          $refreshSpinner.stop();
+          $refreshSpinner.css('height', top);
+          $refreshSpinner.delay(1000).animate({'height': "0px"}, 500);
           $('#recent-entries').fadeOut(400).fadeIn(1500);
         }
       }
       else {
+        if(dy < 16) dy = 16;
+
         let top = `${dy}px`;
-        $('.refresh-spinner').stop();
-        $('.refresh-spinner').css('height', top);
+        if($refreshSpinner.is(':animated')) {
+          $refreshSpinner.stop();
+        }
+        refreshSpinner.style.height = top;
       }
    },
     function(e) {
-      console.log('pull end cb');
-      $('.refresh-spinner').animate({'height': "0px"}, 500);
+      $refreshSpinner.animate({'height': "0px"}, 500);
     })
   }
   tl.refreshEntryDisplay = refreshEntryDisplay;

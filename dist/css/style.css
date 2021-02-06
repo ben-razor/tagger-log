@@ -468,6 +468,7 @@ div.diary-entry .diary-entry-tags {
 .refresh-spinner {
   width: 100%;
   height: 0;
+  display: flex;
   background-image: url(../img/svg/Wedges-5s-200px.svg);
   background-size: contain;
   background-position: center ;
