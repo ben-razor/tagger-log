@@ -114,16 +114,19 @@ var taggerlog = taggerlog || {};
   /**
    * Converts csv of tags to array of lower case tags.
    * Replaces spaces and underscores with dashes.
+   * 
    * @param {string} tagStr A CSV string of tags.
-   * @param {boolean} clean Whether to sanitize tag.
+   * @param {boolean=} clean Whether to sanitize tag (default true).
+   * @param {string=} separator Separator to use instead of ','
    * @returns {string[]}
    */
-  function tagCSVToTags(tagStr, clean) {
-    if(clean === undefined) clean = true;
+  function tagCSVToTags(tagStr, clean, separator) {
+    if(clean === undefined || clean === null) clean = true;
+    if(separator === undefined || separator === null) separator = ',';
 
     let tagSet = new Set();
 
-    let tagStrings = tagStr.split(',');
+    let tagStrings = tagStr.split(separator);
     for(var i = 0; i < tagStrings.length; i++) {
       var tag = tagStrings[i]
       tagStrings[i] = tag.trim();

@@ -369,7 +369,7 @@ var taggerlog = taggerlog || {};
     }
     var $elem = $form.find('[name=new-tag]');
     var tagStr = $elem.val();
-    var tags = tl.tagCSVToTags(tagStr, false);
+    var tags = tl.tagCSVToTags(tagStr, false, " ");
     tags = tags.concat(tl.queryTags);
 
     let tagVerifier = new tl.TagVerifier(tl.tagErrorConfig);
@@ -817,7 +817,7 @@ var taggerlog = taggerlog || {};
     var $elem = $form.find('[name=new-tag]');
     var tagStr = $elem.val();
 
-    var tags = tl.tagCSVToTags(tagStr, false);
+    var tags = tl.tagCSVToTags(tagStr, false, " ");
     tags = tags.concat(formTags);
     tags = processTagList(tags);
 
@@ -1581,12 +1581,9 @@ var taggerlog = taggerlog || {};
     var hadComma = false;
     $('.tagAutoComplete').textcomplete([
       {
-        match: /(^|\b)(,*\w{1,})$/,// /(^|\w)(\w*(?:\s*\w*))$/,
+        match: /(^|\b)(\w{1,})$/,// /(^|\w)(\w*(?:\s*\w*))$/,
         // #4 - Function called at every new keystroke
         search(query, callback) {
-          if(query.charAt(0) === ',') {
-            hadComma = true;
-          }
           query = query.replaceAll(',', '');
           var matching = tl.allTags.filter(tag => tag.startsWith(query.toLowerCase()));
           var numMatches = matching.length;
@@ -1604,13 +1601,7 @@ var taggerlog = taggerlog || {};
         },
         // #6 - Template used to display the selected result in the textarea
         replace: function(word, e) {
-          if(hadComma) {
-            hadComma = false;
-            return ',' + word + ',';
-          }
-          else {
-            return word + ',';
-          }
+          return word + ' ';
         }
       }
     ]);
