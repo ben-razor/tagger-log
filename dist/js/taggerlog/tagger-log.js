@@ -951,7 +951,7 @@ var taggerlog = taggerlog || {};
     if(tags.length) {
       tl.allTags = tl.allTags.filter(item => !tags.includes(item));
       tl.queryTags = tl.queryTags.filter(item => !tags.includes(item));
-      tl.saveTagsRefresh();
+      tl.queryRelatedTags = tl.queryRelatedTags.filter(item => !tags.includes(item));
    }
   }
   tl.removeTags = removeTags;
