@@ -142,6 +142,7 @@ var taggerlog = taggerlog || {};
             if(orphans.length) {
               tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
               tl.queryTags = tl.queryTags.filter(item => !orphans.includes(item));
+              tl.queryRelatedTags = tl.queryRelatedTags.filter(item => !orphans.includes(item));
               that.saveTags();
             }
           });
@@ -217,6 +218,7 @@ var taggerlog = taggerlog || {};
           if(orphans.length) {
             tl.allTags = tl.allTags.filter(item => !orphans.includes(item));
             tl.queryTags = tl.queryTags.filter(item => !orphans.includes(item));
+            tl.queryRelatedTags = tl.queryRelatedTags.filter(item => !orphans.includes(item));
             that.getEntries();
           }
           that.saveTags();
@@ -241,7 +243,7 @@ var taggerlog = taggerlog || {};
 
       db.collection('diary-tags').doc(loggedInUser.uid).set({tags: tl.allTags.join()})
       .then(function(docRef) {
-        tl.saveTagsRefresh();
+        that.getEntries();
       })
       .catch(function(error) {
         tl.util.logError(error);

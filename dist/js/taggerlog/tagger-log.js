@@ -463,7 +463,7 @@ var taggerlog = taggerlog || {};
    * Refresh user interface after all tags saved.
    */
   function saveTagsRefresh() {
-    tl.refreshTagDisplay();
+    refreshTagDisplay();
   }
   tl.saveTagsRefresh = saveTagsRefresh;
 
