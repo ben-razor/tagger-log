@@ -144,14 +144,24 @@ div.diary-entry .diary-entry-tags {
   cursor: hand;
 }
 
+#diary-tag-combos {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .diary-tag-combo {
-  display: inline-block; 
+  display: flex; 
+  align-items: center;
+  justify-content: center;
   padding: 5px;
-  margin: 2px 1px 2px 0px;
+  margin: 2px 3px 2px 0px;
   border-radius: 3px;
   border: 1px solid hsl(30, 60%, 40%);
   color: hsl(30, 60%, 40%);
   background-color: white;
+  flex: 1 1 30%;
+  text-align: center;
+  font-variant: all-small-caps;
 }
 
 .diary-tag-combo:hover {
