@@ -636,7 +636,7 @@ var taggerlog = taggerlog || {};
     var refreshSpinner = $refreshSpinner.get()[0];
     
     $('#recent-entries').Pullable(function() { triggered = false; }, function(e, dx, dy) {
-      if(window.scrollY >= 1) {
+      if(window.scrollY >= 1 || dy <= 0) {
         return;
       }
 
