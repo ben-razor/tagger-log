@@ -1209,12 +1209,23 @@ var taggerlog = taggerlog || {};
   }
 
   /**
+   * Check if screen is bigger than bootstrap large breakpoint
+   */
+  function screenIsLarge() {
+    let width = $(window).width();
+    return width >= 992;
+  }
+  
+  /**
    * Hides elements on mobile html while typing in case
    * the static controls hide the form.
    */
   function hideWhenTyping() {
-    $('#diary-controls-toggle').removeClass('d-none').addClass('d-flex');
-    $('#diary-controls').removeClass('d-flex').addClass('d-none');
+    if(!screenIsLarge()) {
+      $('#diary-controls-toggle').removeClass('d-none').addClass('d-flex');
+      $('#diary-controls').removeClass('d-flex').addClass('d-none');
+      $('.header').hide();
+    }
   }
 
   /**
@@ -1223,6 +1234,7 @@ var taggerlog = taggerlog || {};
   function showWhenNotTyping() {
     $('#diary-controls-toggle').addClass('d-none').removeClass('d-flex');
     $('#diary-controls').removeClass('d-none').addClass('d-flex');
+    $('.header').show();
   }
 
   /**

@@ -293,6 +293,12 @@ div.diary-entry .diary-entry-tags {
   box-shadow: none;
 }
 
+#diary-controls-toggle {
+  width: 5em;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
 #diary-controls-toggle div {
   width: 60px; 
   height: 60px; 
