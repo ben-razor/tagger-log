@@ -203,6 +203,13 @@ var taggerlog = taggerlog || {};
   });
 
   /**
+   * Check if running in app.
+   */
+  function isMobileApp() {
+    return 'AndroidInterface' in window;
+  }
+
+  /**
    * Perform initializations after log in.
    */
   function init(isNewUser) {
@@ -1279,9 +1286,14 @@ var taggerlog = taggerlog || {};
       $inputs.focus(function() {
         hideWhenTyping();
       });
-      $inputs.on('blur', function() {
-        showWhenNotTyping();
+      $inputs.on('blur', function(e) {
+        // Allow time for any onclick to trigger before changing interface
+        // otherwise add entry button click may be cancelled.
+        setTimeout(function() {
+          onKeyboardHidden();
+        }, 100);
       });
+
       $('#diary-controls-toggle').on('click', function(event) {
         event.stopPropagation();
         showWhenNotTyping();
@@ -1297,6 +1309,11 @@ var taggerlog = taggerlog || {};
     }
   }
   tl.updateLoggedInUI = updateLoggedInUI;
+
+  function onKeyboardHidden() {
+    showWhenNotTyping();
+  }
+  tl.onKeyboardHidden = onKeyboardHidden;
 
   /**
    * For smaller displays, shows the new entry form and hides tags display.
