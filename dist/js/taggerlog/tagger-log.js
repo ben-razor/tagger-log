@@ -740,7 +740,7 @@ var taggerlog = taggerlog || {};
         return match;
       }
     });
-    entry = entry.replaceAll('*', '&bull;');
+    entry = entry.replaceAll(/(^\s*)\*/gm, '$1&bull;');
     entry = entry.replaceAll('\n', '<br />');
     return entry;
   }
