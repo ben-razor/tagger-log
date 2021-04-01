@@ -1377,13 +1377,8 @@ var taggerlog = taggerlog || {};
     var dragging = $pulledParent.hasClass('pullClick');
 
     if(!dragging) {
-      var selection = window.getSelection();
-      var selecting = selection.toString().length; 
       $pulledParent.data('beingPulled', false);
-      
-      if(!selecting) {
-        editEntryStart(entryID);
-      }
+      editEntryStart(entryID);
     }
   }
   tl.entryClicked = entryClicked;
