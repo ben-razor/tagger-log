@@ -139,6 +139,14 @@ div.diary-entry .diary-entry-tags {
   user-select:none;-o-user-select:none;
 }
 
+h3.diary-entry-heading-3 {
+  font-size: 1.3em;
+  text-transform: uppercase;
+  color: hsl(30deg, 70%, 60%);
+  margin: 0 0 0.3em 0;
+  padding: 0;
+}
+
 .diary-tag:hover {
   cursor: pointer;
   cursor: hand;
@@ -156,9 +164,9 @@ div.diary-entry .diary-entry-tags {
   padding: 5px;
   margin: 2px 3px 2px 0px;
   border-radius: 3px;
-  border: 1px solid hsl(30, 60%, 40%);
-  color: hsl(30, 60%, 40%);
-  background-color: white;
+  border: 1px solid hsl(30, 20%, 20%);
+  color: hsl(30, 58%, 70%);
+  background-color:hsl(30, 50%, 10%);
   flex: 1 1 30%;
   text-align: center;
   font-variant: all-small-caps;
@@ -171,6 +179,7 @@ div.diary-entry .diary-entry-tags {
 
 .diary-tag-combo.active {
   background-color: hsl(30, 60%, 40%);
+  border: 1px solid hsl(30, 20%, 20%);
   color: white;
 }
 

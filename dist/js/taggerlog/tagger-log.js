@@ -740,6 +740,12 @@ var taggerlog = taggerlog || {};
         return match;
       }
     });
+    entry = entry.replace(/^(###.*)$/gm, function(match) {
+      var heading = match.replace(/^###/, '').trim();
+      heading = heading.replace('\n', '');
+      return '<h3 class="diary-entry-heading-3">' + heading + '</h3>';
+    });
+    entry = entry.replace('</h3>\n', '</h3>');
     entry = entry.replaceAll(/^\*/gm, '&bull;');
     entry = entry.replaceAll('\n', '<br />');
     return entry;
