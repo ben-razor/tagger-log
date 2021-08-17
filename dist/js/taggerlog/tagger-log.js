@@ -730,25 +730,37 @@ var taggerlog = taggerlog || {};
    */
   function postFormatEntry(entry) {
     var linkTemplate = '<a href="{link}" target="_blank" onclick="event.stopPropagation();">{linkDisplay}</a>';
-    entry = entry.replace(/^(http.*)$/gm, function(match) {
-      if(isValidURL(match)) {
-        var line = linkTemplate.replace('{link}', match);
-        line = line.replace('{linkDisplay}', match);
-        return line;
+    var lines = entry.split('\n');
+    var newEntry = '';
+    for(var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if(line.startsWith('http')) {
+        line = line.replace(/^(http.*)/, function(match) {
+          if(isValidURL(match)) {
+            var line = linkTemplate.replace('{link}', match);
+            line = line.replace('{linkDisplay}', match);
+            return line + '\n';
+          }
+          else {
+            return match + '\n';
+          }
+        });
+      }
+      else if(line.startsWith('###')) {
+        line = line.replace(/^(###.*)/, function(match) {
+          var heading = match.replace(/^###/, '').trim();
+          heading = heading.replace('\n', '');
+          return '<h3 class="diary-entry-heading-3">' + heading + '</h3>';
+        });
       }
       else {
-        return match;
+        line = line.replace(/\*\*(.*?)\*\*/g, (r) => '<b>' + r.replaceAll('*', '') + '</b>')
+        line = line.replace(/\*(.*?)\*/g, (r) => '<i>' + r.replaceAll('*', '') + '</i>')
+        line = line.replace(/^\*/, '&bull;') + '\n';
       }
-    });
-    entry = entry.replace(/^(###.*)$/gm, function(match) {
-      var heading = match.replace(/^###/, '').trim();
-      heading = heading.replace('\n', '');
-      return '<h3 class="diary-entry-heading-3">' + heading + '</h3>';
-    });
-    entry = entry.replace('</h3>\n', '</h3>');
-    entry = entry.replaceAll(/^\*/gm, '&bull;');
-    entry = entry.replaceAll('\n', '<br />');
-    return entry;
+      newEntry += line;
+    }
+    return newEntry;
   }
 
   /**
