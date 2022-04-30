@@ -288,7 +288,9 @@
               <div class="fancy-finish pb-3 d-lg-none" onclick="taggerlog.toggleNewEntry(event)"></div>
             </div>
             <div class="col-lg-4" id="diary-entries-panel">
-              <h3 class="">Entries</h3>        
+              <h3 class="pressable" onclick="taggerlog.doManualRefresh()">Entries 
+                <span class="refresh-indicator">&#8635;</span>
+              </h3>        
               <div class="refresh-spinner" id="refresh-spinner"></div>
               <div id="recent-entries">
                 Entries will appear here.

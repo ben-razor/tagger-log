@@ -179,7 +179,7 @@ h3.diary-entry-heading-3 {
 }
 
 .diary-tag-combo.active {
-  background-color: hsl(30, 60%, 40%);
+  background-color: hsl(30, 100%, 42%);
   color: white;
   box-shadow: 0px 0px 6px #946d3c;
 }
@@ -525,4 +525,12 @@ h3.diary-entry-heading-3 {
 
 .tagAutoComplete:placeholder-shown {
   word-spacing: unset;
+}
+
+.pressable {
+  cursor: pointer;
+}
+
+.refresh-indicator {
+  opacity: 0.32;
 }

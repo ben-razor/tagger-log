@@ -5,7 +5,7 @@ var taggerlog = taggerlog || {};
 (function(tl) {
 
   var config = {
-    "max-length": 400,
+    "max-length": 600,
     "combo-title-max-length": 30,
     "default-user-img": "img/ui/default-user-1-sm.png"
   };
@@ -1590,6 +1590,17 @@ var taggerlog = taggerlog || {};
     }
   }
   tl.entryChanged = entryChanged;
+
+  function doManualRefresh() {
+    let $refreshSpinner = $('.refresh-spinner');
+
+    tl.dataStore.getEntries(true);
+    $refreshSpinner.stop();
+    $refreshSpinner.css('height', "50px");
+    $refreshSpinner.delay(100).animate({'height': "0px"}, 800).stop();
+    $('#recent-entries').fadeOut(400).fadeIn(1500);
+  }
+  tl.doManualRefresh = doManualRefresh;
 
   /**
    * Initialises the entry text areas to call entryChanged
