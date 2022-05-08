@@ -2,7 +2,8 @@
     "name": "tagger-log",
     "version": "1.0.0",
     "scripts": {
-        "build": "./process-js"
+        "build": "./process-js",
+        "deploy": "firebase deploy --only hosting"
     },
     "devDependencies": {
         "@babel/cli": "^7.12.10",

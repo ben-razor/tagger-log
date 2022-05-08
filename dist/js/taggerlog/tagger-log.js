@@ -729,7 +729,8 @@ var taggerlog = taggerlog || {};
    * @param {string} entry 
    */
   function postFormatEntry(entry) {
-    var linkTemplate = '<a href="{link}" target="_blank" onclick="event.stopPropagation();">{linkDisplay}</a>';
+    var linkTemplate = '<a class="diary-entry-link" href="{link}" target="_blank" onclick="event.stopPropagation();">{linkDisplay}</a>';
+    var imageTemplate = '<img class="diary-entry-image" src="{linkDisplay}" width="200" />';
     var lines = entry.split('\n');
     var newEntry = '';
     for(var i = 0; i < lines.length; i++) {
@@ -737,9 +738,24 @@ var taggerlog = taggerlog || {};
       if(line.startsWith('http')) {
         line = line.replace(/^(http.*)/, function(match) {
           if(isValidURL(match)) {
-            var line = linkTemplate.replace('{link}', match);
-            line = line.replace('{linkDisplay}', match);
-            return line + '\n';
+            var l = '';
+            console.log(JSON.stringify(['ibb', line]));
+            
+            let isImgBBImg = line.includes('ibb');
+
+            // Make sure it's an image link and not just a link to the viewer page
+            if(!line.split('/')[4]) {
+              isImgBBImg = false;
+            }
+
+            if(isImgBBImg) { 
+              l = imageTemplate.replace('{link}', match);
+            }
+            else {
+              l = linkTemplate.replace('{link}', match);
+            }
+            l = l.replace('{linkDisplay}', match);
+            return l + '\n';
           }
           else {
             return match + '\n';
