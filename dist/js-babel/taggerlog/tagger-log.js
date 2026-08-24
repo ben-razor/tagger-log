@@ -1,1 +1,1777 @@
-'use strict';function _createForOfIteratorHelper(a,b){var c;if("undefined"==typeof Symbol||null==a[Symbol.iterator]){if(Array.isArray(a)||(c=_unsupportedIterableToArray(a))||b&&a&&"number"==typeof a.length){c&&(a=c);var d=0,e=function(){};return{s:e,n:function n(){return d>=a.length?{done:!0}:{done:!1,value:a[d++]}},e:function e(a){throw a},f:e}}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}var f,g=!0,h=!1;return{s:function s(){c=a[Symbol.iterator]()},n:function n(){var a=c.next();return g=a.done,a},e:function e(a){h=!0,f=a},f:function f(){try{g||null==c.return||c.return()}finally{if(h)throw f}}}}function _unsupportedIterableToArray(a,b){if(a){if("string"==typeof a)return _arrayLikeToArray(a,b);var c=Object.prototype.toString.call(a).slice(8,-1);return"Object"===c&&a.constructor&&(c=a.constructor.name),"Map"===c||"Set"===c?Array.from(a):"Arguments"===c||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(c)?_arrayLikeToArray(a,b):void 0}}function _arrayLikeToArray(a,b){(null==b||b>a.length)&&(b=a.length);for(var c=0,d=Array(b);c<b;c++)d[c]=a[c];return d}var taggerlog=taggerlog||{};(function(a){function b(a){this.dataStore=a,this.init=function(){this.dataStore&&this.dataStore.init()},this.deleteEntry=function(a){this.dataStore&&this.dataStore.deleteEntry(a)},this.addEntry=function(a){var b=null;return this.dataStore&&(b=this.dataStore.addEntry(a)),b},this.editEntry=function(a,b,c){this.dataStore&&this.dataStore.editEntry(a,b,c)},this.getEntries=function(a){this.dataStore&&this.dataStore.getEntries(a)},this.getTags=function(){this.dataStore&&this.dataStore.getTags()},this.saveTagCombos=function(){this.dataStore&&this.dataStore.saveTagCombos()},this.logIn=function(){this.dataStore&&this.dataStore.logIn()},this.logOut=function(){this.dataStore&&this.dataStore.logOut()}}function c(){I(),K(),C()}function d(){for(var b=a.gettingStartedEntries.length,c=0;c<b;c++){var d=a.gettingStartedEntries[c],e=d.text,f=d.tags,g={uid:a.loggedInUser.uid,entry:e,date:new Date(Date.now()-1e3*c),"tag-list":f,deleted:!1};h(g)}}function e(b,c){c===void 0&&(c="entry-error");var d=b.reason,e=$("#text-entry-error-"+d).html(),f=a.tagErrorConfig[d];if(f){var g=f.data;if(g)for(var h in g)e=e.replaceAll("{"+h+"}",g[h])}var i=$("#"+c+"-alert"),j=$("#"+c+"-text");j.html(e),i.fadeTo(2e3,1e3).delay(2e3).slideUp(500)}function f(a){var b=$("#text-"+a).html(),c=$("#entry-alert"),d=$("#entry-alert-text");d.html(b),c.fadeTo(2e3,1e3).slideUp(500)}function g(a){this.reason=a}function h(b){var c=b["tag-list"];a.allTags=a.allTags.concat(c),a.allTags=u(a.allTags),b.id=a.dataStore.addEntry(JSON.stringify(b)),k(b)}function i(b,c,d){var c=$("#add-entry-spinner"),d=$("#diary-submit"),f=b[0].reason;a.util.logObject(["Error adding document:",b]),c.hide(),d.prop("disabled",!1),e(b[0])}function j(b){var c=$("#edit-entry-spinner"),d=$("#edit-entry-button");a.util.logError(JSON.stringify(b)),c.hide(),d.prop("disabled",!1),e(b[0],"edit-error")}function k(b,c){var d=!1;c&&(b=JSON.parse(b),b.date=new Date(b.date),b["date-modified"]=new Date(b["date-modified"]));for(var e,f=0;f<a.entries.length;f++)if(e=a.entries[f],e.id===b.id){d=!0,b.deleted?a.entries.splice(f,1):a.entries[f]=b;break}if(!d&&!b.deleted){for(var g,h=!1,f=0;f<a.entries.length;f++)if(g=a.entries[f],b.date.getTime()>=g.date.getTime()){a.entries.splice(f,0,b),h=!0;break}h||a.entries.push(b)}}function l(){a.queryRelatedTags=[];for(var b=0<a.queryTags.length,c=0;c<a.entries.length;c++){var d=a.entries[c],e=d["tag-list"],f=!0;b&&!a.queryTags.every(function(a){return 0<=e.indexOf(a)})&&(f=!1),f&&b&&(a.queryRelatedTags=a.queryRelatedTags.concat(e))}return b&&(a.queryRelatedTags=u(a.queryRelatedTags)),a.queryRelatedTags}function m(){n(),w(),I()}function n(){for(var b="<div class=\"diary-entries\">{rows}</div>",c=$("#elem-no-entries").html(),d=$("#elem-no-entries-for-tags").html(),e="",f=0<a.queryTags.length,g=0<M.length,h=0;h<a.entries.length;h++){var j=a.entries[h],k=a.cleanTags(j["tag-list"]),l=k.join(),m=!0;if(f&&!a.queryTags.every(function(a){return 0<=k.indexOf(a)})&&(m=!1),g&&k.some(function(a){return 0<=M.indexOf(a)})&&(m=!1),m){var v="<div class=\"diary-entry noselect\" onclick=\"taggerlog.entryClicked(event, '{entry-id}')\">\n      <div class=\"diary-entry-text\">{entry}</div>\n      <div>\n        <div class=\"row\">\n          <div class=\"diary-entry-controls col-3\"></div>\n          <div class=\"diary-entry-tags col-9 text-truncate\">{tags}</div>\n        </div>\n      </div>\n    </div>".replace("{date}",j.date);v=v.replace("{entry}",s(p(j.entry))),v=v.replace("{entry-id}",j.id),v=v.replace("{tags}",l),e+=v}}var n=0<a.queryTags.length||0<M.length;""==e&&(n?e=d:e=c);var o=b.replace("{rows}",e),q=$("#recent-entries");q.html(o);var r=!1,t=$(".refresh-spinner"),u=t.get()[0];$("#recent-entries").Pullable(function(){r=!1},function(b,c,d){if(!(1<=window.scrollY||0>=d)){if(!(100<=d)){16>d&&(d=16);var e="".concat(d,"px");t.is(":animated")&&t.stop(),u.style.height=e}else if(d=100,!r){setTimeout(function(){a.dataStore.getEntries(!0)},800),r=!0;"".concat(100,"px");t.stop(),t.css("height","100px"),t.delay(1e3).animate({height:"0px"},500),$("#recent-entries").fadeOut(400).fadeIn(1500)}}},function(){t.animate({height:"0px"},500)})}function o(a){return a=new Option(a).innerHTML,a}function p(a){return a=o(a),a}function q(a){return a=DOMPurify.sanitize(a),a=a.replace(/[\r\n\t]/g,""),a}function r(a){var b=a.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,63}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);return null!==b}function s(a){for(var b,c=a.split("\n"),d="",e=0;e<c.length;e++)b=c[e],b.startsWith("http")?b=b.replace(/^(http.*)/,function(a){if(r(a)){var c="";console.log(JSON.stringify(["ibb",b]));var d=b.includes("ibb");return b.split("/")[4]||(d=!1),c=d?"<img class=\"diary-entry-image\" src=\"{linkDisplay}\" width=\"200\" />".replace("{link}",a):"<a class=\"diary-entry-link\" href=\"{link}\" target=\"_blank\" onclick=\"event.stopPropagation();\">{linkDisplay}</a>".replace("{link}",a),c=c.replace("{linkDisplay}",a),c+"\n"}return a+"\n"}):b.startsWith("###")?b=b.replace(/^(###.*)/,function(a){var b=a.replace(/^###/,"").trim();return b=b.replace("\n",""),"<h3 class=\"diary-entry-heading-3\">"+b+"</h3>"}):(b=b.replace(/\*\*(.*?)\*\*/g,function(a){return"<b>"+a.replaceAll("*","")+"</b>"}),b=b.replace(/\*(.*?)\*/g,function(a){return"<i>"+a.replaceAll("*","")+"</i>"}),b=b.replace(/^\*/,"&bull;")+"\n"),d+=b;return d}function t(b){for(var c=null,d=0;d<a.entries.length&&(c=a.entries[d],c.id!==b);d++);var e=c,f=$("#edit-entry-form"),g=f.find("textarea[name=diary-entry]"),h=f.find("[name=diary-date]");g.val(e.entry);var j=e.date;h[0].valueAsNumber=j.getTime(),$("#edit-entry-button").data("id",b),$("#delete-entry-button-on-popup").data("id",b);for(var k=e["tag-list"],l=$("#elem-diary-tag-edit").html(),m="",n="",d=0;d<k.length;d++)m=l.replaceAll("{tag}",a.cleanTag(k[d])),m=m.replace("{selected}","selected"),n+=m;$("#diary-edit-entry-tags").html(n),f.find("[name=new-tag]").val(""),$("#edit-entry-date").removeClass("show"),$("#editEntryModal").on("shown.bs.modal",function(){$("#editEntryModal").find("[name=diary-entry]").focus()}),H(),$("#editEntryModal").modal()}function u(a){for(var b=new Set(a),c=Array.from(b).sort(),d=a.length-1;0<=d;d--)""==c[d]&&c.splice(d,1);return c}function v(b,c){var d=a.queryTags.indexOf(b),e=-1!=d,f=M.indexOf(b),g=-1!=f,h=a.queryTags[0];c?(e&&a.queryTags.splice(d,1),g?M.splice(f,1):M.push(b)):(!e&&!g&&a.queryTags.push(b),e&&a.queryTags.splice(d,1),g&&M.splice(f,1));var i=a.queryTags[0],j=a.entries.length&&i===h;l(),J(),j?m():a.dataStore.getEntries()}function w(){var b=$("#elem-diary-tag").html(),c=$("#elem-diary-tag-display").html(),d="",e="",f=[],g="",h=a.allTags;a.queryRelatedTags.length&&(h=a.queryRelatedTags),7<h.length-a.queryTags.length?($(".tl-header-search-container").removeClass("d-none"),N&&(h=h.filter(function(a){return a.startsWith(N.toLowerCase())}))):($(".tl-header-search-container").addClass("d-none"),J());var j=$("#elem-no-tags").html();if(a.loggedInUser){var k=a.loggedInUser.uid;x("query-tags-"+k,a.queryTags),x("exclude-tags-"+k,M)}for(var l="",m="",n=0;n<a.queryTags.length;n++)l=c.replaceAll("{tag}",a.cleanTag(a.queryTags[n])),l=l.replace("{selected}","selected"),m+=l;$("#diary-entry-active-tags").html(m);for(var o,p="",r=h.length,n=0;n<a.queryTags.length;n++)o=a.cleanTag(a.queryTags[n]),g=b.replaceAll("{tag}",o),g=g.replaceAll("{selected}","selected"),e+=g,f.push(o);for(var o,n=0;n<M.length;n++)o=a.cleanTag(M[n]),g=b.replaceAll("{tag}",a.cleanTag(o)),g=g.replaceAll("{selected}","exclude"),e+=g,f.push("!"+o);var s=f.join(",");if(f.length&&(a.tagCombos.find(function(a){return a.tags===s})?$("#star-tags-main").addClass("starred"):$("#star-tags-main").removeClass("starred")),h.length){var t,u=_createForOfIteratorHelper(h);try{for(u.s();!(t=u.n()).done;){var o=t.value;if(!(-1<a.queryTags.indexOf(o)||-1<M.indexOf(o))){var w=!a.queryTags.length&&!M.length;w&&7<r&&p&&o.charAt(0)!=p.charAt(0)&&(d+="<br />"),g=b.replaceAll("{tag}",a.cleanTag(o)),g=g.replaceAll("{selected}",""),d+=g,p=o}}}catch(a){u.e(a)}finally{u.f()}}else d=j;var y=$("#panel-all-tags").addClass("d-none"),z=$("#panel-selected-tags").addClass("d-none"),A=$("#panel-related-tags").addClass("d-none"),B=$("#diary-related-tags");e?(z.removeClass("d-none"),$("#diary-selected-tags").html(e),$("#diary-tags").html(""),d&&(A.removeClass("d-none"),B.html(d))):(y.removeClass("d-none"),$("#diary-tags").html(d));var C=$("#panel-tag-combos").addClass("d-none"),D=$("#diary-tag-combos");if(a.tagCombos.length){for(var E="",F=$("#elem-diary-tag-combos").html(),n=0;n<a.tagCombos.length;n++){var G=a.tagCombos[n].tags,H=a.tagCombos[n].title,I=F.replaceAll("{tag}",G);I=I.replaceAll("{tag-string}",q(H)),I=G===s?I.replaceAll("{active}","active"):I.replaceAll("{active}",""),E+=I}D.html(E),C.removeClass("d-none")}$(".diary-tag").HoldButton(350,function(a){var b=a.data("tag");v(b,!0)},function(a){var b=a.data("tag");v(b)})}function x(b,c){if(a.loggedInUser){var d=a.loggedInUser.uid;window.localStorage.setItem(d+b,JSON.stringify(c))}}function y(b){if(a.loggedInUser){var c=a.loggedInUser.uid;return window.localStorage.getItem(c+b)}}function z(){var a=$(window).width();return 992<=a}function A(){z()||($("#diary-controls-toggle").removeClass("d-none").addClass("d-flex"),$("#diary-controls").removeClass("d-flex").addClass("d-none"),$(".header").hide())}function B(){$("#diary-controls-toggle").addClass("d-none").removeClass("d-flex"),$("#diary-controls").removeClass("d-none").addClass("d-flex"),$(".header").show()}function C(){var b=this,c=a.loggedInUser;if($(".loading-show").fadeOut(600,function(){return $(b).addClass("d-none")}),$(".loaded-show").removeClass("d-none").hide().delay(300).fadeIn(1e3),a.loggedInUser){var d=a.loggedInUser.uid,e=y("query-tags-"+d),f=y("exclude-tags-"+d);e&&(a.queryTags=JSON.parse(e)),f&&(M=JSON.parse(f)),$(".logged-in-show").removeClass("d-none"),$(".logged-out-show").addClass("d-none");var g=L["default-user-img"];$("#header-user-img").on("error",function(){$(this).attr("src",L["default-user-img"])}),c.photoURL&&(g=c.photoURL),$("#header-user-img").attr("src",g),$("#header-user-name").html(c.displayName),$("#header-user-email").html(c.email),$("#diary-controls").removeClass("d-none").addClass("d-flex");var h=$("input[type=text], textarea");h.focus(function(){A()}),h.on("blur",function(){setTimeout(function(){D()},100)}),$("#diary-controls-toggle").on("click",function(a){a.stopPropagation(),B()}),a.dataStore.getEntries(),a.dataStore.getTags()}else $(".logged-in-show").addClass("d-none"),$(".logged-out-show").removeClass("d-none"),$("#diary-controls").removeClass("d-flex").addClass("d-none")}function D(){B()}function E(a){var b=$("#"+a),c=b.find(".diary-tag"),d=[];c.each(function(){var a=$(this),b=a.data("tag");a.hasClass("exclude")&&(b="!"+b),d.push(b)});var e=d.join(",");return e}function F(b){var c=$(b),d=c.data("tag"),e=d.split(","),f=a.queryTags[0],g=!1;if(c.hasClass("active"))M=[],a.queryTags=[],c.removeClass("active"),$(".selected-tags-star").removeClass("starred");else{a.queryTags=[],M=[];for(var h,j=0;j<e.length;j++)h=e[j],h.startsWith("!")?M.push(h.substring(1)):a.queryTags.push(h);var k=a.queryTags[0];g=a.entries.length&&k===f}J(),l(),g?m():a.dataStore.getEntries()}function G(a){var b=$(a),c=b.data("countElem"),d=$("#"+c),e=b.data("entry-type"),f=[e,"max-length"].join("-"),g=L[f],h=b.val().length;d.removeClass("max warning");h>g-g/10?(d.html(h+"/"+g),d.removeClass("d-none"),h>=g?d.addClass("max"):d.addClass("warning")):d.addClass("d-none")}function H(){var b=$(".entry-count");b.on("change keyup input",function(a){G($(a.target))}),b.each(function(){var b=$(this),c="max-length",d=b.data("entryType");d&&(c=d+"-"+c);var e=a.config[c];b.attr("maxlength",e),G(this)})}function I(){$(".tagAutoComplete").textcomplete([{match:/(^|\b)(\w{1,})$/,search:function search(b,c){b=b.replaceAll(",","");var d=a.allTags.filter(function(a){return a.startsWith(b.toLowerCase())}),e=d.length;d=d.slice(0,5),c(d);var f=$(".textcomplete-dropdown");d.length<e&&!f.find(".textcomplete-morematches").length&&f.html(f.html()+"<li class=\"textcomplete-morematches\">...</li>")},template:function template(a){return a},replace:function replace(a){return a+" "}}])}function J(){N="",$(".tl-header-search").val(N)}function K(){J(),$(".tl-header-search").on("input",function(){N=$(this).val().trim(),w()})}var L={"max-length":600,"combo-title-max-length":30,"default-user-img":"img/ui/default-user-1-sm.png"};a.config=L,a.entries=[],a.allTags=[],a.queryTags=[];var M=[];a.queryRelatedTags=[],a.tagCombos=[];var N="";a.json=function(a){return JSON.stringify(a)},a.dataStore=new b,a.setDataStore=function(c){a.dataStore=new b(c)},$(function(){window.AndroidInterface?a.setDataStore(window.AndroidInterface):a.setDataStore(new a.TLInterfaceFirebase(a)),a.dataStore.init()}),a.init=function(b){a.entries=[],a.allTags=[],a.tagCombos=[],a.queryRelatedTags=[],M=[],a.queryTags=[],b&&d(),c()},a.logIn=function(){this.dataStore.logIn()},a.logOut=function(){this.dataStore.logOut()},a.initNewUser=d,a.setUser=function(b){a.loggedInUser=b,a.updateLoggedInUI()},a.showAlert=f,a.showAlert=f,a.diaryAddEntry=function(b){var c=a.loggedInUser,d=$("#add-entry-spinner"),e=$("#diary-submit");d.show(),e.prop("disabled",!0);var j=$(b),k=j.find("textarea[name=diary-entry]"),n=k.val().substring(0,L["max-length"]),o=j.find("[name=diary-date]").val(),p=[];n||p.push(new g("entry-empty"));var q=j.find("[name=new-tag]"),r=q.val(),s=a.tagCSVToTags(r,!1," ");s=s.concat(a.queryTags);var t=new a.TagVerifier(a.tagErrorConfig);if(t.verifyTags(s),t.errors.length&&(p=p.concat(t.errors)),p.length)i(p,d,e);else{s=a.cleanTags(s),s=u(s);var v=new Date;o&&""!==o&&(v=new Date(o));var w={uid:c.uid,entry:n,date:v,deleted:!1,"tag-list":s};h(w),l(),m(),d.hide(),e.prop("disabled",!1),f("entry-added-alert"),k.val("")}},a.addEntryAndTags=h,a.entryFailedUpdateUI=i,a.saveTagsRefresh=function(){w()},a.insertEntry=k,a.updateQueryRelatedTags=l,a.refreshUI=m,a.refreshEntryDisplay=n;a.editEntryStart=t,a.editEntry=function(b){var c=$("#edit-entry-spinner"),d=$("#edit-entry-button");c.show(),d.prop("disabled",!0);var e=$("#edit-entry-form"),h=e.find("textarea[name=diary-entry]").val().substring(0,L["max-length"]),k=e.find("[name=diary-date]"),l=[];h||l.push(new g("entry-empty"));var n=[],o=[],p=$("#diary-edit-entry-tags").find(".diary-tag");p.each(function(){var a=$(this);a.hasClass("selected")?n.push(a.data("tag")):o.push(a.data("tag"))});var q=e.find("[name=new-tag]"),r=q.val(),s=a.tagCSVToTags(r,!1," ");s=s.concat(n),s=u(s);var t=new a.TagVerifier(a.tagErrorConfig);if(t.verifyTags(s),t.errors.length&&(l=l.concat(t.errors)),l.length)j(l);else{a.allTags=a.allTags.concat(s),a.allTags=u(a.allTags);var v={entry:h,"tag-list":s},w=new Date(k.val());v.date=w;for(var x=null,y=0;y<a.entries.length;y++)a.entries[y].id===b&&(x=a.entries[y]);a.dataStore.editEntry(b,a.json(x),a.json(v));for(var z,y=0;y<a.entries.length;y++)if(z=a.entries[y],z.id==b){v.id=b,v.date=w,a.entries[y]=v;break}m(),c.hide(),d.prop("disabled",!1),$("#editEntryModal").modal("hide"),f("entry-edited-alert")}},a.deleteEntryStart=function(a){$("#delete-entry-button").data("id",a),$("#editEntryModal").modal("hide"),$("#deleteEntryModal").modal()},a.deleteEntry=function(b){var c=$("#delete-entry-spinner");c.show(),a.dataStore.deleteEntry(b),f("entry-deleted-alert");for(var d,e=0;e<a.entries.length;e++)if(d=a.entries[e],d.id==b){a.entries.splice(e,1);break}n(),c.hide(),$("#deleteEntryModal").modal("hide")},a.processTagList=u,a.setAllTags=function(b){var c=[];b&&(c=u(b.split(","))),a.allTags=c,w()},a.removeTags=function(b){var c=b.split();c.length&&(a.allTags=a.allTags.filter(function(a){return!c.includes(a)}),a.queryTags=a.queryTags.filter(function(a){return!c.includes(a)}),a.queryRelatedTags=a.queryRelatedTags.filter(function(a){return!c.includes(a)}))},a.setTagCombos=function(b,c){c&&(b=JSON.parse(b)),a.tagCombos=b,w()},a.toggleTag=v,a.toggleEditTag=function(a){var b=$("#diary-tag-edit-"+a);b.hasClass("selected")?b.removeClass("selected"):b.addClass("selected")},a.refreshTagDisplay=w,a.updateLoggedInUI=C,a.onKeyboardHidden=D,a.toggleNewEntry=function(){var a=$("#diary-new-entry-panel"),b=$("#diary-tags-panel"),c=$("#diary-entries-panel"),d=$("#diary-control-new-entry"),e=$("#diary-control-tags");a.hasClass("collapse")?(a.removeClass("collapse"),c.removeClass("collapse"),b.addClass("collapse"),d.removeClass("inactive"),e.addClass("inactive"),$("#diary-new-entry").find("[name=diary-entry]").focus()):(a.addClass("collapse"),c.removeClass("collapse"),d.addClass("inactive")),window.scrollTo(0,0)},a.toggleTags=function(){var a=$("#diary-tags-panel"),b=$("#diary-new-entry-panel"),c=$("#diary-control-new-entry"),d=$("#diary-control-tags");a.hasClass("collapse")?(a.removeClass("collapse"),b.addClass("collapse"),c.addClass("inactive"),d.removeClass("inactive")):(a.addClass("collapse"),d.addClass("inactive")),window.scrollTo(0,0)},a.entryClicked=function(a,b){var c=$(a.target),d=c.closest(".pullable"),e=d.hasClass("pullClick");e||(d.data("beingPulled",!1),t(b))},a.starTagsStart=function(b){var c=$(b),d=c.data("tagsElem"),e=E(d),f=a.tagCombos.find(function(a){return a.tags===e});f===void 0?($("#star-tags-modal").on("shown.bs.modal",function(){$("#star-tags-form").find("[name=title]").val("").focus(),H()}),$("#star-tags-modal").modal()):(a.tagCombos=a.tagCombos.filter(function(a){return a.tags!==e}),a.dataStore.saveTagCombos(),c.removeClass("starred"),w())},a.starTags=function(b){var c=$(b),d=c.data("tagsElem"),f=$("#"+d),h=f.find(".diary-tag"),i=$("#star-tags-form").find("[name=title").val(),j=q(i);if(i!==j)e(new g("starred-title-invalid"),"star-tags-error");else if(!i)e(new g("starred-title-empty"),"star-tags-error");else{i=j.trim().substring(0,a.config["combo-title-max-length"]);var k=[];h.each(function(){var a=$(this),b=a.data("tag");a.hasClass("exclude")&&(b="!"+b),k.push(b)});var l=k.join(",");a.tagCombos.unshift({title:i,tags:l}),c.addClass("starred"),w(),$("#star-tags-modal").modal("hide"),a.dataStore.saveTagCombos()}},a.getTagCombos=function(){return a.tagCombos},a.selectCombo=F,a.entryChanged=G,a.doManualRefresh=function(){var b=$(".refresh-spinner");a.dataStore.getEntries(!0),b.stop(),b.css("height","50px"),b.delay(100).animate({height:"0px"},800).stop(),$("#recent-entries").fadeOut(400).fadeIn(1500)},H(),I(),K()})(taggerlog);
+'use strict';
+/** @suppress {duplicate} */
+
+var taggerlog = taggerlog || {};
+
+(function (tl) {
+  var config = {
+    "max-length": 600,
+    "combo-title-max-length": 30,
+    "default-user-img": "img/ui/default-user-1-sm.png"
+  };
+  tl.config = config;
+  /**
+   * The entry data for the currently active tags.
+   * @type {object[]}
+   */
+
+  tl.entries = [];
+  /**
+   * All the tags currently stored with entries. Sorted and unique.
+   * @type {string[]}
+   */
+
+  tl.allTags = [];
+  /**
+   * The 'active' tags which limit displayed entries and are auto 
+   * attached to new entries. Sorted and unique.
+   * @type {string[]}
+   */
+
+  tl.queryTags = [];
+  /**
+   * Entries with a tag in excludeTags will not be displayed.
+   * Sorted and unique.
+   * @type {string[]}
+   */
+
+  var excludeTags = [];
+  /**
+   * Tags that are used on any entry that the queryTags are also used
+   * on, includes the queryTags themselves. Sorted and unique.
+   * @type {string[]}
+   */
+
+  tl.queryRelatedTags = [];
+  /**
+   * An array of starred tag combinations with titles.
+   * 
+   * E.g. [
+   *   { 'title': 'Web', 'tags': 'dev,web' }, 
+   *   { 'title': 'Cymbals', 'tags': 'audio,drums,cymbals' }
+   * ]
+   * 
+   * @type {string[]}
+   */
+
+  tl.tagCombos = [];
+  /**
+   * Search term to limit the displayed tags.
+   */
+
+  var tagSearch = '';
+  /**
+   * Helper method to convert an object to JSON.
+   * 
+   * @param {object} data 
+   */
+
+  tl.json = function (data) {
+    return JSON.stringify(data);
+  };
+  /**
+   * Default data store used to wrap any specific data store
+   * and only forward messages if one is set.
+   * 
+   * @param {object} dataStore 
+   */
+
+
+  function TLDataStoreWrapper(dataStore) {
+    this.dataStore = dataStore;
+    /**
+     * Calls init on any attached data store.
+     */
+
+    this.init = function () {
+      if (this.dataStore) {
+        this.dataStore.init();
+      }
+    };
+    /**
+     * Calls deleteEntry on any attached data store.
+     * 
+     * @param {string} id 
+     */
+
+
+    this.deleteEntry = function (id) {
+      if (this.dataStore) {
+        this.dataStore.deleteEntry(id);
+      }
+    };
+    /**
+     * Adds an entry to any attached data store.
+     * 
+     * @param {object} entryDataJSON entry as JSON 
+     * @returns {string} The id of the added entry
+     */
+
+
+    this.addEntry = function (entryDataJSON) {
+      var entryID = null;
+
+      if (this.dataStore) {
+        entryID = this.dataStore.addEntry(entryDataJSON);
+      }
+
+      return entryID;
+    };
+    /**
+     * Edits an entry in any attached data store.
+     * 
+     * @param {object} currentEntryJSON entry as JSON 
+     * @param {object} entryDataJSON entry as JSON 
+     */
+
+
+    this.editEntry = function (id, currentEntryJSON, entryDataJSON) {
+      if (this.dataStore) {
+        this.dataStore.editEntry(id, currentEntryJSON, entryDataJSON);
+      }
+    };
+    /**
+     * Requests attached data store to retrieve all entries
+     * matching the current query tags.
+     * 
+     * @param {boolean=} doReload Get all from server, no cache.
+     */
+
+
+    this.getEntries = function (doReload) {
+      if (this.dataStore) {
+        this.dataStore.getEntries(doReload);
+      }
+    };
+    /**
+     * Requests attached data store to retrieve all tags and
+     * tag combos.
+     */
+
+
+    this.getTags = function () {
+      if (this.dataStore) {
+        this.dataStore.getTags();
+      }
+    };
+    /**
+     * Requests attached data store to save tag combos.
+     */
+
+
+    this.saveTagCombos = function () {
+      if (this.dataStore) {
+        this.dataStore.saveTagCombos();
+      }
+    };
+    /**
+     * Request log in to any attached data store.
+     */
+
+
+    this.logIn = function () {
+      if (this.dataStore) {
+        this.dataStore.logIn();
+      }
+    };
+    /**
+     * Request log out from any attached data store.
+     */
+
+
+    this.logOut = function () {
+      if (this.dataStore) {
+        this.dataStore.logOut();
+      }
+    };
+  }
+
+  async function copyRecentEntries() {
+    try {
+      const jsonString = JSON.stringify(tl.recentEntries, null, 2);
+      await navigator.clipboard.writeText(jsonString);
+      console.log('JSON copied to clipboard successfully!');
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
+  }
+
+  tl.copyRecentEntries = copyRecentEntries;
+  /**
+   * An object that provides methods to read and write data.
+   */
+
+  tl.dataStore = new TLDataStoreWrapper();
+  /**
+   * Sets the interface that will be used for reading and 
+   * writing data.
+   */
+
+  tl.setDataStore = function (dataStore) {
+    tl.dataStore = new TLDataStoreWrapper(dataStore);
+  };
+  /**
+   * On load, initialize attached data stores.
+   */
+
+
+  $(function () {
+    if (window['AndroidInterface']) {
+      tl.setDataStore(window['AndroidInterface']);
+    } else {
+      tl.setDataStore(new tl.TLInterfaceFirebase(tl));
+    }
+
+    tl.dataStore.init();
+  });
+  /**
+   * Check if running in app.
+   */
+
+  function isMobileApp() {
+    return 'AndroidInterface' in window;
+  }
+  /**
+   * Perform initializations after log in.
+   */
+
+
+  function init(isNewUser) {
+    tl.entries = [];
+    tl.allTags = [];
+    tl.tagCombos = [];
+    tl.queryRelatedTags = [];
+    excludeTags = [];
+    tl.queryTags = [];
+
+    if (isNewUser) {
+      initNewUser();
+    }
+
+    initUI();
+  }
+
+  tl.init = init;
+  /**
+   * Initialize UI elements.
+   */
+
+  function initUI() {
+    initAutocomplete();
+    initTagSearch();
+    updateLoggedInUI();
+  }
+  /**
+   * Perform log in steps for storage provider.
+   */
+
+
+  function logIn() {
+    this.dataStore.logIn();
+  }
+
+  tl.logIn = logIn;
+  /**
+   * Perform log out steps for storage provider.
+   */
+
+  function logOut() {
+    this.dataStore.logOut();
+  }
+
+  tl.logOut = logOut;
+  /**
+   * Creates getting started entries for new users.
+   */
+
+  function initNewUser() {
+    var numEntries = tl.gettingStartedEntries.length;
+
+    for (var i = 0; i < numEntries; i++) {
+      var entry = tl.gettingStartedEntries[i];
+      var text = entry['text'];
+      var tags = entry['tags'];
+      const entryData = {
+        uid: tl.loggedInUser.uid,
+        entry: text,
+        date: new Date(Date.now() - i * 1000),
+        'tag-list': tags,
+        deleted: false
+      };
+      addEntryAndTags(entryData);
+    }
+  }
+
+  tl.initNewUser = initNewUser;
+  /**
+   * Set user data.
+   * 
+   * User fields:
+   * 
+   * var user = {
+   *   uid: String,
+   *   displayName: String,
+   *   email: String,
+   *   photoURL: String
+   * }
+   * 
+   * @param {object} user 
+   */
+
+  tl.setUser = function (user) {
+    tl.loggedInUser = user;
+    tl.updateLoggedInUI();
+  };
+  /**
+   * Display an alert to reflect actions carried out on entries.
+   * 
+   * @param {object} error An error object
+   * @param {string} elemPrefix 
+   */
+
+
+  function showErrorAlert(error, elemPrefix) {
+    if (elemPrefix === undefined) {
+      elemPrefix = 'entry-error';
+    }
+
+    var id = error.reason;
+    var alertText = $('#text-entry-error-' + id).html();
+    var tagErrorInfo = tl.tagErrorConfig[id];
+
+    if (tagErrorInfo) {
+      var replace = tagErrorInfo['data'];
+
+      if (replace) {
+        for (var string in replace) {
+          alertText = alertText.replaceAll('{' + string + '}', replace[string]);
+        }
+      }
+    }
+
+    var $alertElem = $('#' + elemPrefix + '-alert');
+    var $alertTextElem = $('#' + elemPrefix + '-text');
+    $alertTextElem.html(alertText);
+    $alertElem.fadeTo(2000, 1000).delay(2000).slideUp(500);
+  }
+
+  tl.showAlert = showAlert;
+  /**
+   * Display an alert to reflect actions carried out on entries.
+   * 
+   * @param {string} id 
+   */
+
+  function showAlert(id) {
+    var alertText = $('#text-' + id).html();
+    var $alertElem = $('#entry-alert');
+    var $alertTextElem = $('#entry-alert-text');
+    $alertTextElem.html(alertText);
+    $alertElem.fadeTo(2000, 1000).slideUp(500);
+  }
+
+  tl.showAlert = showAlert;
+  /**
+   * Class for communicating an errors with entries.
+   * 
+   * @param {string} reason A reason code like entry-empty
+   */
+
+  function EntryError(reason) {
+    this.reason = reason;
+  }
+  /**
+   * Adds an entry to the diary.
+   * 
+   * An entry has an optional header containing comma separated tags, starting with '--',
+   * For example:
+   *   -- dev, web, css
+   * 
+   * These are added into the database as a comma separated string of tags, this line
+   * is stripped from the entry before adding the entry to the database.
+   */
+
+
+  function diaryAddEntry(form) {
+    var loggedInUser = tl.loggedInUser;
+    var $spinner = $('#add-entry-spinner');
+    var $button = $('#diary-submit');
+    $spinner.show();
+    $button.prop('disabled', true);
+    var $form = $(form);
+    var $entry = $form.find('textarea[name=diary-entry]');
+    var entry = $entry.val().substring(0, config['max-length']);
+    var dateStr = $form.find('[name=diary-date]').val();
+    var errors = [];
+
+    if (!entry) {
+      errors.push(new EntryError('entry-empty'));
+    }
+
+    var $elem = $form.find('[name=new-tag]');
+    var tagStr = $elem.val();
+    var tags = tl.tagCSVToTags(tagStr, false, " ");
+    tags = tags.concat(tl.queryTags);
+    let tagVerifier = new tl.TagVerifier(tl.tagErrorConfig);
+    tagVerifier.verifyTags(tags);
+
+    if (tagVerifier.errors.length) {
+      errors = errors.concat(tagVerifier.errors);
+    }
+
+    if (errors.length) {
+      entryFailedUpdateUI(errors, $spinner, $button);
+    } else {
+      tags = tl.cleanTags(tags);
+      tags = processTagList(tags);
+      let date = new Date();
+
+      if (dateStr && dateStr !== '') {
+        date = new Date(dateStr);
+      }
+
+      const entryData = {
+        uid: loggedInUser.uid,
+        entry: entry,
+        date: date,
+        deleted: false,
+        'tag-list': tags
+      };
+      addEntryAndTags(entryData);
+      updateQueryRelatedTags();
+      refreshUI();
+      $spinner.hide();
+      $button.prop('disabled', false);
+      showAlert('entry-added-alert');
+      $entry.val('');
+    }
+  }
+
+  tl.diaryAddEntry = diaryAddEntry;
+  /**
+   * Takes an entry, passes it to datastore for saving.
+   * 
+   * Updates the entry list and tags locally.
+   * 
+   * @param {object} entryData 
+   */
+
+  function addEntryAndTags(entryData) {
+    let tags = entryData['tag-list'];
+    tl.allTags = tl.allTags.concat(tags);
+    tl.allTags = processTagList(tl.allTags);
+    entryData['id'] = tl.dataStore.addEntry(JSON.stringify(entryData));
+    insertEntry(entryData);
+  }
+
+  tl.addEntryAndTags = addEntryAndTags;
+  /**
+   * Display errors with entry and update entry submit UI.
+   * 
+   * @param {object[]} errors An array of error objects.
+   */
+
+  function entryFailedUpdateUI(errors, $spinner, $button) {
+    var $spinner = $('#add-entry-spinner');
+    var $button = $('#diary-submit');
+    var errorReason = errors[0].reason;
+    tl.util.logObject(['Error adding document:', errors]);
+    $spinner.hide();
+    $button.prop('disabled', false);
+    showErrorAlert(errors[0]);
+  }
+
+  tl.entryFailedUpdateUI = entryFailedUpdateUI;
+  /**
+   * Display errors with entry and update entry edit UI.
+   * 
+   * @param {object[]} errors An array of error objects.
+   */
+
+  function editFailedUpdateUI(errors) {
+    var $spinner = $('#edit-entry-spinner');
+    var $button = $('#edit-entry-button');
+    tl.util.logError(JSON.stringify(errors));
+    $spinner.hide();
+    $button.prop('disabled', false);
+    showErrorAlert(errors[0], 'edit-error');
+  }
+  /**
+   * Refresh user interface after all tags saved.
+   */
+
+
+  function saveTagsRefresh() {
+    refreshTagDisplay();
+  }
+
+  tl.saveTagsRefresh = saveTagsRefresh;
+  /**
+   * Adds an entry to tl.entries.
+   * 
+   * If the entry exists, replaces the existing entry that has the same id.
+   * 
+   * If the entry has the deleted field set to true, deletes the record
+   * from tl.entries.
+   * 
+   * @param {object} data
+   */
+
+  function insertEntry(data, isJSON) {
+    let exists = false;
+
+    if (isJSON) {
+      data = JSON.parse(data);
+      data['date'] = new Date(data['date']);
+      data['date-modified'] = new Date(data['date-modified']);
+    }
+
+    for (var i = 0; i < tl.entries.length; i++) {
+      var existingEntry = tl.entries[i];
+
+      if (existingEntry['id'] === data['id']) {
+        exists = true;
+
+        if (data['deleted']) {
+          tl.entries.splice(i, 1);
+        } else {
+          tl.entries[i] = data;
+        }
+
+        break;
+      }
+    }
+
+    if (!exists && !data['deleted']) {
+      let inserted = false;
+
+      for (var i = 0; i < tl.entries.length; i++) {
+        var entry = tl.entries[i];
+
+        if (data['date'].getTime() >= entry['date'].getTime()) {
+          tl.entries.splice(i, 0, data);
+          inserted = true;
+          break;
+        }
+      }
+
+      if (!inserted) {
+        tl.entries.push(data);
+      }
+    }
+  }
+
+  tl.insertEntry = insertEntry;
+  /**
+   * When there are active tags, gets all other tags from
+   * records matching tags.
+   * 
+   * These can then be shown as related tags.
+   */
+
+  function updateQueryRelatedTags() {
+    tl.queryRelatedTags = [];
+    let tagQueryActive = tl.queryTags.length > 0;
+
+    for (var i = 0; i < tl.entries.length; i++) {
+      var data = tl.entries[i];
+      var tagList = data['tag-list'];
+      var containsQueryTags = true;
+
+      if (tagQueryActive) {
+        if (!tl.queryTags.every(r => tagList.indexOf(r) >= 0)) {
+          containsQueryTags = false;
+        }
+      }
+
+      if (containsQueryTags) {
+        if (tagQueryActive) {
+          tl.queryRelatedTags = tl.queryRelatedTags.concat(tagList);
+        }
+      }
+    }
+
+    if (tagQueryActive) {
+      tl.queryRelatedTags = processTagList(tl.queryRelatedTags);
+    }
+
+    return tl.queryRelatedTags;
+  }
+
+  tl.updateQueryRelatedTags = updateQueryRelatedTags;
+  /**
+   * Performs a refresh of the UI after the full entries list is
+   * changed.
+   */
+
+  function refreshUI() {
+    refreshEntryDisplay();
+    refreshTagDisplay();
+    initAutocomplete();
+  }
+
+  tl.refreshUI = refreshUI;
+  /**
+   * Displays the entries for the currently active tags.
+   * 
+   * @param {object[]} entries List of entry data
+   */
+
+  function refreshEntryDisplay() {
+    var tableTemplate = '<div class="diary-entries">{rows}</div>';
+    var defaultEntry = $('#elem-no-entries').html();
+    var defaultEntryNoMatchingTags = $('#elem-no-entries-for-tags').html();
+    var rowTemplate = `<div class="diary-entry noselect" onclick="taggerlog.entryClicked(event, '{entry-id}')">
+      <div class="diary-entry-text">{entry}</div>
+      <div>
+        <div class="row">
+          <div class="diary-entry-controls col-3"></div>
+          <div class="diary-entry-tags col-9 text-truncate">{tags}</div>
+        </div>
+      </div>
+    </div>`;
+    var rows = '';
+    var tagQueryActive = tl.queryTags.length > 0;
+    var excludeQueryActive = excludeTags.length > 0;
+
+    for (var i = 0; i < tl.entries.length; i++) {
+      var data = tl.entries[i];
+      var tagList = tl.cleanTags(data['tag-list']);
+      var tags = tagList.join();
+      var containsQueryTags = true;
+
+      if (tagQueryActive) {
+        if (!tl.queryTags.every(r => tagList.indexOf(r) >= 0)) {
+          containsQueryTags = false;
+        }
+      }
+
+      if (excludeQueryActive) {
+        if (tagList.some(r => excludeTags.indexOf(r) >= 0)) {
+          containsQueryTags = false;
+        }
+      }
+
+      if (containsQueryTags) {
+        let row = rowTemplate.replace('{date}', data['date']);
+        row = row.replace('{entry}', postFormatEntry(cleanEntry(data['entry'])));
+        row = row.replace('{entry-id}', data['id']);
+        row = row.replace('{tags}', tags);
+        rows += row;
+      }
+    }
+
+    var hasSelectedTags = tl.queryTags.length > 0 || excludeTags.length > 0;
+
+    if (rows == '') {
+      if (hasSelectedTags) {
+        rows = defaultEntryNoMatchingTags;
+      } else {
+        rows = defaultEntry;
+      }
+    }
+
+    var tableHTML = tableTemplate.replace('{rows}', rows);
+    var $recentEntriesElem = $('#recent-entries');
+    $recentEntriesElem.html(tableHTML);
+    let triggered = false;
+    let $refreshSpinner = $('.refresh-spinner');
+    var refreshSpinner = $refreshSpinner.get()[0];
+    $('#recent-entries').Pullable(function () {
+      triggered = false;
+    }, function (e, dx, dy) {
+      if (window.scrollY >= 1 || dy <= 0) {
+        return;
+      }
+
+      const maxElemHeight = 100;
+
+      if (dy >= maxElemHeight) {
+        dy = maxElemHeight;
+
+        if (!triggered) {
+          setTimeout(function () {
+            tl.dataStore.getEntries(true);
+          }, 800);
+          triggered = true;
+          let top = `${maxElemHeight}px`;
+          $refreshSpinner.stop();
+          $refreshSpinner.css('height', top);
+          $refreshSpinner.delay(1000).animate({
+            'height': "0px"
+          }, 500);
+          $('#recent-entries').fadeOut(400).fadeIn(1500);
+        }
+      } else {
+        if (dy < 16) dy = 16;
+        let top = `${dy}px`;
+
+        if ($refreshSpinner.is(':animated')) {
+          $refreshSpinner.stop();
+        }
+
+        refreshSpinner.style.height = top;
+      }
+    }, function (e) {
+      $refreshSpinner.animate({
+        'height': "0px"
+      }, 500);
+    });
+  }
+
+  tl.refreshEntryDisplay = refreshEntryDisplay;
+  /**
+   * Converts HTML special characters to enties like &entity_name;
+   * 
+   * @param {string} text 
+   */
+
+  function htmlEntities(text) {
+    text = new Option(text).innerHTML;
+    return text;
+  }
+  /**
+   * Replaces HTML special characters.
+   * 
+   * @param {string} entry 
+   */
+
+
+  function cleanEntry(entry) {
+    entry = htmlEntities(entry);
+    return entry;
+  }
+  /**
+   * Replaces HTML special characters. Removes control characters including newlines
+   * and tabs.
+   * 
+   * @param {string} entry 
+   */
+
+
+  function cleanTitle(entry) {
+    entry = DOMPurify.sanitize(entry); // entry = entry.replace(/[\x00-\x1F\x21-\x2F\x3A-\x40\x7B-\x9F]/g, '');
+
+    entry = entry.replace(/[\r\n\t]/g, '');
+    return entry;
+  }
+  /**
+   * Tests if link is valid to use as a href.
+   * 
+   * @param {string} string 
+   */
+
+
+  function isValidURL(string) {
+    var res = string.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,63}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+    return res !== null;
+  }
+
+  ;
+  /**
+   * Do any formatting after markdown and sanitising has been done.
+   * 
+   * @param {string} entry 
+   */
+
+  function postFormatEntry(entry) {
+    var linkTemplate = '<a class="diary-entry-link" href="{link}" target="_blank" onclick="event.stopPropagation();">{linkDisplay}</a>';
+    var imageTemplate = '<img class="diary-entry-image" src="{linkDisplay}" width="200" />';
+    var lines = entry.split('\n');
+    var newEntry = '';
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+
+      if (line.startsWith('http')) {
+        line = line.replace(/^(http.*)/, function (match) {
+          if (isValidURL(match)) {
+            var l = '';
+            console.log(JSON.stringify(['ibb', line]));
+            let isImgBBImg = line.includes('ibb'); // Make sure it's an image link and not just a link to the viewer page
+
+            if (!line.split('/')[4]) {
+              isImgBBImg = false;
+            }
+
+            if (isImgBBImg) {
+              l = imageTemplate.replace('{link}', match);
+            } else {
+              l = linkTemplate.replace('{link}', match);
+            }
+
+            l = l.replace('{linkDisplay}', match);
+            return l + '\n';
+          } else {
+            return match + '\n';
+          }
+        });
+      } else if (line.startsWith('###')) {
+        line = line.replace(/^(###.*)/, function (match) {
+          var heading = match.replace(/^###/, '').trim();
+          heading = heading.replace('\n', '');
+          return '<h3 class="diary-entry-heading-3">' + heading + '</h3>';
+        });
+      } else {
+        line = line.replace(/\*\*(.*?)\*\*/g, r => '<b>' + r.replaceAll('*', '') + '</b>');
+        line = line.replace(/\*(.*?)\*/g, r => '<i>' + r.replaceAll('*', '') + '</i>');
+        line = line.replace(/^\*/, '&bull;') + '\n';
+      }
+
+      newEntry += line;
+    }
+
+    return newEntry;
+  }
+  /**
+   * Pops up a modal to edit an entry.
+   * 
+   * @param {string} id Entry ID
+   */
+
+
+  function editEntryStart(id) {
+    var curEntry = null;
+
+    for (var i = 0; i < tl.entries.length; i++) {
+      curEntry = tl.entries[i];
+
+      if (curEntry.id === id) {
+        break;
+      }
+    }
+
+    let data = curEntry;
+    var $form = $('#edit-entry-form');
+    var $entry = $form.find('textarea[name=diary-entry]');
+    var $date = $form.find('[name=diary-date]');
+    $entry.val(data['entry']);
+    var date = data['date'];
+    $date[0].valueAsNumber = date.getTime();
+    $('#edit-entry-button').data('id', id);
+    $('#delete-entry-button-on-popup').data('id', id);
+    var tags = data['tag-list'];
+    var tagDisplayTemplate = $('#elem-diary-tag-edit').html();
+    var tagHTML = '';
+    var tagsHTML = '';
+
+    for (var i = 0; i < tags.length; i++) {
+      tagHTML = tagDisplayTemplate.replaceAll('{tag}', tl.cleanTag(tags[i]));
+      tagHTML = tagHTML.replace('{selected}', 'selected');
+      tagsHTML += tagHTML;
+    }
+
+    $('#diary-edit-entry-tags').html(tagsHTML);
+    $form.find('[name=new-tag]').val('');
+    $('#edit-entry-date').removeClass('show');
+    $('#editEntryModal').on('shown.bs.modal', function () {
+      $('#editEntryModal').find('[name=diary-entry]').focus();
+    });
+    entryInputInit();
+    $('#editEntryModal').modal();
+  }
+
+  tl.editEntryStart = editEntryStart;
+  /**
+   * Updates an entry using information from the edit entry form.
+   * 
+   * @param {string} id Entry ID
+   */
+
+  function editEntry(id) {
+    var $spinner = $('#edit-entry-spinner');
+    var $button = $('#edit-entry-button');
+    $spinner.show();
+    $button.prop('disabled', true);
+    const $form = $('#edit-entry-form');
+    const entry = $form.find('textarea[name=diary-entry]').val().substring(0, config['max-length']);
+    const $date = $form.find('[name=diary-date]');
+    var errors = [];
+
+    if (!entry) {
+      errors.push(new EntryError('entry-empty'));
+    }
+
+    var formTags = [];
+    var formTagsRemoved = [];
+    var $formTags = $('#diary-edit-entry-tags').find('.diary-tag');
+    $formTags.each(function () {
+      var $formTag = $(this);
+
+      if ($formTag.hasClass('selected')) {
+        formTags.push($formTag.data('tag'));
+      } else {
+        formTagsRemoved.push($formTag.data('tag'));
+      }
+    });
+    var $elem = $form.find('[name=new-tag]');
+    var tagStr = $elem.val();
+    var tags = tl.tagCSVToTags(tagStr, false, " ");
+    tags = tags.concat(formTags);
+    tags = processTagList(tags);
+    let tagVerifier = new tl.TagVerifier(tl.tagErrorConfig);
+    tagVerifier.verifyTags(tags);
+
+    if (tagVerifier.errors.length) {
+      errors = errors.concat(tagVerifier.errors);
+    }
+
+    if (errors.length) {
+      editFailedUpdateUI(errors);
+    } else {
+      tl.allTags = tl.allTags.concat(tags);
+      tl.allTags = processTagList(tl.allTags);
+      var newEntry = {
+        'entry': entry,
+        'tag-list': tags
+      };
+      var newDate = new Date($date.val());
+      newEntry['date'] = newDate;
+      let currentEntry = null;
+
+      for (var i = 0; i < tl.entries.length; i++) {
+        if (tl.entries[i].id === id) {
+          currentEntry = tl.entries[i];
+        }
+      }
+
+      tl.dataStore.editEntry(id, tl.json(currentEntry), tl.json(newEntry));
+
+      for (var i = 0; i < tl.entries.length; i++) {
+        var entryData = tl.entries[i];
+
+        if (entryData['id'] == id) {
+          newEntry['id'] = id;
+          newEntry['date'] = newDate;
+          tl.entries[i] = newEntry;
+          break;
+        }
+      }
+
+      refreshUI();
+      $spinner.hide();
+      $button.prop('disabled', false);
+      $('#editEntryModal').modal('hide');
+      showAlert('entry-edited-alert');
+    }
+  }
+
+  tl.editEntry = editEntry;
+  /**
+   * Pops up a modal to delete an entry.
+   * 
+   * @param {string} id Entry ID
+   */
+
+  function deleteEntryStart(id) {
+    $('#delete-entry-button').data('id', id);
+    $('#editEntryModal').modal('hide');
+    $('#deleteEntryModal').modal();
+  }
+
+  tl.deleteEntryStart = deleteEntryStart;
+  /**
+   * Deletes an entry.
+   * 
+   * @param {string} id Entry ID
+   */
+
+  function deleteEntry(id) {
+    var $spinner = $('#delete-entry-spinner');
+    $spinner.show();
+    tl.dataStore.deleteEntry(id);
+    showAlert('entry-deleted-alert');
+
+    for (var i = 0; i < tl.entries.length; i++) {
+      var entryData = tl.entries[i];
+
+      if (entryData['id'] == id) {
+        tl.entries.splice(i, 1);
+        break;
+      }
+    }
+
+    refreshEntryDisplay();
+    $spinner.hide();
+    $('#deleteEntryModal').modal('hide');
+  }
+
+  tl.deleteEntry = deleteEntry;
+  /**
+   * Takes an array of tags, removes duplicates and empty tag and sorts.
+   * 
+   * @param {string[]} tagList 
+   */
+
+  function processTagList(tagList) {
+    var tagSet = new Set(tagList);
+    var tags = Array.from(tagSet).sort();
+
+    for (var i = tagList.length - 1; i >= 0; i--) {
+      if (tags[i] == '') {
+        tags.splice(i, 1);
+      }
+    }
+
+    return tags;
+  }
+
+  tl.processTagList = processTagList;
+  /**
+   * Callback for when a data store changes the allTags array.
+   * 
+   * @param {string[]} CSV string of tags 
+   */
+
+  function setAllTags(tagString) {
+    let allTags = [];
+
+    if (tagString) {
+      allTags = processTagList(tagString.split(','));
+    }
+
+    tl.allTags = allTags;
+    refreshTagDisplay();
+  }
+
+  tl.setAllTags = setAllTags;
+  /**
+   * Remove tags from allTags and queryTags.
+   * 
+   * @param {string[]} tagString 
+   */
+
+  function removeTags(tagString) {
+    let tags = tagString.split();
+
+    if (tags.length) {
+      tl.allTags = tl.allTags.filter(item => !tags.includes(item));
+      tl.queryTags = tl.queryTags.filter(item => !tags.includes(item));
+      tl.queryRelatedTags = tl.queryRelatedTags.filter(item => !tags.includes(item));
+    }
+  }
+
+  tl.removeTags = removeTags;
+  /**
+   * Callback for when a data store changes the tagCombos array.
+   * 
+   * @param {string[]} tagCombos
+   * @param {boolean=} isJSON Is tagCombos an object or JSON representation
+   */
+
+  function setTagCombos(tagCombos, isJSON) {
+    if (isJSON) {
+      tagCombos = JSON.parse(tagCombos);
+    }
+
+    tl.tagCombos = tagCombos;
+    refreshTagDisplay();
+  }
+
+  tl.setTagCombos = setTagCombos;
+  /**
+   * Makes a tag active/deactivated.
+   * 
+   * @param {string} tag 
+   */
+
+  function toggleTag(tag, exclude) {
+    let queryTagIndex = tl.queryTags.indexOf(tag);
+    let tagActive = queryTagIndex != -1;
+    let excludeTagIndex = excludeTags.indexOf(tag);
+    let tagExcluded = excludeTagIndex != -1;
+    let prevPrimaryTag = tl.queryTags[0];
+
+    if (exclude) {
+      if (tagActive) {
+        tl.queryTags.splice(queryTagIndex, 1);
+      }
+
+      if (tagExcluded) {
+        excludeTags.splice(excludeTagIndex, 1);
+      } else {
+        excludeTags.push(tag);
+      }
+    } else {
+      if (!tagActive && !tagExcluded) {
+        tl.queryTags.push(tag);
+      }
+
+      if (tagActive) {
+        tl.queryTags.splice(queryTagIndex, 1);
+      }
+
+      if (tagExcluded) {
+        excludeTags.splice(excludeTagIndex, 1);
+      }
+    }
+
+    let primaryTag = tl.queryTags[0];
+    let alreadyHaveEntries = tl.entries.length && primaryTag === prevPrimaryTag;
+    updateQueryRelatedTags();
+    clearTagSearch();
+
+    if (alreadyHaveEntries) {
+      refreshUI();
+    } else {
+      tl.dataStore.getEntries();
+    }
+  }
+
+  tl.toggleTag = toggleTag;
+  /**
+   * Makes a tag active/deactivated on the entry edit form.
+   * 
+   * @param {string} tag 
+   */
+
+  function toggleEditTag(tag) {
+    var $elem = $('#diary-tag-edit-' + tag);
+
+    if ($elem.hasClass('selected')) {
+      $elem.removeClass('selected');
+    } else {
+      $elem.addClass('selected');
+    }
+  }
+
+  tl.toggleEditTag = toggleEditTag;
+  /**
+   * Updates the displaying of tags based on currently active
+   * query tags.
+   */
+
+  function refreshTagDisplay() {
+    var tagTemplate = $('#elem-diary-tag').html();
+    var tagDisplayTemplate = $('#elem-diary-tag-display').html();
+    var tagHTML = '';
+    var queryTagHTML = '';
+    var queryTagCombo = [];
+    var replacedTemplate = '';
+    let tags = tl.allTags;
+
+    if (tl.queryRelatedTags.length) {
+      tags = tl.queryRelatedTags;
+    }
+
+    if (tags.length - tl.queryTags.length > 7) {
+      $('.tl-header-search-container').removeClass('d-none');
+
+      if (tagSearch) {
+        tags = tags.filter(x => x.startsWith(tagSearch.toLowerCase()));
+      }
+    } else {
+      $('.tl-header-search-container').addClass('d-none');
+      clearTagSearch();
+    }
+
+    var noTagsElem = $('#elem-no-tags').html();
+
+    if (tl.loggedInUser) {
+      var uid = tl.loggedInUser.uid;
+      setItem('query-tags-' + uid, tl.queryTags);
+      setItem('exclude-tags-' + uid, excludeTags);
+    }
+
+    var activeTagHTML = '';
+    var activeTagsHTML = '';
+
+    for (var i = 0; i < tl.queryTags.length; i++) {
+      activeTagHTML = tagDisplayTemplate.replaceAll('{tag}', tl.cleanTag(tl.queryTags[i]));
+      activeTagHTML = activeTagHTML.replace('{selected}', 'selected');
+      activeTagsHTML += activeTagHTML;
+    }
+
+    $('#diary-entry-active-tags').html(activeTagsHTML);
+    var prevTag = '';
+    var numTags = tags.length;
+
+    for (var i = 0; i < tl.queryTags.length; i++) {
+      var tag = tl.cleanTag(tl.queryTags[i]);
+      replacedTemplate = tagTemplate.replaceAll('{tag}', tag);
+      replacedTemplate = replacedTemplate.replaceAll('{selected}', 'selected');
+      queryTagHTML += replacedTemplate;
+      queryTagCombo.push(tag);
+    }
+
+    for (var i = 0; i < excludeTags.length; i++) {
+      var tag = tl.cleanTag(excludeTags[i]);
+      replacedTemplate = tagTemplate.replaceAll('{tag}', tl.cleanTag(tag));
+      replacedTemplate = replacedTemplate.replaceAll('{selected}', 'exclude');
+      queryTagHTML += replacedTemplate;
+      queryTagCombo.push('!' + tag);
+    }
+
+    var queryTagComboString = queryTagCombo.join(',');
+
+    if (queryTagCombo.length) {
+      if (tl.tagCombos.find(o => o['tags'] === queryTagComboString)) {
+        $('#star-tags-main').addClass('starred');
+      } else {
+        $('#star-tags-main').removeClass('starred');
+      }
+    }
+
+    if (tags.length) {
+      for (var tag of tags) {
+        if (tl.queryTags.indexOf(tag) > -1 || excludeTags.indexOf(tag) > -1) {
+          continue;
+        }
+
+        let showingAllTags = !tl.queryTags.length && !excludeTags.length;
+
+        if (showingAllTags) {
+          if (numTags > 7 && prevTag && tag.charAt(0) != prevTag.charAt(0)) {
+            tagHTML += '<br />';
+          }
+        }
+
+        replacedTemplate = tagTemplate.replaceAll('{tag}', tl.cleanTag(tag));
+        replacedTemplate = replacedTemplate.replaceAll('{selected}', '');
+        tagHTML += replacedTemplate;
+        prevTag = tag;
+      }
+    } else {
+      tagHTML = noTagsElem;
+    }
+
+    var $panelAllTags = $('#panel-all-tags').addClass('d-none');
+    var $selectedTagsPanel = $('#panel-selected-tags').addClass('d-none');
+    var $relatedTagsPanel = $('#panel-related-tags').addClass('d-none');
+    var $relatedTags = $('#diary-related-tags');
+
+    if (queryTagHTML) {
+      $selectedTagsPanel.removeClass('d-none');
+      $('#diary-selected-tags').html(queryTagHTML);
+      $('#diary-tags').html('');
+
+      if (tagHTML) {
+        $relatedTagsPanel.removeClass('d-none');
+        $relatedTags.html(tagHTML);
+      }
+    } else {
+      $panelAllTags.removeClass('d-none');
+      $('#diary-tags').html(tagHTML);
+    }
+
+    var $panelTagCombos = $('#panel-tag-combos').addClass('d-none');
+    var $tagCombos = $('#diary-tag-combos');
+
+    if (tl.tagCombos.length) {
+      var tagCombosHTML = '';
+      var template = $('#elem-diary-tag-combos').html();
+
+      for (var i = 0; i < tl.tagCombos.length; i++) {
+        var tagCombo = tl.tagCombos[i]['tags'];
+        var tagComboTitle = tl.tagCombos[i]['title'];
+        var tagComboElem = template.replaceAll('{tag}', tagCombo);
+        tagComboElem = tagComboElem.replaceAll('{tag-string}', cleanTitle(tagComboTitle));
+
+        if (tagCombo === queryTagComboString) {
+          tagComboElem = tagComboElem.replaceAll('{active}', 'active');
+        } else {
+          tagComboElem = tagComboElem.replaceAll('{active}', '');
+        }
+
+        tagCombosHTML += tagComboElem;
+      }
+
+      $tagCombos.html(tagCombosHTML);
+      $panelTagCombos.removeClass('d-none');
+    }
+
+    $('.diary-tag').HoldButton(350, function ($holdButton) {
+      var tag = $holdButton.data('tag');
+      toggleTag(tag, true);
+    }, function ($holdButton) {
+      var tag = $holdButton.data('tag');
+      toggleTag(tag);
+    });
+  }
+
+  tl.refreshTagDisplay = refreshTagDisplay;
+  /**
+   * Helper function for setting items in local storage.
+   * 
+   * @param {string} id 
+   * @param {object} value 
+   */
+
+  function setItem(id, value) {
+    if (tl.loggedInUser) {
+      var uid = tl.loggedInUser.uid;
+      window.localStorage.setItem(uid + id, JSON.stringify(value));
+    }
+  }
+  /**
+   * Helper function for getting item from local storage.
+   * 
+   * @param {string} id 
+   */
+
+
+  function getItem(id) {
+    if (tl.loggedInUser) {
+      var uid = tl.loggedInUser.uid;
+      return window.localStorage.getItem(uid + id);
+    }
+  }
+  /**
+   * Check if screen is bigger than bootstrap large breakpoint
+   */
+
+
+  function screenIsLarge() {
+    let width = $(window).width();
+    return width >= 992;
+  }
+  /**
+   * Hides elements on mobile html while typing in case
+   * the static controls hide the form.
+   */
+
+
+  function hideWhenTyping() {
+    if (!screenIsLarge()) {
+      $('#diary-controls-toggle').removeClass('d-none').addClass('d-flex');
+      $('#diary-controls').removeClass('d-flex').addClass('d-none');
+      $('.header').hide();
+    }
+  }
+  /**
+   * Shows any elements hidden by hideWhenTyping.
+   */
+
+
+  function showWhenNotTyping() {
+    $('#diary-controls-toggle').addClass('d-none').removeClass('d-flex');
+    $('#diary-controls').removeClass('d-none').addClass('d-flex');
+    $('.header').show();
+  }
+  /**
+   * Loads the user interface for a logged in user.
+   */
+
+
+  function updateLoggedInUI() {
+    var loggedInUser = tl.loggedInUser;
+    $('.loading-show').fadeOut(600, () => $(this).addClass('d-none'));
+    $('.loaded-show').removeClass('d-none').hide().delay(300).fadeIn(1000);
+
+    if (tl.loggedInUser) {
+      var uid = tl.loggedInUser.uid;
+      var storedQueryTags = getItem('query-tags-' + uid);
+      var storedExcludeTags = getItem('exclude-tags-' + uid);
+
+      if (storedQueryTags) {
+        tl.queryTags = JSON.parse(storedQueryTags);
+      }
+
+      if (storedExcludeTags) {
+        excludeTags = JSON.parse(storedExcludeTags);
+      }
+
+      $('.logged-in-show').removeClass('d-none');
+      $('.logged-out-show').addClass('d-none');
+      var photoURL = config['default-user-img'];
+      $('#header-user-img').on('error', function () {
+        $(this).attr('src', config['default-user-img']);
+      });
+
+      if (loggedInUser.photoURL) {
+        photoURL = loggedInUser.photoURL;
+      }
+
+      $('#header-user-img').attr('src', photoURL);
+      $('#header-user-name').html(loggedInUser.displayName);
+      $('#header-user-email').html(loggedInUser.email);
+      $('#diary-controls').removeClass('d-none').addClass('d-flex');
+      var $inputs = $('input[type=text], textarea');
+      $inputs.focus(function () {
+        hideWhenTyping();
+      });
+      $inputs.on('blur', function (e) {
+        // Allow time for any onclick to trigger before changing interface
+        // otherwise add entry button click may be cancelled.
+        setTimeout(function () {
+          onKeyboardHidden();
+        }, 100);
+      });
+      $('#diary-controls-toggle').on('click', function (event) {
+        event.stopPropagation();
+        showWhenNotTyping();
+      });
+      tl.dataStore.getEntries();
+      tl.dataStore.getTags();
+    } else {
+      $('.logged-in-show').addClass('d-none');
+      $('.logged-out-show').removeClass('d-none');
+      $('#diary-controls').removeClass('d-flex').addClass('d-none');
+    }
+  }
+
+  tl.updateLoggedInUI = updateLoggedInUI;
+
+  function onKeyboardHidden() {
+    showWhenNotTyping();
+  }
+
+  tl.onKeyboardHidden = onKeyboardHidden;
+  /**
+   * For smaller displays, shows the new entry form and hides tags display.
+   */
+
+  function toggleNewEntry() {
+    var $newEntry = $('#diary-new-entry-panel');
+    var $tags = $('#diary-tags-panel');
+    var $entries = $('#diary-entries-panel');
+    var $newEntryBtn = $('#diary-control-new-entry');
+    var $tagsBtn = $('#diary-control-tags');
+
+    if ($newEntry.hasClass('collapse')) {
+      $newEntry.removeClass('collapse');
+      $entries.removeClass('collapse');
+      $tags.addClass('collapse');
+      $newEntryBtn.removeClass('inactive');
+      $tagsBtn.addClass('inactive');
+      $('#diary-new-entry').find('[name=diary-entry]').focus();
+    } else {
+      $newEntry.addClass('collapse');
+      $entries.removeClass('collapse');
+      $newEntryBtn.addClass('inactive');
+    }
+
+    window.scrollTo(0, 0);
+  }
+
+  tl.toggleNewEntry = toggleNewEntry;
+  /**
+   * For smaller displays, shows the tags display and hides entry form.
+   */
+
+  function toggleTags(event) {
+    var $tags = $('#diary-tags-panel');
+    var $newEntry = $('#diary-new-entry-panel');
+    var $newEntryBtn = $('#diary-control-new-entry');
+    var $tagsBtn = $('#diary-control-tags');
+
+    if ($tags.hasClass('collapse')) {
+      $tags.removeClass('collapse');
+      $newEntry.addClass('collapse');
+      $newEntryBtn.addClass('inactive');
+      $tagsBtn.removeClass('inactive');
+    } else {
+      $tags.addClass('collapse');
+      $tagsBtn.addClass('inactive');
+    }
+
+    window.scrollTo(0, 0);
+  }
+
+  tl.toggleTags = toggleTags;
+  /**
+   * Handler for clicking on an entry.
+   * 
+   * @param {string} entryID 
+   */
+
+  function entryClicked(e, entryID) {
+    var $elem = $(e.target);
+    var $pulledParent = $elem.closest('.pullable');
+    var dragging = $pulledParent.hasClass('pullClick');
+
+    if (!dragging) {
+      $pulledParent.data('beingPulled', false);
+      editEntryStart(entryID);
+    }
+  }
+
+  tl.entryClicked = entryClicked;
+  /**
+   * Given the element id of a container of tag buttons. Builds a CSV where excluded
+   * tags are prepended with !.
+   * 
+   * E.g.
+   *   dev,web,todo,!done
+   * 
+   * This is then used as the identifier for a group of starred tags.
+   * 
+   * @param {string} tagsElemID 
+   */
+
+  function getStarredTagString(tagsElemID) {
+    var $tagsElem = $('#' + tagsElemID);
+    var $tags = $tagsElem.find('.diary-tag');
+    var tags = [];
+    $tags.each(function () {
+      var $this = $(this);
+      var tagID = $this.data('tag');
+
+      if ($this.hasClass('exclude')) {
+        tagID = '!' + tagID;
+      }
+
+      tags.push(tagID);
+    });
+    var tagString = tags.join(',');
+    return tagString;
+  }
+  /**
+   * If current active tags are starred, unstars them.
+   * 
+   * Otherwise, open a popup to star the combination of tags.
+   */
+
+
+  function starTagsStart(elem) {
+    var $elem = $(elem);
+    var tagsElemID = $elem.data('tagsElem');
+    var tagString = getStarredTagString(tagsElemID);
+    var existingCombo = tl.tagCombos.find(x => x['tags'] === tagString);
+
+    if (existingCombo !== undefined) {
+      tl.tagCombos = tl.tagCombos.filter(x => x['tags'] !== tagString);
+      tl.dataStore.saveTagCombos();
+      $elem.removeClass('starred');
+      refreshTagDisplay();
+    } else {
+      $('#star-tags-modal').on('shown.bs.modal', function () {
+        $('#star-tags-form').find('[name=title]').val('').focus();
+        entryInputInit();
+      });
+      $('#star-tags-modal').modal();
+    }
+  }
+
+  tl.starTagsStart = starTagsStart;
+  /**
+   * Marks a selection of tags as stars, saves these to the
+   * database as a preset.
+   * 
+   * @param {object} The clicked star element.
+   */
+
+  function starTags(elem) {
+    var $elem = $(elem);
+    var tagsElem = $elem.data('tagsElem');
+    var $tagsElem = $('#' + tagsElem);
+    var $tags = $tagsElem.find('.diary-tag');
+    var title = $('#star-tags-form').find('[name=title').val();
+    var cleanedTitle = cleanTitle(title);
+
+    if (title !== cleanedTitle) {
+      showErrorAlert(new EntryError('starred-title-invalid'), 'star-tags-error');
+    } else if (!title) {
+      showErrorAlert(new EntryError('starred-title-empty'), 'star-tags-error');
+    } else {
+      title = cleanedTitle.trim().substring(0, tl.config['combo-title-max-length']);
+      var tags = [];
+      $tags.each(function () {
+        var $this = $(this);
+        var tagID = $this.data('tag');
+
+        if ($this.hasClass('exclude')) {
+          tagID = '!' + tagID;
+        }
+
+        tags.push(tagID);
+      });
+      var tagString = tags.join(',');
+      tl.tagCombos.unshift({
+        'title': title,
+        'tags': tagString
+      });
+      $elem.addClass('starred');
+      refreshTagDisplay();
+      $('#star-tags-modal').modal('hide');
+      tl.dataStore.saveTagCombos();
+    }
+  }
+
+  tl.starTags = starTags;
+  /**
+   * Gets the array of favourite tag combinations. 
+   */
+
+  function getTagCombos() {
+    return tl.tagCombos;
+  }
+
+  tl.getTagCombos = getTagCombos;
+  /**
+   * Makes the tags in a combo active/excluded.
+   */
+
+  function selectCombo(elem) {
+    var $elem = $(elem);
+    var tagString = $elem.data('tag');
+    var tags = tagString.split(',');
+    let prevPrimaryTag = tl.queryTags[0];
+    let alreadyHaveEntries = false;
+
+    if ($elem.hasClass('active')) {
+      excludeTags = [];
+      tl.queryTags = [];
+      $elem.removeClass('active');
+      $('.selected-tags-star').removeClass('starred');
+    } else {
+      tl.queryTags = [];
+      excludeTags = [];
+
+      for (var i = 0; i < tags.length; i++) {
+        var tag = tags[i];
+
+        if (tag.startsWith('!')) {
+          excludeTags.push(tag.substring(1));
+        } else {
+          tl.queryTags.push(tag);
+        }
+      }
+
+      let primaryTag = tl.queryTags[0];
+      alreadyHaveEntries = tl.entries.length && primaryTag === prevPrimaryTag;
+    }
+
+    clearTagSearch();
+    updateQueryRelatedTags();
+
+    if (alreadyHaveEntries) {
+      refreshUI();
+    } else {
+      tl.dataStore.getEntries();
+    }
+  }
+
+  tl.selectCombo = selectCombo;
+  /**
+   * Called when the input in the entry textarea is changed.
+   * 
+   * Warns when message length limit being reached.
+   * 
+   * @param {object} elem 
+   */
+
+  function entryChanged(elem) {
+    var $elem = $(elem);
+    var countElem = $elem.data('countElem');
+    var $countElem = $('#' + countElem);
+    var entryType = $elem.data('entry-type');
+    var configID = [entryType, 'max-length'].join('-');
+    var entryMaxLength = config[configID];
+    var count = $elem.val().length;
+    $countElem.removeClass('max warning');
+    var warningLevel = entryMaxLength / 10;
+
+    if (count > entryMaxLength - warningLevel) {
+      $countElem.html(count + '/' + entryMaxLength);
+      $countElem.removeClass('d-none');
+
+      if (count >= entryMaxLength) {
+        $countElem.addClass('max');
+      } else {
+        $countElem.addClass('warning');
+      }
+    } else {
+      $countElem.addClass('d-none');
+    }
+  }
+
+  tl.entryChanged = entryChanged;
+
+  function doManualRefresh() {
+    let $refreshSpinner = $('.refresh-spinner');
+    tl.dataStore.getEntries(true);
+    $refreshSpinner.stop();
+    $refreshSpinner.css('height', "50px");
+    $refreshSpinner.delay(100).animate({
+      'height': "0px"
+    }, 800).stop();
+    $('#recent-entries').fadeOut(400).fadeIn(1500);
+  }
+
+  tl.doManualRefresh = doManualRefresh;
+  /**
+   * Initialises the entry text areas to call entryChanged
+   * when input changes.
+   */
+
+  function entryInputInit() {
+    var $entryAreas = $('.entry-count');
+    $entryAreas.on('change keyup input', function (event) {
+      entryChanged($(event.target));
+    });
+    $entryAreas.each(function () {
+      var $entryArea = $(this);
+      var configID = 'max-length';
+      var entryType = $entryArea.data('entryType');
+
+      if (entryType) {
+        configID = entryType + '-' + configID;
+      }
+
+      var maxLength = tl.config[configID];
+      $entryArea.attr('maxlength', maxLength);
+      entryChanged(this);
+    });
+  }
+
+  entryInputInit();
+  /**
+   * Set up autocomplete.
+   */
+
+  function initAutocomplete() {
+    var hadComma = false;
+    $('.tagAutoComplete').textcomplete([{
+      match: /(^|\b)(\w{1,})$/,
+
+      // /(^|\w)(\w*(?:\s*\w*))$/,
+      // #4 - Function called at every new keystroke
+      search(query, callback) {
+        query = query.replaceAll(',', '');
+        var matching = tl.allTags.filter(tag => tag.startsWith(query.toLowerCase()));
+        var numMatches = matching.length;
+        matching = matching.slice(0, 5);
+        callback(matching);
+        var $dropdown = $('.textcomplete-dropdown');
+
+        if (matching.length < numMatches && !$dropdown.find('.textcomplete-morematches').length) {
+          $dropdown.html($dropdown.html() + '<li class="textcomplete-morematches">...</li>');
+        }
+      },
+
+      // #5 - Template used to display each retrieved result
+      template: function (word) {
+        return word;
+      },
+      // #6 - Template used to display the selected result in the textarea
+      replace: function (word, e) {
+        return word + ' ';
+      }
+    }]);
+  }
+
+  initAutocomplete();
+  /**
+   * Clear tag search variable and elements.
+   */
+
+  function clearTagSearch() {
+    tagSearch = '';
+    $('.tl-header-search').val(tagSearch);
+  }
+  /**
+   * Set up search box for limiting displayed tags.
+   */
+
+
+  function initTagSearch() {
+    clearTagSearch();
+    $('.tl-header-search').on('input', function (e) {
+      tagSearch = $(this).val().trim();
+      refreshTagDisplay();
+    });
+  }
+
+  initTagSearch();
+})(taggerlog);

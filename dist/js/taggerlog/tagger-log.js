@@ -172,7 +172,21 @@ var taggerlog = taggerlog || {};
         this.dataStore.logOut();
       }
     }
+
+    
   }
+
+  async function copyRecentEntries() {
+    try {
+      const jsonString = JSON.stringify(tl.recentEntries, null, 2);
+      await navigator.clipboard.writeText(jsonString);
+      console.log('JSON copied to clipboard successfully!');
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
+  }
+
+  tl.copyRecentEntries = copyRecentEntries;
 
   /**
    * An object that provides methods to read and write data.

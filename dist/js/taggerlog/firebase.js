@@ -317,6 +317,8 @@ var taggerlog = taggerlog || {};
           query = query.limit(10);
         }
 
+        tl.recentEntries = [];
+
         query.get({source: 'cache'})
         .then(function(querySnapshot) {
           var mostRecentModify = null;
@@ -337,7 +339,11 @@ var taggerlog = taggerlog || {};
                 mostRecentModify = data['date-modified'];
               }
             }
+
+            tl.recentEntries.push(data);
           });
+
+          console.log(tl.recentEntries)
 
           tl.updateQueryRelatedTags();
           tl.refreshUI();
