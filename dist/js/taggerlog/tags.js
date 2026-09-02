@@ -9,7 +9,7 @@ var taggerlog = taggerlog || {};
     "tag-empty": {},
     "tag-format-max-length": {
       "data": {
-        "max-length": 20
+        "max-length": 30
       }
     },
     "tag-format-max-tags": {
